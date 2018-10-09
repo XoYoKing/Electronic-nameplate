@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.jackie.ts8209a.Activity.ShowNameActivity"
+    style="@style/activity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="10dp"
+        android:layout_y="200dp"
+        android:text="姓名"
+        android:textSize="50sp"
+        android:textColor="#FFFFFF"/>
+
+</AbsoluteLayout>

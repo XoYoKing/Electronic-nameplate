@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/activity"
+    tools:context="com.jackie.ts8209a.Activity.CallServiceActivity">
+
+    <TextView
+        style="@style/page_title"
+        android:text="@string/call_services" />
+
+    <Button
+        android:id="@+id/callservice_coffee"
+        style="@style/call_service_button"
+        android:layout_marginLeft="52dp"
+        android:layout_marginTop="114dp"
+        android:background="@drawable/img_kafei_n"
+        android:text="@string/coffee" />
+
+    <Button
+        android:id="@+id/callservice_tea"
+        style="@style/call_service_button"
+        android:layout_marginLeft="286dp"
+        android:layout_marginTop="114dp"
+        android:background="@drawable/img_cha_n"
+        android:text="@string/tea" />
+
+    <Button
+        android:id="@+id/callservice_water"
+        style="@style/call_service_button"
+        android:layout_marginLeft="520dp"
+        android:layout_marginTop="114dp"
+        android:background="@drawable/img_shui_n"
+        android:text="@string/water" />
+
+    <Button
+        android:id="@+id/callservice_micphone"
+        style="@style/call_service_button"
+        android:layout_marginLeft="752dp"
+        android:layout_marginTop="114dp"
+        android:background="@drawable/img_huatong_n"
+        android:text="@string/microphone" />
+
+    <Button
+        android:id="@+id/callservice_flower"
+        style="@style/call_service_button"
+        android:layout_marginLeft="52dp"
+        android:layout_marginTop="344dp"
+        android:background="@drawable/img_hua_n"
+        android:text="@string/flower" />
+
+    <Button
+        android:id="@+id/callservice_pen"
+        style="@style/call_service_button"
+        android:layout_marginLeft="286dp"
+        android:layout_marginTop="344dp"
+        android:background="@drawable/img_bi_n"
+        android:text="@string/pen" />
+
+    <Button
+        android:id="@+id/callservice_paper"
+        style="@style/call_service_button"
+        android:layout_marginLeft="520dp"
+        android:layout_marginTop="344dp"
+        android:background="@drawable/img_zhi_n"
+        android:text="@string/paper" />
+
+    <Button
+        android:id="@+id/callservice_artificial"
+        style="@style/call_service_button"
+        android:layout_marginLeft="752dp"
+        android:layout_marginTop="344dp"
+        android:background="@drawable/img_fwy_n"
+        android:text="@string/artificial_services" />
+
+    <include layout="@layout/inc_status_bar" />
+    <include layout="@layout/inc_return_button" />
+    <include layout="@layout/inc_prompt_box" />
+
+</RelativeLayout>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.jackie.ts8209a.Activity.MainActivity"
+    style="@style/activity">
+
+    <TextView
+        android:id="@+id/main_page_title"
+        style="@style/page_title"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="30dp"
+        android:text="@string/welcome_title"
+        />
+
+    <TextView
+        android:id="@+id/main_welcome_content"
+        style="@style/page_title"
+        android:layout_toRightOf="@id/main_page_title"
+        android:layout_marginLeft="10dp"
+        android:text=""
+        />
+
+    <Button
+        android:id="@+id/main_meeting_info_btn"
+        style="@style/main_page_meet_btn"
+        android:text="@string/meeting_info"
+         />
+
+    <Button
+        android:id="@+id/main_call_service_btn"
+        style="@style/main_page_btn"
+        android:layout_marginLeft="522dp"
+        android:layout_marginTop="114dp"
+        android:background="@drawable/btn_call_service"
+        android:text="@string/call_services"/>
+
+    <!--<Button-->
+        <!--android:id="@+id/main_show_name_btn"-->
+        <!--style="@style/menu_button"-->
+        <!--android:layout_marginLeft="422dp"-->
+        <!--android:layout_marginTop="78dp"-->
+        <!--android:text="铭牌显示"/>-->
+
+    <Button
+        android:id="@+id/main_sms_btn"
+        style="@style/main_page_btn"
+        android:layout_marginLeft="754dp"
+        android:layout_marginTop="114dp"
+        android:background="@drawable/btn_sms"
+        android:text="@string/sms_func"/>
+
+    <Button
+        android:id="@+id/main_edit_name_btn"
+        style="@style/main_page_btn"
+        android:layout_marginLeft="522dp"
+        android:layout_marginTop="344dp"
+        android:background="@drawable/btn_local_name"
+        android:text="@string/edit_user_info"/>
+
+    <Button
+        android:id="@+id/main_setting_btn"
+        style="@style/main_page_btn"
+        android:layout_marginLeft="754dp"
+        android:layout_marginTop="344dp"
+        android:background="@drawable/btn_setting"
+        android:text="@string/sys_setting"/>
+
+    <include layout="@layout/inc_status_bar"/>
+    <include layout="@layout/inc_prompt_box" />
+
+</RelativeLayout>

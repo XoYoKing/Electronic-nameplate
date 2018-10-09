@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.jackie.ts8209a.Activity.EditUserInfoActivity"
+    style="@style/activity">
+
+    <TextView
+        style="@style/page_title"
+        android:text="@string/edit_user_info"
+        />
+
+    <!-- 姓名、公司、职位输入区域 -->
+    <EditText
+        android:id="@+id/edit_user_name_et"
+        style="@style/userinfo"
+        android:layout_marginTop="166dp"
+        android:hint="@string/user_name" />
+
+    <EditText
+        android:id="@+id/edit_comp_name_et"
+        style="@style/userinfo"
+        android:layout_marginTop="308dp"
+        android:hint="@string/comp_name" />
+
+    <EditText
+        android:id="@+id/edit_user_pos_et"
+        style="@style/userinfo"
+        android:layout_marginTop="440dp"
+        android:hint="@string/user_pos" />
+
+    <!-- 勾选设置项目 -->
+    <RadioGroup
+        android:id="@+id/edit_choice_tick_rg"
+        android:layout_width="60dp"
+        android:layout_height="400dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="120dp"
+        android:layout_toRightOf="@id/edit_user_name_et"
+        android:orientation="vertical" >
+
+        <RadioButton
+            android:id="@+id/edit_name_tick_rbtn"
+            style="@style/edit_choice_tick" />
+
+        <RadioButton
+            android:id="@+id/edit_comp_tick_rbtn"
+            style="@style/edit_choice_tick" />
+
+        <RadioButton
+            android:id="@+id/edit_pos_tick_rbtn"
+            style="@style/edit_choice_tick" />
+
+    </RadioGroup>
+
+    <!-- 颜色、字体、字号参数设置区域 -->
+    <RelativeLayout
+        android:id="@+id/edit_set_para_lay"
+        android:layout_width="366dp"
+        android:layout_height="400dp"
+        android:layout_marginLeft="608dp"
+        android:layout_marginTop="116dp"
+        android:background="@drawable/bg_80574b3f_r">
+
+        <!-- 预览区域 -->
+        <RelativeLayout
+            android:id="@+id/edit_preview_set_lay"
+            android:layout_width="280dp"
+            android:layout_height="164dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:background="#00FFFFFF"
+            android:padding="3dp">
+
+            <TextView
+                style="@style/nameplate_preview_text"
+                android:id="@+id/edit_preview_set_user_tv"
+                android:layout_centerInParent="true"/>
+
+            <TextView
+                style="@style/nameplate_preview_text"
+                android:id="@+id/edit_preview_set_comp_tv"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"/>
+
+            <TextView
+                style="@style/nameplate_preview_text"
+                android:id="@+id/edit_preview_set_pos_tv"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"/>
+
+            <Button
+                android:id="@+id/edit_preview_set_btn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/btn_preview_set_nameplate"/>
+
+        </RelativeLayout>
+
+
+
+        <TextView
+            style="@style/edit_info_text"
+            android:text="@string/click_to_preview_nameplate"
+            android:layout_marginTop="5dp"
+            android:textSize="20sp"
+            android:layout_below="@id/edit_preview_set_lay"
+            android:layout_alignLeft="@id/edit_preview_set_lay"/>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_marginTop="210dp"
+            android:padding="5dp"
+            android:background="#564A40" >
+
+            <Button
+                android:id="@+id/edit_font_style_btn"
+                style="@style/edit_info_button"
+                android:layout_width="140dp"
+                android:layout_marginLeft="34dp"/>
+
+            <Button
+                android:id="@+id/edit_font_size_btn"
+                style="@style/edit_info_button"
+                android:layout_width="60dp"
+                android:layout_marginLeft="194dp"/>
+
+            <Button
+                android:id="@+id/edit_font_color_btn"
+                style="@style/edit_info_button"
+                android:layout_width="60dp"
+                android:layout_marginLeft="274dp"/>
+
+            <TextView
+                style="@style/edit_info_text"
+                android:layout_width="140dp"
+                android:layout_below="@id/edit_font_style_btn"
+                android:layout_alignLeft="@id/edit_font_style_btn"
+                android:text="@string/font_style"/>
+
+            <TextView
+                style="@style/edit_info_text"
+                android:layout_width="60dp"
+                android:layout_below="@id/edit_font_size_btn"
+                android:layout_alignLeft="@id/edit_font_size_btn"
+                android:text="@string/font_size"/>
+
+            <TextView
+                style="@style/edit_info_text"
+                android:layout_width="60dp"
+                android:layout_below="@id/edit_font_color_btn"
+                android:layout_alignLeft="@id/edit_font_color_btn"
+                android:text="@string/font_color"/>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/edit_bg_color_tv"
+            style="@style/edit_info_text"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="60dp"
+            android:layout_marginTop="350dp"
+            android:text="@string/select_bg_color" />
+
+        <Button
+            android:id="@+id/edit_bg_color_btn"
+            style="@style/edit_info_button"
+            android:layout_width="80dp"
+            android:layout_marginLeft="25dp"
+            android:layout_alignBaseline="@id/edit_bg_color_tv"
+            android:layout_toRightOf="@id/edit_bg_color_tv"/>
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/edit_save"
+        android:layout_width="120dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="12dp"
+        android:layout_below="@id/edit_set_para_lay"
+        android:layout_alignRight="@id/edit_set_para_lay"
+        android:background="@drawable/btn_edit_save"
+        android:text="@string/save"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"/>
+
+    <include layout="@layout/inc_status_bar"/>
+    <include layout="@layout/inc_return_button"/>
+    <include layout="@layout/inc_prompt_box" />
+</RelativeLayout>

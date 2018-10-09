@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 提示弹框 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_centerHorizontal="true"
+    android:paddingLeft="50dp"
+    android:paddingRight="50dp"
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp"
+    android:layout_marginLeft="125dp"
+    android:layout_marginRight="125dp"
+    android:background="@drawable/bg_prompt_box"
+    android:gravity="center"
+    android:visibility="gone"
+    android:id="@+id/prompt_box_lay"
+    android:orientation="vertical">
+
+
+
+</LinearLayout> <!-- 提示弹框 -->

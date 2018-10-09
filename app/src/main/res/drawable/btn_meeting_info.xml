@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/hyxx_h" android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <item android:drawable="@drawable/hyxx_n">
+        <shape android:shape="rectangle">
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+</selector>

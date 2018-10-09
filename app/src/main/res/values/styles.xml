@@ -1,0 +1,228 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+    
+    <!--Activity Style-->
+    <style name="activity">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@drawable/background_img</item>
+    </style>
+
+    <!--Layout Style-->
+    <style name="layout">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="ip_config_dialog_item_layout" parent="layout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">65dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!--TextView Style-->
+    <style name="text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="page_title" parent="text">
+        <item name="android:textColor">#FFFEFE</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_marginTop">50dp</item>
+    </style>
+    <style name="status_bar" parent="text">
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+    <style name="custom_dialog_text" parent="text">
+        <item name="android:textColor">#FFFEFE</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+    </style>
+    <style name="custom_dialog_text_title" parent="custom_dialog_text">
+        <item name="android:textSize">23sp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingTop">8dp</item>
+    </style>
+    <style name="custom_dialog_text_content" parent="custom_dialog_text">
+        <item name="android:textSize">20sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">10dp</item>
+    </style>
+    <style name="ip_config_dialog_text_title" parent="custom_dialog_text_content">
+        <item name="android:layout_width">145dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:gravity">center_vertical|right</item>
+    </style>
+    <style name="ip_config_dialog_text_content" parent="custom_dialog_text_content">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">bottom</item>
+        <item name="android:padding">0dp</item>
+    </style>
+    <style name="ip_config_dialog_text_spot" parent="ip_config_dialog_text_content">
+        <item name="android:text">.</item>
+    </style>
+    <style name="nameplate_preview_text" parent="text">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="edit_info_text" parent="text">
+        <item name="android:textColor">#BBBBBB</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+    <style name="setting_item_text" parent="text">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">#CCCCCC</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:gravity">right</item>
+    </style>
+    <style name="setting_item_num_text" parent="setting_item_text">
+        <item name="android:gravity">left</item>
+    </style>
+    <!--<style infoName="setting_config_item_text" parent="setting_item_text">-->
+        <!--<item infoName="android:layout_marginRight">0dp</item>-->
+        <!--<item infoName="android:layout_alignParentRight">false</item>-->
+        <!--<item infoName="android:layout_marginLeft">100dp</item>-->
+    <!--</style>-->
+
+    <!--Button Style-->
+    <style name="button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="return_button" parent="button">
+        <item name="android:background">@drawable/btn_return</item>
+        <item name="android:layout_marginTop">30dp</item>
+    </style>
+    <style name="main_page_btn" parent="button">
+        <item name="android:layout_width">212dp</item>
+        <item name="android:layout_height">212dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:gravity">bottom|center_horizontal</item>
+        <item name="android:paddingBottom">15dp</item>
+    </style>
+    <style name="main_page_meet_btn" parent="button">
+        <item name="android:layout_width">442dp</item>
+        <item name="android:layout_height">442dp</item>
+        <item name="android:layout_marginLeft">60dp</item>
+        <item name="android:layout_marginTop">114dp</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">left|top</item>
+        <item name="android:padding">28dp</item>
+        <item name="android:background">@drawable/btn_meeting_info</item>
+    </style>
+    <style name="custom_dialog_btn" parent="button">
+        <item name="android:textColor">#CCCCCC</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingLeft">30dp</item>
+        <item name="android:paddingRight">30dp</item>
+        <item name="android:background">@drawable/btn_11ffffff_5r</item>
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">20dp</item>
+    </style>
+    <style name="call_service_button" parent="main_page_btn">
+        <item name="android:layout_width">220dp</item>
+        <item name="android:layout_height">210dp</item>
+        <item name="android:paddingBottom">58dp</item>
+    </style>
+    <style name="edit_info_button" parent="button">
+        <item name="android:textColor">#CCCCCC</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:text"></item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/btn_edit_info</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingRight">15dp</item>
+    </style>
+
+    <!--ImageView Styles-->
+    <style name="imageview">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="status_icon_view" parent="imageview">
+        <item name="android:layout_marginRight">15dp</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <!--Dialog Styles-->
+    <style name="custom_dialog" parent="android:style/Theme.Dialog">
+        <item name="android:background">#00000000</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.7</item>
+    </style>
+
+    <!--     EditText style  -->
+    <style name="edittext">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="userinfo" parent="edittext">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:layout_width">435dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_marginLeft">78dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLength">10</item>
+        <item name="android:imeOptions">actionDone</item>
+    </style>
+    <style name="ip_config_dialog_edittext" parent="edittext">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textColor">#FFFEFE</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:inputType">numberDecimal</item>
+        <item name="android:maxLength">3</item>
+        <item name="android:layout_width">80dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:imeOptions">actionNext</item>
+    </style>
+
+    <!--     RadioButton style  -->
+    <style name="radiobutton"></style>
+    <style name="edit_choice_tick" parent="radiobutton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:drawableBottom">@drawable/btn_edit_choice_tick</item>
+        <item name="android:button">@null</item>
+        <item name="android:paddingBottom">30dp</item>
+    </style>
+    <style name="setting_item_choice" parent="radiobutton">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_marginLeft">52dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/setting_item_text_color</item>
+        <!--         <item infoName="android:background">@drawable/btn_setting_item</item> -->
+        <item name="android:button">@null</item>
+    </style>
+
+
+</resources>

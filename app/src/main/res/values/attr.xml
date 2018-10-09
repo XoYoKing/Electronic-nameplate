@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="WifiSelection" >
+        <attr name="Ssid" format="string"/>
+        <attr name="Rssi" format="integer"/>
+    </declare-styleable>
+</resources>

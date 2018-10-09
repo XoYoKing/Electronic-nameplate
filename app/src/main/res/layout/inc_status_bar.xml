@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="30dp"
+    android:background="#4C000000"
+    android:paddingTop="5dp">
+
+
+    <TextClock
+        style="@style/status_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="15dp"
+        android:format24Hour="yyyy-MM-dd  EE  HH:mm"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="right|center_vertical"
+        android:layout_marginRight="15dp"
+        android:layout_alignParentRight="true">
+
+        <ImageView
+            android:id="@+id/stabar_network_iv"
+            style="@style/status_icon_view"
+            android:src="@drawable/ico_fwq_n"/>
+
+        <ImageView
+            android:id="@+id/stabar_wired_net_iv"
+            style="@style/status_icon_view"
+            android:src="@drawable/ico_wx_n"/>
+
+        <ImageView
+            android:id="@+id/stabar_wifi_iv"
+            style="@style/status_icon_view"
+            android:src="@drawable/iv_wifi_level_list"/>
+
+        <ImageView
+            android:id="@+id/stabar_batlevel_iv"
+            style="@style/imageview"
+            android:src="@drawable/iv_battery_level_list"/>
+
+        <TextView
+            android:id="@+id/stabar_batlevel_tv"
+            style="@style/status_bar"
+            android:text="100%"/>
+
+
+    </LinearLayout>
+
+
+
+
+
+</RelativeLayout>

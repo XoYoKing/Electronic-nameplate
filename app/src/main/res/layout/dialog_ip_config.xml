@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="500dp"
+        android:layout_height="380dp"
+        android:background="@drawable/bg_605348_10r"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:orientation="vertical">
+
+
+            <TextView
+                style="@style/custom_dialog_text_title"
+                android:layout_weight="30"
+                android:text="IP地址配置" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="#33FFFFFF" />
+
+            <TextView
+                android:id="@+id/ip_config_warning_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textColor="#FF0000"
+                android:text=""
+                android:visibility="visible"/>
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="10dp"
+                android:paddingBottom="15dp">
+
+                <LinearLayout style="@style/ip_config_dialog_item_layout">
+
+                    <TextView
+                        style="@style/ip_config_dialog_text_title"
+                        android:text="终端ID："/>
+
+                    <EditText
+                        android:id="@+id/ip_config_dev_id_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_serv_ip0_et"/>
+
+
+                </LinearLayout>
+
+                <LinearLayout style="@style/ip_config_dialog_item_layout">
+
+                    <TextView
+                        style="@style/ip_config_dialog_text_title"
+                        android:text="服务器IP："/>
+
+                    <EditText
+                        android:id="@+id/ip_config_serv_ip0_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_serv_ip1_et"/>
+
+                    <TextView style="@style/ip_config_dialog_text_spot" />
+
+                    <EditText
+                        android:id="@+id/ip_config_serv_ip1_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_serv_ip2_et"/>
+
+                    <TextView style="@style/ip_config_dialog_text_spot" />
+
+                    <EditText
+                        android:id="@+id/ip_config_serv_ip2_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_serv_ip3_et"/>
+
+                    <TextView style="@style/ip_config_dialog_text_spot" />
+
+                    <EditText
+                        android:id="@+id/ip_config_serv_ip3_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_serv_port_et"/>
+
+
+                </LinearLayout>
+
+                <LinearLayout style="@style/ip_config_dialog_item_layout">
+
+                    <TextView
+                        style="@style/ip_config_dialog_text_title"
+                        android:text="服务器端口："/>
+
+                    <EditText
+                        android:id="@+id/ip_config_serv_port_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:maxLength="5"
+                        android:layout_width="100dp"
+                        android:nextFocusForward="@+id/ip_config_local_ip0_et"/>
+
+
+                </LinearLayout>
+
+                <LinearLayout style="@style/ip_config_dialog_item_layout">
+
+                    <TextView
+                        style="@style/ip_config_dialog_text_title"
+                        android:text="本机IP："/>
+
+                    <EditText
+                        android:id="@+id/ip_config_local_ip0_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_local_ip1_et"/>
+
+                    <TextView style="@style/ip_config_dialog_text_spot" />
+
+                    <EditText
+                        android:id="@+id/ip_config_local_ip1_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_local_ip2_et"/>
+
+                    <TextView style="@style/ip_config_dialog_text_spot" />
+
+                    <EditText
+                        android:id="@+id/ip_config_local_ip2_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:nextFocusForward="@+id/ip_config_local_ip3_et"/>
+
+                    <TextView style="@style/ip_config_dialog_text_spot" />
+
+                    <EditText
+                        android:id="@+id/ip_config_local_ip3_et"
+                        style="@style/ip_config_dialog_edittext"
+                        android:imeOptions="actionDone"/>
+
+                </LinearLayout>
+
+                <LinearLayout style="@style/ip_config_dialog_item_layout">
+
+                    <TextView
+                        style="@style/ip_config_dialog_text_title"
+                        android:text="DHCP:"/>
+
+                    <Switch
+                        android:id="@+id/ip_config_dhcp_sw"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/ip_config_cancel_btn"
+                style="@style/custom_dialog_btn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="取 消" />
+
+            <Button
+                android:id="@+id/ip_config_confirm_btn"
+                style="@style/custom_dialog_btn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="确 认" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</FrameLayout>

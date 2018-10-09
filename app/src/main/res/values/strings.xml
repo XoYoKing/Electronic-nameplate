@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">TS8209A</string>
+
+
+    <string name="welcome_title">欢迎您</string>
+    <string name="meeting_info">会议信息</string>
+    <string name="call_services">呼叫服务</string>
+    <string name="sms_func">短信功能</string>
+    <string name="edit_user_info">编辑用户信息</string>
+    <string name="sys_setting">系统设置</string>
+    <string name="coffee">咖啡</string>
+    <string name="tea">茶</string>
+    <string name="water">水</string>
+    <string name="microphone">话筒</string>
+    <string name="flower">花</string>
+    <string name="pen">笔</string>
+    <string name="paper">纸</string>
+    <string name="artificial_services">人工服务</string>
+    <string name="user_name">用户名称</string>
+    <string name="comp_name">公司名称</string>
+    <string name="user_pos">用户职位</string>
+    <string name="click_to_preview_nameplate">点击上方预览铭牌布局</string>
+    <string name="font_style">字体</string>
+    <string name="font_size">字号</string>
+    <string name="font_color">颜色</string>
+    <string name="select_bg_color">选择背景颜色</string>
+    <string name="save">保存</string>
+    <string name="ip_address">IP地址</string>
+    <string name="backlight">亮度</string>
+    <string name="wifi_config">wifi设置</string>
+    <string name="app_config">应用配置</string>
+    <string name="dev_id">终端ID:</string>
+    <string name="server_ip">服务器IP:</string>
+    <string name="server_port">服务器端口:</string>
+    <string name="local_ip">本机IP:</string>
+    <string name="dhcp">DHCP:</string>
+    <string name="screen_backlight">屏幕亮度</string>
+    <string name="wifi_switch">WIFI开关</string>
+    <string name="wifi_select">选择WIFI</string>
+    <string name="wifi_status">Wifi状态</string>
+    <string name="wifi_disconnect_and_unsave">断开当前wifi并取消保存</string>
+    <string name="sys_version">系统版本</string>
+    <string name="app_version">软件版本</string>
+    <string name="sys_language">系统语言</string>
+    <string name="lang_cn_en">简体中文</string>
+    <string name="to_engineer_mode">切换到工程模式</string>
+    <string name="app_updata">软件升级</string>
+
+    <string name="addressee">收件人：</string>
+    <string name="sms_content">内   容：</string>
+    <string name="please_input_sms_content">请输入短信内容</string>
+    <string name="choice">选 择</string>
+    <string name="send">发 送</string>
+    <string name="sms_record">消息记录</string>
+    <string name="edit_the_message">编辑消息</string>
+    <string name="confirm">确 定</string>
+    <string name="please_select_the_addressee">请选择收件人</string>
+    <string name="text_messaging_cannot_be_empty">短信发送内容不能为空</string>
+    <string name="text_messaging_success">短信发送成功</string>
+
+</resources>
