@@ -62,7 +62,7 @@ public class CallServiceActivity extends AppActivity {
         public void onClick(View view) {
             final Button button = (Button) view;
 
-            CustomDialog.Builder builder = new CustomDialog.Builder(actContext, CustomDialog.DOUBLE_BTN);
+            CustomDialog.Builder builder = new CustomDialog.Builder(CallServiceActivity.this, CustomDialog.DOUBLE_BTN);
             builder.setTitle(true,getResources().getString(R.string.call_services)).setContent("是否呼叫服务："+button.getText()).setFisrtBtn("取消").setSecondBtn("确定");
             builder.setButtonClickListerner(new View.OnClickListener() {
 

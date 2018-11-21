@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/nameplate_layout"
+    android:layout_width="1024px"
+    android:layout_height="600px"
+    android:background="#FFFFFF"
+    android:visibility="invisible" >
+
+
+    <TextView
+        android:id="@+id/nameplate_Company"
+        style="@style/nameplate_view_text"/>
+
+    <TextView
+        android:id="@+id/nameplate_Person"
+        style="@style/nameplate_view_text"/>
+
+    <TextView
+        android:id="@+id/nameplate_Position"
+        style="@style/nameplate_view_text"/>
+
+</AbsoluteLayout>

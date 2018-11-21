@@ -23,9 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -101,7 +99,6 @@ public class Network extends Service {
     //命令通讯服务器socket
     private socketHandler commandSocket;
     //图片服务器下载
-    private httpDownloadHandler imageDownload;
     private networkMonitor monitor;
     private boolean servConnected = false;
     private boolean devRegistered = false;
@@ -253,7 +250,7 @@ public class Network extends Service {
                             break;
                         case RSP_TS_DEVICE_REG:
                             if(json.getInt("iResult") == 200) {
-                                App.SystemDateTime.setDateTimeMillis(Long.parseLong(json.getString("strErrorMsg")));
+                                APP.SystemDateTime.setDateTimeMillis(Long.parseLong(json.getString("strErrorMsg")));
                                 devRegistered = true;
                             }
                             else
@@ -273,14 +270,21 @@ public class Network extends Service {
                         case EVT_TS_QUIT_MEETING:
                             break;
                         case RSP_TS_GET_USERINFO:
+//                            Log.d(TAG,json.toString());
                             bundle.putString("strUserName",json.getString("strUserName"));
                             bundle.putString("strCompany",json.getString("strCompany"));
                             bundle.putString("strPosition",json.getString("strPosition"));
                             if(!json.isNull("strNameplateUrl")) {
-                                Log.d(TAG, "image url:" + json.getString("strNameplateUrl"));
+//                                Log.d(TAG, "image url:" + json.getString("strNameplateUrl"));
                                 String imgUrl = json.getString("strNameplateUrl");
-                                imageDownload = new httpDownloadHandler("/storage/sdcard0/nameplate");
-                                imageDownload.donwloadImg(imgUrl);
+                                httpDownloadHandler npDownload = new httpDownloadHandler("/storage/sdcard0/nameplate");
+                                npDownload.donwloadImg(imgUrl);
+                            }
+                            if(!json.isNull("strNameplateBGUrl")) {
+//                                Log.d(TAG, "image url:" + json.getString("strNameplateUrl"));
+                                String imgUrl = json.getString("strNameplateUrl");
+                                httpDownloadHandler bgDownload = new httpDownloadHandler("/storage/sdcard0/nameplateBG");
+                                bgDownload.donwloadImg(imgUrl);
                             }
                             socketTransHandler.sendEmptyMessage(REQ_TS_GET_USERLIST);
                             break;
@@ -415,24 +419,25 @@ public class Network extends Service {
         private Runnable saveFileRunnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    byte[] data = getImage(url);
-                    if (data != null) {
-                        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);// bitmap
-                        saveFile(bitmap, url.substring(url.lastIndexOf('/') + 1, url.length()));
+                synchronized ("saveFileRunnable") {
+                    try {
+                        byte[] data = getImage(url);
+                        if (data != null) {
+                            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);// bitmap
+                            saveFile(bitmap, url.substring(url.lastIndexOf('/') + 1, url.length()));
 
-                        if (resultHandler != null)
-                            resultHandler.sendEmptyMessage(0);
-                    } else {
-                        Log.e(TAG, "Image error!");
+                            if (resultHandler != null)
+                                resultHandler.sendEmptyMessage(0);
+                        } else {
+                            Log.e(TAG, "Image error!");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
-
         };
 
         private byte[] getImage(String path) throws Exception{

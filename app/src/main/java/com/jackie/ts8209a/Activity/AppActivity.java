@@ -1,13 +1,19 @@
 package com.jackie.ts8209a.Activity;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -17,7 +23,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jackie.ts8209a.Application.App;
+import com.jackie.ts8209a.Application.APP;
 import com.jackie.ts8209a.Managers.BatteryManager;
 import com.jackie.ts8209a.Managers.NetworkManager;
 import com.jackie.ts8209a.RemoteServer.Network;
@@ -46,19 +52,19 @@ public class AppActivity extends Activity {
     protected static String infoStartTime = "";
     protected static String infoEndTime = "";
 
+    //MeetingInfo->Msg from Administrator
+    protected static ArrayList<String> adminMsg = new ArrayList<String>();
+
     //SMS->UserList
     protected static HashMap<Integer,String> userList = null;
     //SMS->sms infoContent
     protected static ArrayList<String[]> newSMS = new ArrayList<String[]>();
     protected static ArrayList<String[]> oldSMS = new ArrayList<String[]>();
-    protected static ArrayList<String> sysSMS = new ArrayList<String>();
-
 
     protected String TAG = getClass().getSimpleName();
     protected boolean returnEnable = true;
     protected boolean statusBarEnable = true;
-    protected Context actContext;
-    protected App app;
+    protected APP App;
 
     protected PowerManager.WakeLock wakeLock;
     protected statusBarHandler statusBar;
@@ -68,6 +74,9 @@ public class AppActivity extends Activity {
     protected WifiManager wifiManager;
     protected NetworkManager networkManager;
 
+    protected LocalBroadcastManager localBroadcast = null;
+    protected IntentFilter intentFilter = null;
+//    protected BroadcastReceiver broadcastReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,9 +93,9 @@ public class AppActivity extends Activity {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
-        actContext = this;
+//        actContext = this;
         try {
-            app = (App) getApplication();
+            App = (APP) getApplication();
             batteryManager = BatteryManager.getBatteryManager();
             wifiManager = WifiManager.getWifiManager();
             networkManager = NetworkManager.getNetworkManager();
@@ -97,6 +106,8 @@ public class AppActivity extends Activity {
 
         if(statusBarEnable)
             statusBar = new statusBarHandler(this);
+
+        initBroadcast();
     }
 
     @Override
@@ -114,7 +125,7 @@ public class AppActivity extends Activity {
             btnReturn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    finish();
+                    retBtnClick();
                 }
             });
         }
@@ -251,6 +262,60 @@ public class AppActivity extends Activity {
             }
         }
 
+    }
+
+    //本地广播
+    protected void initBroadcast(){
+        localBroadcast = LocalBroadcastManager.getInstance(this);
+
+        setIntentFilter();
+        localBroadcast.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                broadcastProcessing(intent);
+            }
+        },intentFilter);
+
+    }
+
+    protected void setIntentFilter(){
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(APP.ACTION_MAIN);
+        intentFilter.addAction(APP.ACTION_STAR_ACTIVITY);
+        intentFilter.addAction(APP.ACTION_FINISH_ACTIVITY);
+        intentFilter.addAction(APP.ACTION_REFRESH_ACTIVITY);
+    }
+
+    protected void broadcastProcessing(Intent intent){
+        if (intent.getAction().equals(APP.ACTION_STAR_ACTIVITY)
+                && isActivityTop()) {
+
+            Intent starActIntent = new Intent(this, (Class<?>) intent.getExtras().get("CLASS"));
+            startActivity(starActIntent);
+
+        } else if (intent.getAction().equals(APP.ACTION_FINISH_ACTIVITY)
+                && isActivityTop()
+                && getClass().equals(intent.getExtras().get("CLASS"))) {
+
+            this.finish();
+
+        } else if (intent.getAction().equals(APP.ACTION_REFRESH_ACTIVITY)
+                && isActivityTop()
+                && (getClass().equals(intent.getExtras().get("CLASS")) || intent.getExtras().get("CLASS") == null)) {
+
+            onResume();
+        }
+    }
+
+    protected boolean isActivityTop() {
+        Class<? extends Context> cls = getClass();
+        ActivityManager manager = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        String name = manager.getRunningTasks(1).get(0).topActivity.getClassName();
+        return name.equals(cls.getName());
+    }
+
+    protected void retBtnClick(){
+        finish();
     }
 
     public static class PromptBox {
@@ -560,13 +625,13 @@ public class AppActivity extends Activity {
 
     }
 
-    public static Handler handler = new Handler(){
+    public static Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             Bundle bundle = msg.getData();
             switch (msg.what) {
                 case MEETING_INFO:
-                    if(bundle == null)
+                    if (bundle == null)
                         break;
                     infoName = bundle.getString("strName");
                     infoSlogan = bundle.getString("strSlogan");
@@ -578,7 +643,7 @@ public class AppActivity extends Activity {
                     userList = (HashMap) msg.obj;
                     break;
                 case SERVIE_ACK:
-                    PromptBox.BuildPrompt("CALL_SERVICE_ACK").Text("已收到服务请求："+msg.obj).Time(1).TimeOut(2500);
+                    PromptBox.BuildPrompt("CALL_SERVICE_ACK").Text("已收到服务请求：" + msg.obj).Time(1).TimeOut(2500);
                     break;
                 case SMS_MSG:
                     if (bundle == null)
@@ -587,7 +652,7 @@ public class AppActivity extends Activity {
                     int userId = bundle.getInt("iReceiverID");
                     try {
                         smsStr[0] = userList.get(userId);
-                        if(smsStr[0] == null)
+                        if (smsStr[0] == null)
                             smsStr[0] = "ID: " + userId;
                     } catch (Exception e) {
                         smsStr[0] = "ID: " + userId;
@@ -598,13 +663,13 @@ public class AppActivity extends Activity {
 
                     PromptBox.BuildPrompt("YOU_HAVE_A_SMS")
                             .Text("你有一条来自：" + smsStr[0]
-                                        + "的新消息").Time(5).TimeOut(8000);
+                                    + "的新消息").Time(1).TimeOut(8000);
                     break;
                 case SYS_SMS_MSG:
-                    sysSMS.add(bundle.getString("strContent"));
+                    adminMsg.add(bundle.getString("strContent"));
                     PromptBox.BuildPrompt("YOU_HAVE_A_SMS")
-                            .Text("你有一条来自管理员的新消息").Time(5).TimeOut(8000);
-//                    Log.i("sms receive","SYS msg->"+bundle.getString("strContent"));
+                            .Text("你有一条来自管理员的新消息").Time(1).TimeOut(8000);
+                    APP.LocalBroadcast.send(APP.ACTION_REFRESH_ACTIVITY, MeetingInfoActivity.class);
                     break;
             }
         }

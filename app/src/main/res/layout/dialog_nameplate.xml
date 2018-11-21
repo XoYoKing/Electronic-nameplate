@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="1024dp"
+    android:layout_height="600dp">
+
+    <RelativeLayout
+        android:id="@+id/nameplate_preview_lay"
+        android:layout_width="1024dp"
+        android:layout_height="wrap_content"
+        android:background="#00000000"
+        android:visibility="visible">
+
+        <TextView
+            style="@style/nameplate_preview_dialog_title"
+            android:id="@+id/nameplate_preview_title"
+            android:text="@string/nameplate_preview"/>
+
+        <AbsoluteLayout
+            android:id="@+id/nameplate_preview_bg_lay"
+            android:layout_width="768dp"
+            android:layout_height="450dp"
+            android:background="#FFFFFF"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/nameplate_preview_title">
+
+            <com.jackie.ts8209a.CustomView.View.MoveTextView
+                android:id="@+id/nameplate_preview_comp_tv"
+                style="@style/nameplate_dialog_preview_movetext"/>
+
+            <com.jackie.ts8209a.CustomView.View.MoveTextView
+                android:id="@+id/nameplate_preview_user_tv"
+                style="@style/nameplate_dialog_preview_movetext"/>
+
+            <com.jackie.ts8209a.CustomView.View.MoveTextView
+                android:id="@+id/nameplate_preview_pos_tv"
+                style="@style/nameplate_dialog_preview_movetext"/>
+        </AbsoluteLayout>
+
+        <Button
+            style="@style/nameplate_preview_button"
+            android:layout_width="250dp"
+            android:id="@+id/nameplate_preview_confirm_btn"
+            android:layout_marginLeft="180dp"
+            android:layout_below="@id/nameplate_preview_bg_lay"
+            android:text="@string/nameplate_confirm"/>
+
+        <Button
+            style="@style/nameplate_preview_button"
+            android:layout_width="250dp"
+            android:id="@+id/nameplate_preview_close_btn"
+            android:layout_marginLeft="180dp"
+            android:layout_below="@id/nameplate_preview_bg_lay"
+            android:layout_toRightOf="@id/nameplate_preview_confirm_btn"
+            android:text="@string/close_preview"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/nameplate_updata_lay"
+        android:layout_width="600dp"
+        android:layout_height="360dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_605348_10r"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/nameplate_updata_tv"
+            style="@style/page_title"
+            android:text="@string/nameplate_is_updating"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100dp"
+            android:textSize="35sp"/>
+
+        <ProgressBar
+            android:id="@+id/nameplate_updata_pb"
+            style="?android:attr/progressBarStyleLargeInverse"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="50dp"
+            android:layout_below="@id/nameplate_updata_tv"
+            android:layout_centerHorizontal="true"/>
+
+    </RelativeLayout>
+
+    <include layout="@layout/inc_nameplate" />
+
+</FrameLayout>

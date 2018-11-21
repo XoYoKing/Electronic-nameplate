@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.jackie.ts8209a.CustomView.Dialog.SelectorDialog;
 import com.jackie.ts8209a.R;
 
 import java.io.UnsupportedEncodingException;
@@ -35,7 +36,7 @@ public class SmsActivity extends AppActivity {
     private EditText etContent;
     private LinearLayout layReceContent;
 
-    private static String[] smsAddressee = {""};
+    private String[] smsAddressee = {""};
     private boolean smsReceiveContent = false;
     private boolean addrChecked[] = null;
     private ArrayList<String> addresseeChoiceList = new ArrayList<String>();
@@ -46,12 +47,12 @@ public class SmsActivity extends AppActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms);
 
-        btnAddressee = (Button)findViewById(R.id.sms_choice_addressee_btn);
-        btnSend = (ImageButton)findViewById(R.id.sms_send_btn);
-        layAddressee = (LinearLayout)findViewById(R.id.sms_addressee_lay);
-        etContent = (EditText)findViewById(R.id.sms_content_et);
-        layReceContent = (LinearLayout)findViewById(R.id.sms_receive_content_lay);
-        ((ImageButton) findViewById(R.id.sms_receive_content_btn)).setOnClickListener(new smsReceiveContentButtonListener());
+        btnAddressee = (Button) findViewById(R.id.sms_choice_addressee_btn);
+        btnSend = (ImageButton) findViewById(R.id.sms_send_btn);
+        layAddressee = (LinearLayout) findViewById(R.id.sms_addressee_lay);
+        etContent = (EditText) findViewById(R.id.sms_content_et);
+        layReceContent = (LinearLayout) findViewById(R.id.sms_receive_content_lay);
+        (findViewById(R.id.sms_receive_content_btn)).setOnClickListener(new smsReceiveContentButtonListener());
 
         btnAddressee.setOnClickListener(new addresseeChoiceClickLisgener());
         btnSend.setOnClickListener(new smsSendButtonListener());
@@ -64,26 +65,25 @@ public class SmsActivity extends AppActivity {
 
         smsAddressee = getUserList();
 
-        if (smsAddressee != null){
-            Log.i("SMS Resume","addressee length = "+smsAddressee.length);
+        if (smsAddressee != null) {
+//            Log.i("SMS Resume","addressee length = "+smsAddressee.length);
             addrChecked = new boolean[smsAddressee.length];
-        }
-        else
+        } else
             btnAddressee.setEnabled(false);
 
-        if(!newSMS.isEmpty()){
+        if (!newSMS.isEmpty()) {
             displaySmsRecord();
         }
         PromptBox.removePrompt("YOU_HAVE_A_SMS");
     }
 
-    private void displaySmsRecord(){
+    private void displaySmsRecord() {
         smsReceiveContent = true;
-        ((RelativeLayout)findViewById(R.id.sms_edit_send_lay)).setVisibility(View.GONE);
-        ((ScrollView)findViewById(R.id.sms_receive_content_sv)).setVisibility(View.VISIBLE);
+        ( findViewById(R.id.sms_edit_send_lay)).setVisibility(View.GONE);
+        ( findViewById(R.id.sms_receive_content_sv)).setVisibility(View.VISIBLE);
         layReceContent.removeAllViews();
 
-        for(int i=0;i<newSMS.size();i++){
+        for (int i = 0; i < newSMS.size(); i++) {
             String[] sms = newSMS.get(i);
 
             LinearLayout layout = new LinearLayout(this);
@@ -156,8 +156,8 @@ public class SmsActivity extends AppActivity {
             layReceContent.addView(layout);
         }
 
-        if(!newSMS.isEmpty()){
-            for(int i=0;i<newSMS.size();i++){
+        if (!newSMS.isEmpty()) {
+            for (int i = 0; i < newSMS.size(); i++) {
                 String[] sms = newSMS.get(i);
 //				newSMS.remove(0);
                 oldSMS.add(sms);
@@ -166,10 +166,10 @@ public class SmsActivity extends AppActivity {
         }
     }
 
-    private void undisplaySmsRecord(){
+    private void undisplaySmsRecord() {
         smsReceiveContent = false;
-        ((ScrollView)findViewById(R.id.sms_receive_content_sv)).setVisibility(View.GONE);
-        ((RelativeLayout)findViewById(R.id.sms_edit_send_lay)).setVisibility(View.VISIBLE);
+        ((ScrollView) findViewById(R.id.sms_receive_content_sv)).setVisibility(View.GONE);
+        ((RelativeLayout) findViewById(R.id.sms_edit_send_lay)).setVisibility(View.VISIBLE);
     }
 
     private String[] getUserList() {
@@ -190,7 +190,7 @@ public class SmsActivity extends AppActivity {
 
         for (Integer key : userList.keySet()) {
 //            Log.d(TAG,"Key = " + key + " Value: "+userList.get(key));
-            if(name.equals(userList.get(key)))
+            if (name.equals(userList.get(key)))
                 id = key;
         }
 
@@ -201,48 +201,42 @@ public class SmsActivity extends AppActivity {
 
         @Override
         public void onClick(View view) {
-//			addresseeChoice = null;
+            if (userList.size() == 0 || smsAddressee == null) {
+                btnAddressee.setEnabled(false);
+                return;
+            }
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(SmsActivity.this);
-            builder.setMultiChoiceItems(smsAddressee, addrChecked, new addresseeMultiChoiceListener());
-            builder.setPositiveButton(getResources().getText(R.string.confirm), new addresseeConfirmListener());
-            builder.show();
+            SelectorDialog dialog = new SelectorDialog(SmsActivity.this, smsAddressee);
+            dialog.setMode(SelectorDialog.MULTI_SELECTION).setOnSelectConfirmListener(new addresseeConfirmListener()).setChecked(addrChecked).show();
         }
     }
 
-    private class addresseeMultiChoiceListener implements DialogInterface.OnMultiChoiceClickListener {
-
-//        public addresseeMultiChoiceListener(boolean[] check){
+//    private class addresseeMultiChoiceListener implements DialogInterface.OnMultiChoiceClickListener {
 //
+//        @Override
+//        public void onClick(DialogInterface dialog, int witch, boolean bl) {
+//            addrChecked[witch] = bl;
 //        }
+//    }
+
+    private class addresseeConfirmListener implements SelectorDialog.OnSelectConfirmListener {
 
         @Override
-        public void onClick(DialogInterface dialog, int witch, boolean bl) {
-            addrChecked[witch] = bl;
-        }
-    }
-
-    private class addresseeConfirmListener implements android.content.DialogInterface.OnClickListener{
-
-        @Override
-        public void onClick(DialogInterface dialog, int witch) {
-
-//			ArrayList<String> addresseeChoiceList = new ArrayList<String>();
+        public void multiSelect(boolean[] checked, String[] content) {
+            addrChecked = checked;
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.setMargins(5, 0, 0, 0);
-
             Drawable drawRemove = getResources().getDrawable(R.drawable.ico_yichu_n);
             drawRemove.setBounds(0, 0, drawRemove.getMinimumWidth(), drawRemove.getMinimumHeight());
 
             addresseeRemoveClickListener listener = new addresseeRemoveClickListener();
 
             layAddressee.removeAllViews();
-
-//			smsAddresseeStr = new String[addrChecked.length];
-            for(int i = 0; i< addrChecked.length; i++){
-                if (addrChecked[i]) {
-//					smsAddresseeStr[i] = new String(smsAddressee[i]);
+            addresseeChoiceList.clear();
+            for (int i = 0; i < checked.length; i++) {
+                if (checked[i]) {
+                    // smsAddresseeStr[i] = new String(smsAddressee[i]);
                     addresseeChoiceList.add(smsAddressee[i]);
 
                     Button btn = new Button(SmsActivity.this);
@@ -253,12 +247,14 @@ public class SmsActivity extends AppActivity {
                     btn.setCompoundDrawables(null, null, drawRemove, null);
                     btn.setBackground(getResources().getDrawable(R.drawable.btn_addressee_chosen));
                     btn.setOnClickListener(listener);
-//					btn.setContentDescription(String.valueOf(i));
 
                     layAddressee.addView(btn);
                 }
             }
-//			addresseeChoice = addresseeChoiceList.toArray(new String[addresseeChoiceList.size()]);
+        }
+
+        @Override
+        public void singleSelect(int choice, String content) {
         }
     }
 
@@ -266,14 +262,20 @@ public class SmsActivity extends AppActivity {
 
         @Override
         public void onClick(View view) {
-            Button btn = (Button)view;
+            Button btn = (Button) view;
 //			int remove = Integer.parseInt((String) btn.getContentDescription());
 
-            for(int i=0;i<addresseeChoiceList.size();i++){
-                if(btn.getText().equals(addresseeChoiceList.get(i))){
+            for (int i = 0; i < addresseeChoiceList.size(); i++) {
+                if (addresseeChoiceList.get(i).equals(btn.getText())) {
                     addresseeChoiceList.remove(i);
-                    addrChecked[i] = false;
+//					choiced[i] = false;
 //					Log.d("addresseeRemoveClickListener","Remove: "+btn.getText());
+                }
+            }
+
+            for (int i = 0; i < smsAddressee.length; i++) {
+                if (btn.getText().equals(smsAddressee[i])) {
+                    addrChecked[i] = false;
                 }
             }
             layAddressee.removeView(view);
@@ -284,17 +286,16 @@ public class SmsActivity extends AppActivity {
 
         @Override
         public void onClick(View view) {
-            ImageButton btn = (ImageButton)view;
+            ImageButton btn = (ImageButton) view;
 
-            if(smsReceiveContent){
+            if (smsReceiveContent) {
                 undisplaySmsRecord();
                 btn.setImageResource(R.drawable.ico_lsjl_n);
-                ((TextView)findViewById(R.id.sms_receive_content_tv)).setText((String)getResources().getText(R.string.sms_record));
-            }
-            else{
+                ((TextView) findViewById(R.id.sms_receive_content_tv)).setText(getResources().getString(R.string.sms_record));
+            } else {
                 displaySmsRecord();
                 btn.setImageResource(R.drawable.ico_fasong_n);
-                ((TextView)findViewById(R.id.sms_receive_content_tv)).setText((String)getResources().getText(R.string.edit_the_message));
+                ((TextView) findViewById(R.id.sms_receive_content_tv)).setText(getResources().getString(R.string.edit_the_message));
             }
         }
 
@@ -304,57 +305,32 @@ public class SmsActivity extends AppActivity {
 
         @Override
         public void onClick(View view) {
-            if(addresseeChoiceList.size() == 0){
-                PromptBox.BuildPrompt("PLEASE_CHOISE_ADDRESSEE").Text((String)getResources().getText(R.string.please_select_the_addressee)).Time(1).TimeOut(5000);
-            }
-            else if(msgContent.equals("")){
-                PromptBox.BuildPrompt("CONTENT_CAN_NOT_EMPTY").Text((String)getResources().getText(R.string.text_messaging_cannot_be_empty)).Time(1).TimeOut(5000);
-            }
-            else{
-                PromptBox.BuildPrompt("SMS_SEND_SUCCESS").Text((String)getResources().getText(R.string.text_messaging_success)).Time(1).TimeOut(5000);
-                try {
-                    byte[] content = msgContent.getBytes("GB2312");
-                    int packNum = content.length/14;
-                    int remain = content.length%14;
-                    byte[] send = null;
+            if (addresseeChoiceList.size() == 0) {
+                PromptBox.BuildPrompt("PLEASE_CHOISE_ADDRESSEE").Text((String) getResources().getText(R.string.please_select_the_addressee)).Time(1).TimeOut(5000);
+            } else if (msgContent.equals("")) {
+                PromptBox.BuildPrompt("CONTENT_CAN_NOT_EMPTY").Text((String) getResources().getText(R.string.text_messaging_cannot_be_empty)).Time(1).TimeOut(5000);
+            } else {
+                PromptBox.BuildPrompt("SMS_SEND_SUCCESS").Text((String) getResources().getText(R.string.text_messaging_success)).Time(1).TimeOut(5000);
 
-                    for(int j=0;j <= packNum;j++){
-                        if (j < packNum) {
-                            send = new byte[16];
 
-                            for (int i = 0; i < 14; i++) {
-                                send[i + 2] = content[j * 14 + i];
-                            }
-                        } else if (j == packNum && remain != 0) {
-                            send = new byte[remain + 2];
+                String[] addresseeChoice = addresseeChoiceList.toArray(new String[addresseeChoiceList.size()]);
+                for (int i = 0; i < addresseeChoice.length; i++) {
+                    if (addresseeChoice[i] == null)
+                        continue;
+                    else {
+                        int id = getUserID(addresseeChoice[i]);
 
-                            for (int i = 0; i < remain; i++) {
-                                send[i + 2] = content[14 * packNum + i];
-                            }
-                        } else
-                            break;
-
-                        String[] addresseeChoice = addresseeChoiceList.toArray(new String[addresseeChoiceList.size()]);
-                        for(int i=0;i<addresseeChoice.length;i++){
-                            if(addresseeChoice[i] == null)
-                                continue;
-                            else{
-                                int id = getUserID(addresseeChoice[i]);
-
-                                if(id >=0 ){
-                                    networkManager.sendSms(id,msgContent);
-                                }
-                            }
+                        if (id >= 0) {
+                            Log.d(TAG, id + " . " + addresseeChoice[i]);
+                            networkManager.sendSms(id, msgContent);
                         }
                     }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
                 }
                 layAddressee.removeAllViews();
                 etContent.setText("");
                 msgContent = "";
                 addresseeChoiceList.removeAll(addresseeChoiceList);
-                for(int i = 0; i< addrChecked.length; i++)
+                for (int i = 0; i < addrChecked.length; i++)
                     addrChecked[i] = false;
 
             }
@@ -370,11 +346,11 @@ public class SmsActivity extends AppActivity {
         }
 
         @Override
-        public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,int arg3) {
+        public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
         }
 
         @Override
-        public void onTextChanged(CharSequence arg0, int arg1, int arg2,int arg3) {
+        public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
         }
 
     }

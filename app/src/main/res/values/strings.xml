@@ -19,7 +19,7 @@
     <string name="user_name">用户名称</string>
     <string name="comp_name">公司名称</string>
     <string name="user_pos">用户职位</string>
-    <string name="click_to_preview_nameplate">点击上方预览铭牌布局</string>
+    <string name="click_to_preview_nameplate">点击预览铭牌布局</string>
     <string name="font_style">字体</string>
     <string name="font_size">字号</string>
     <string name="font_color">颜色</string>
@@ -57,5 +57,18 @@
     <string name="please_select_the_addressee">请选择收件人</string>
     <string name="text_messaging_cannot_be_empty">短信发送内容不能为空</string>
     <string name="text_messaging_success">短信发送成功</string>
+    <string name="select_all">全选</string>
+    <string name="info_abstract">摘要:</string>
+    <string name="click_for_details">点击查看详情</string>
+
+    <string name="color">颜色</string>
+    <string name="choice_bg_color">选择背景色</string>
+    <string name="save_successfully">保存成功</string>
+    <string name="nameplate_preview">电子铭牌布局预览</string>
+    <string name="nameplate_confirm">确认并更新电子铭牌</string>
+    <string name="close_preview">关闭预览页面</string>
+    <string name="nameplate_is_updating">电子铭牌正在更新</string>
+    <string name="color_picker_title">点击色环选择颜色;下方选择色调;点击中心确定选择</string>
+    <string name="set_font_size">字体大小设置</string>
 
 </resources>

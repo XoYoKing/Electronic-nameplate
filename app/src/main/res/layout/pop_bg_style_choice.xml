@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="366dp"
+    android:layout_height="210dp"
+    android:padding="5dp"
+    android:background="#574B3F">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="设置铭牌背景"
+            android:textSize="24sp"
+            android:textColor="#CCCCCC"
+            android:gravity="center"/>
+
+        <Button
+            android:id="@+id/edit_pop_bg_style_exit_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="X"
+            android:textSize="26sp"
+            android:textColor="#999999"
+            android:background="#00FFFFFF"/>
+    </RelativeLayout>
+
+
+    <Button
+        android:id="@+id/edit_pop_bg_style_img_btn"
+        style="@style/edit_bg_pop_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="使用图片背景"/>
+
+    <Button
+        android:id="@+id/edit_pop_bg_style_color_btn"
+        style="@style/edit_bg_pop_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="使用纯色背景"/>
+</LinearLayout>

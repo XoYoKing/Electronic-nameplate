@@ -48,6 +48,15 @@
 
         </ScrollView>
 
+        <Button
+            android:id="@+id/custom_dialog_first_btn"
+            style="@style/custom_dialog_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:padding="5dp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </FrameLayout>

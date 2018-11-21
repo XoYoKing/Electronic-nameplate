@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.Log;
 
-import com.jackie.ts8209a.Application.App;
+import com.jackie.ts8209a.Application.APP;
 
 /**
  * Created by kuangyt on 2018/8/27.
@@ -33,8 +33,14 @@ public class UserInfoManager {
     private final String[] keyLocalIp = { "LOCALIP_1", "LOCALIP_2",
             "LOCALIP_3", "LOCALIP_4" };
 
+    private final String[] keyFontPosX = { "USNAMEFONTPOSX", "COMPFONTPOSX", "POSFONTPOSX" };
+    private final String[] keyFontPosY = { "USNAMEFONTPOSY", "COMPFONTPOSY", "POSFONTPOSY" };
+
     private final String keyServerPort = "SERVERPORT";
     private final String keyNamePlateBGColor = "NAMEPLATEBGCOLOR";
+    private final String keyNamePlateType = "NAMEPLATETYPE";
+    private final String keyNamePlateBGImg = "NAMEPLATEBGIMG";
+    private final String keyNamePlateImage = "NAMEPLATEIMAGE";
     private final String keyDhcp = "DHCP";
     private final String keyLanguage = "LANGUAGE";
     private final String keyBrightness = "BRIGHTNESS";
@@ -47,7 +53,7 @@ public class UserInfoManager {
     //类唯一实现静态对象
     private static UserInfoManager UserInfo = new UserInfoManager();
 
-    private static App app;
+    private static APP App;
     private static SharedPreferences userInfo = null;
     private static SharedPreferences.Editor editor = null;
     private static boolean saving = false;
@@ -57,11 +63,16 @@ public class UserInfoManager {
     private int[] fontColor = new int[3];
     private int[] fontStyle = new int[3];
     private int[] fontSize = new int[3];
+    private float[] fontPosX = new float[3];
+    private float[] fontPosY = new float[3];
     private int[] localIp = { 192, 168, 1, 1 };
     private int[] serverIp = { 192, 168, 1, 100 };
     private int serverPort = 8000;
     private boolean dhcp = false;
     private int NamePlateBGColor = Color.RED;
+    private int NamePlateType = 0;
+    private String NamePlateBGImgPath = "";
+    private String NamePlateImagePath = "";
     private String language = "zh";
     private int brightness = 50;
     private String ssid = "";
@@ -78,9 +89,9 @@ public class UserInfoManager {
         return UserInfo;
     }
 
-    public void init(App app) {
-        UserInfoManager.app = app;
-        userInfo = UserInfoManager.app.getSharedPreferences(USER_INFO_PATH, Context.MODE_PRIVATE);
+    public void init(APP App) {
+        UserInfoManager.App = App;
+        userInfo = UserInfoManager.App.getSharedPreferences(USER_INFO_PATH, Context.MODE_PRIVATE);
         editor = userInfo.edit();
 
         for (int i = 0; i < 3; i++) {
@@ -88,6 +99,8 @@ public class UserInfoManager {
             fontColor[i] = userInfo.getInt(keyFontColor[i], Color.YELLOW);
             fontStyle[i] = userInfo.getInt(keyFontStyle[i], 1);
             fontSize[i] = userInfo.getInt(keyFontSize[i], 50);
+            fontPosX[i] = userInfo.getFloat(keyFontPosX[i], 0);
+            fontPosY[i] = userInfo.getFloat(keyFontPosY[i], 0);
         }
         for (int i = 0; i < 4; i++) {
             serverIp[i] = userInfo.getInt(keyServerIp[i], serverIp[i]);
@@ -102,6 +115,9 @@ public class UserInfoManager {
         pwd = userInfo.getString(keyWifiPwd,"");
         wifiType= userInfo.getInt(keyWifiType,3);
         deviceID = userInfo.getInt(keyDeviceID,1);
+        NamePlateType = userInfo.getInt(keyNamePlateType,0);
+        NamePlateBGImgPath = userInfo.getString(keyNamePlateBGImg,"");
+        NamePlateImagePath = userInfo.getString(keyNamePlateImage,"");
 
 
         editor.putString("TS8209A", "TS8209A");
@@ -124,6 +140,8 @@ public class UserInfoManager {
                             editor.putInt(keyFontColor[i], fontColor[i]);
                             editor.putInt(keyFontStyle[i], fontStyle[i]);
                             editor.putInt(keyFontSize[i], fontSize[i]);
+                            editor.putFloat(keyFontPosX[i], fontPosX[i]);
+                            editor.putFloat(keyFontPosY[i], fontPosY[i]);
                         }
                         for (int i = 0; i < 4; i++) {
                             editor.putInt(keyServerIp[i], serverIp[i]);
@@ -138,10 +156,13 @@ public class UserInfoManager {
                         editor.putString(keyWifiPwd,pwd);
                         editor.putInt(keyWifiType,wifiType);
                         editor.putInt(keyDeviceID,deviceID);
+                        editor.putInt(keyNamePlateType,NamePlateType);
+                        editor.putString(keyNamePlateBGImg,NamePlateBGImgPath);
+                        editor.putString(keyNamePlateImage,NamePlateImagePath);
 
                         editor.commit();
 
-//						PromptBox.BuildPrompt("SAVE_SUCCESS").Text((String)app.getApplicationContext().getResources().getText(R.string.save_successfully)).Time(1).TimeOut(3000);
+//						PromptBox.BuildPrompt("SAVE_SUCCESS").Text((String)App.getApplicationContext().getResources().getText(R.string.save_successfully)).Time(1).TimeOut(3000);
                     }catch(Exception e){}
 
                     saving = false;
@@ -206,6 +227,27 @@ public class UserInfoManager {
         return UserInfo;
     }
 
+    // 设置电子铭牌类型
+    public UserInfoManager setNamePlateType(int type){
+        NamePlateType = type;
+        save();
+        return UserInfo;
+    }
+
+    //设置电子铭牌背景图片路径
+    public UserInfoManager setNamePlateBGImg(String path){
+        NamePlateBGImgPath = path;
+        save();
+        return UserInfo;
+    }
+
+    //设置电子铭牌图片铭牌路径
+    public UserInfoManager setNamePlateImage(String path){
+        NamePlateImagePath = path;
+        save();
+        return UserInfo;
+    }
+
     // 设置字体风格
     public UserInfoManager setStyle(int type, int style) {
         if (type >= 0 && type <= 2) {
@@ -238,6 +280,27 @@ public class UserInfoManager {
         if (size.length == 3) {
             for (int i = 0; i < 3; i++) {
                 fontSize[i] = size[i];
+            }
+            save();
+        }
+        return UserInfo;
+    }
+
+    //设置字体位置坐标
+    public UserInfoManager setFontPosition(int type, float posX,float posY) {
+        if (type >= 0 && type <= 2) {
+            fontPosX[type] = posX;
+            fontPosY[type] = posY;
+            save();
+        }
+        return UserInfo;
+    }
+
+    public UserInfoManager setFontPosition(float[] posX,float[] posY){
+        if (posX.length == 3 && posY.length == 3) {
+            for (int i = 0; i < 3; i++) {
+                fontPosX[i] = posX[i];
+                fontPosY[i] = posY[i];
             }
             save();
         }
@@ -354,6 +417,21 @@ public class UserInfoManager {
         return NamePlateBGColor;
     }
 
+    // 获取电子铭牌类型
+    public int getNamePlateType(){
+        return NamePlateType;
+    }
+
+    //获取电子铭牌背景图片路径
+    public String getNamePlateBGImg(){
+        return NamePlateBGImgPath;
+    }
+
+    //获取电子铭牌图片铭牌路径
+    public String getNamePlateImage(){
+        return keyNamePlateImage;
+    }
+
     // 获取字体风格
     public int getStyle(int type) {
         if (type >= 0 && type <= 2) {
@@ -384,6 +462,23 @@ public class UserInfoManager {
             size[i] = fontSize[i];
         }
         return size;
+    }
+
+    //获取字体位置坐标
+    public float[] getPosX(){
+        float[] po = new float[3];
+        for(int i=0;i<3;i++){
+            po[i] = fontPosX[i];
+        }
+        return po;
+    }
+
+    public float[] getPosY(){
+        float[] po = new float[3];
+        for(int i=0;i<3;i++){
+            po[i] = fontPosY[i];
+        }
+        return po;
     }
 
     // 获取服务器IP

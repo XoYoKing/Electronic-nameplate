@@ -1,33 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.jackie.ts8209a.Activity.MeetingInfoActivity"
-    style="@style/activity">
+    style="@style/activity"
+    tools:context="com.jackie.ts8209a.Activity.MeetingInfoActivity">
 
     <TextView
         style="@style/page_title"
-        android:text="会议信息"
-        />
+        android:text="会议信息" />
 
-    <ScrollView
+    <RadioGroup
+        android:id="@+id/meetinginfo_page_choice_rg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="110dp"
+        android:layout_marginLeft="60dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/meetinginfo_page_choice_1_rb"
+            style="@style/meetinfo_page_choice"
+            android:text="会议信息"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/meetinginfo_page_choice_2_rb"
+            style="@style/meetinfo_page_choice"
+            android:text="管理员消息" />
+
+    </RadioGroup>
+
+    <RelativeLayout
         android:layout_width="904dp"
-        android:layout_height="440dp"
+        android:layout_height="399dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="116dp"
+        android:layout_marginTop="156dp"
         android:background="@drawable/bg_1e1b1b_s"
         android:padding="15dp">
 
-        <LinearLayout
-            android:id="@+id/meetinginfo_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
+        <ScrollView
+            android:id="@+id/meetinginfo_admin_msg_sv"
+            style="@style/meetinginfo_content_layout"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/meetinginfo_admin_msg_lay"
+                style="@style/meetinginfo_content_ver_layout">
 
 
-        </LinearLayout>
-    </ScrollView>
+            </LinearLayout>
+        </ScrollView>
 
-    <include layout="@layout/inc_status_bar"/>
-    <include layout="@layout/inc_return_button"/>
+        <ScrollView
+            android:id="@+id/meetinginfo_content_sv"
+            style="@style/meetinginfo_content_layout">
+
+            <LinearLayout
+                style="@style/meetinginfo_content_ver_layout"
+                android:padding="38dp">
+
+                <LinearLayout
+                    style="@style/meetinginfo_content_hor_layout">
+
+                    <TextView
+                    style="@style/meetinginfo_content_title"
+                    android:text="会议名称:"/>
+
+                    <TextView
+                        android:id="@+id/meetinginfo_content_name"
+                        style="@style/meetinginfo_content_text"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    style="@style/meetinginfo_content_hor_layout">
+
+                    <TextView
+                        style="@style/meetinginfo_content_title"
+                        android:text="会议标题:"/>
+
+                    <TextView
+                        android:id="@+id/meetinginfo_content_slogan"
+                        style="@style/meetinginfo_content_text"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    style="@style/meetinginfo_content_hor_layout">
+
+                    <TextView
+                        style="@style/meetinginfo_content_title"
+                        android:text="会议内容:"/>
+
+                    <TextView
+                        android:id="@+id/meetinginfo_content_substance"
+                        style="@style/meetinginfo_content_text"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    style="@style/meetinginfo_content_hor_layout">
+
+                    <TextView
+                        style="@style/meetinginfo_content_title"
+                        android:text="开始时间:"/>
+
+                    <TextView
+                        android:id="@+id/meetinginfo_content_starttime"
+                        style="@style/meetinginfo_content_text"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    style="@style/meetinginfo_content_hor_layout">
+
+                    <TextView
+                        style="@style/meetinginfo_content_title"
+                        android:text="结束时间:"/>
+
+                    <TextView
+                        android:id="@+id/meetinginfo_content_endtime"
+                        style="@style/meetinginfo_content_text"/>
+                </LinearLayout>
+
+
+
+            </LinearLayout>
+        </ScrollView>
+
+    </RelativeLayout>
+
+
+
+    <include layout="@layout/inc_status_bar" />
+
+    <include layout="@layout/inc_return_button" />
+
     <include layout="@layout/inc_prompt_box" />
 </RelativeLayout>

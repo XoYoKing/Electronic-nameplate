@@ -12,7 +12,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 
-import com.jackie.ts8209a.Application.App;
+import com.jackie.ts8209a.Application.APP;
 import com.jackie.ts8209a.CustomView.Dialog.CustomDialog;
 import com.jackie.ts8209a.CustomView.Dialog.WifiPassword;
 import com.jackie.ts8209a.CustomView.View.WifiSelection;
@@ -62,7 +62,7 @@ public class WifiManager {
     private android.net.wifi.WifiManager.WifiLock wifiLock;
 
     //Application环境
-    private static App app = null;
+    private static APP App = null;
 
     //Wifi设置相关变量
     private static CustomDialog wifiSelector = null;
@@ -75,23 +75,23 @@ public class WifiManager {
     }
 
     public static WifiManager getWifiManager() throws Exception{
-        if(app == null || osWifiManager == null){
+        if(App == null || osWifiManager == null){
             throw (new Exception("WifiManager not initialized,please invoke \"initWifiManager()\""));
         }
         return wifiManager;
     }
 
     //wifi管理器初始化
-    public static WifiManager initWifiManager(App application) throws Exception {
-        app = application;
-        osWifiManager = (android.net.wifi.WifiManager) app.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    public static WifiManager initWifiManager(APP App) throws Exception {
+        WifiManager.App = App;
+        osWifiManager = (android.net.wifi.WifiManager) WifiManager.App.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         osWifiInfo = osWifiManager.getConnectionInfo();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(android.net.wifi.WifiManager.WIFI_STATE_CHANGED_ACTION);
 
-        app.registerReceiver(new wifiStatusReceiver(),filter);
+        WifiManager.App.registerReceiver(new wifiStatusReceiver(),filter);
         return getWifiManager();
     }
 

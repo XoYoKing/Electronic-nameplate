@@ -8,16 +8,20 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.jackie.ts8209a.Activity.AppActivity;
-import com.jackie.ts8209a.Application.App;
+import com.jackie.ts8209a.Activity.MainActivity;
+import com.jackie.ts8209a.Activity.MeetingInfoActivity;
+import com.jackie.ts8209a.Application.APP;
 import com.jackie.ts8209a.RemoteServer.Network;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static com.jackie.ts8209a.Activity.AppActivity.SERVIE_ACK;
 import static com.jackie.ts8209a.Activity.AppActivity.SMS_MSG;
@@ -43,16 +47,19 @@ public class NetworkManager {
     private WifiManager wifiManager;
     private WifiManager.WifiInfo wifiInfo;
     private UserInfoManager userInfoManager;
-    private App app;
+    private APP App;
 
     private static NetworkManager networkManager = new NetworkManager();
     private static Messenger networkMessenger;
+//    private static Queue<Bundle> networkSendQueue = new Queue<Bundle>();
+    private static Deque<Bundle> sendQueue = new LinkedBlockingDeque<Bundle>();
 
     private Timer sendDevInfoTimer;
 
     private OnNetworkStatusListener staListener;
 
     private int networkStatus = Network.STA_DISCONNECTED;
+
 
 
     private NetworkManager() {
@@ -69,7 +76,7 @@ public class NetworkManager {
     public static NetworkManager initManager(Messenger messenger){
         try {
 
-            Log.d(TAG,"initManager");
+//            Log.d(TAG,"initManager");
             networkMessenger = messenger;
             Message msg = Message.obtain();
             msg.what = Network.CMD_SET_REPLY;
@@ -86,6 +93,8 @@ public class NetworkManager {
                 }, 3000, 5000);
             }
             networkManager.resetNetwork();
+
+            new Thread(getSendQueue).start();
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -115,6 +124,8 @@ public class NetworkManager {
                             dataMsg.what = MEETING_INFO;
                             dataMsg.setData(msg.getData());
                             AppActivity.handler.sendMessage(dataMsg);
+                            APP.LocalBroadcast.send(APP.ACTION_REFRESH_ACTIVITY, MeetingInfoActivity.class);
+                            APP.LocalBroadcast.send(APP.ACTION_REFRESH_ACTIVITY, MainActivity.class);
                             break;
                         case RSP_TS_GET_USERINFO:
                             userInfoManager.setStr(UserInfoManager.USER,bundle.getString("strUserName"));
@@ -160,17 +171,34 @@ public class NetworkManager {
     });
 
     private void sendToNetwork(int what,Bundle bundle){
-        try {
-            if (networkMessenger == null)
-                return;
-            Message msg = Message.obtain();
-            msg.what = what;
-            msg.setData(bundle);
-            networkMessenger.send(msg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        bundle.putInt("what",what);
+        sendQueue.add(bundle);
     }
+
+    private static Runnable getSendQueue = new Runnable() {
+        @Override
+        public void run() {
+            synchronized ("getSendQueue") {
+                while (true) {
+                        try {
+                            if(sendQueue.size() > 0) {
+                                Bundle bundle = sendQueue.poll();
+                                Message msg = Message.obtain();
+                                msg.what = bundle.getInt("what");
+                                msg.setData(bundle);
+                                networkMessenger.send(msg);
+                            }
+                            Thread.sleep(300);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                }
+            }
+        }
+    };
 
     public void sendDevInfo() {
         Bundle bundle = new Bundle();

@@ -4,4 +4,11 @@
         <attr name="Ssid" format="string"/>
         <attr name="Rssi" format="integer"/>
     </declare-styleable>
+
+    <declare-styleable name="MoveTextView" >
+        <attr name="xMax" format="integer"/>
+        <attr name="yMax" format="integer"/>
+        <attr name="xMin" format="integer"/>
+        <attr name="yMin" format="integer"/>
+    </declare-styleable>
 </resources>

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar">
@@ -22,6 +22,21 @@
         <item name="android:layout_height">65dp</item>
         <item name="android:orientation">horizontal</item>
     </style>
+    <style name="meetinginfo_content_layout" parent="layout">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+    <style name="meetinginfo_content_ver_layout" parent="meetinginfo_content_layout">
+        <item name="android:orientation">vertical</item>
+    </style>
+    <style name="meetinginfo_content_hor_layout" parent="meetinginfo_content_layout">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_marginBottom">20dp</item>
+    </style>
+    <style name="edti_nameplate_para_lay" parent="layout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">202dp</item>
+        <item name="android:layout_marginTop">200dp</item>
+    </style>
 
     <!--TextView Style-->
     <style name="text">
@@ -33,6 +48,11 @@
         <item name="android:textSize">30sp</item>
         <item name="android:layout_centerHorizontal">true</item>
         <item name="android:layout_marginTop">50dp</item>
+    </style>
+    <style name="nameplate_preview_dialog_title" parent="page_title">
+        <item name="android:textSize">28sp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
     </style>
     <style name="status_bar" parent="text">
         <item name="android:gravity">center</item>
@@ -75,10 +95,11 @@
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:textSize">10sp</item>
         <item name="android:gravity">center</item>
+        <item name="android:maxLines">1</item>
     </style>
     <style name="edit_info_text" parent="text">
         <item name="android:textColor">#BBBBBB</item>
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">20sp</item>
         <item name="android:gravity">center</item>
         <item name="android:layout_marginTop">8dp</item>
     </style>
@@ -93,6 +114,36 @@
     <style name="setting_item_num_text" parent="setting_item_text">
         <item name="android:gravity">left</item>
     </style>
+    <style name="meetinginfo_content_title" parent="text">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:textColor">#DDDDDD</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:gravity">right</item>
+        <item name="android:layout_marginRight">20dp</item>
+    </style>
+    <style name="meetinginfo_content_text" parent="text">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">26sp</item>
+    </style>
+    <!--<style name="nameplate_preview_text" parent="text">-->
+        <!--<item name="android:maxLines">1</item>-->
+    <!--</style>-->
+    <style name="nameplate_dialog_preview_text" parent="nameplate_preview_text">
+        <item name="android:shadowColor">#333333</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+    <style name="nameplate_dialog_preview_movetext" parent="nameplate_dialog_preview_text">
+        <item name="com.jackie.ts8209a:xMax">800</item>
+        <item name="com.jackie.ts8209a:yMax">469</item>
+        <item name="com.jackie.ts8209a:xMin">0</item>
+        <item name="com.jackie.ts8209a:yMin">0</item>
+    </style>
+    <style name="nameplate_view_text" parent="nameplate_dialog_preview_text">
+        <item name="android:shadowRadius">2</item>
+    </style>
+
     <!--<style infoName="setting_config_item_text" parent="setting_item_text">-->
         <!--<item infoName="android:layout_marginRight">0dp</item>-->
         <!--<item infoName="android:layout_alignParentRight">false</item>-->
@@ -144,13 +195,25 @@
         <item name="android:paddingBottom">58dp</item>
     </style>
     <style name="edit_info_button" parent="button">
+        <item name="android:layout_height">42dp</item>
         <item name="android:textColor">#CCCCCC</item>
-        <item name="android:textSize">24sp</item>
-        <item name="android:text"></item>
+        <item name="android:textSize">22sp</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/btn_edit_info</item>
         <item name="android:paddingLeft">15dp</item>
         <item name="android:paddingRight">15dp</item>
+    </style>
+    <style name="edit_bg_pop_button" parent="edit_info_button">
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+    <style name="nameplate_preview_button" parent="edit_info_button">
+        <item name="android:layout_height">46dp</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:text"></item>
+        <item name="android:layout_marginTop">15dp</item>
+        <item name="android:padding">5dp</item>
     </style>
 
     <!--ImageView Styles-->
@@ -213,6 +276,25 @@
         <item name="android:button">@null</item>
         <item name="android:paddingBottom">30dp</item>
     </style>
+    <style name="edit_choice_point" parent="radiobutton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:button">@null</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#BBBBBB</item>
+        <item name="android:drawablePadding">15dp</item>
+        <item name="android:padding">15dp</item>
+        <item name="android:drawableLeft">@drawable/btn_choice_point</item>
+    </style>
+    <style name="meetinfo_page_choice" parent="radiobutton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/btn_meetinfo_choice_page</item>
+        <item name="android:button">@null</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textColor">@color/setting_item_text_color</item>
+        <item name="android:textSize">22sp</item>
+    </style>
     <style name="setting_item_choice" parent="radiobutton">
         <item name="android:layout_width">120dp</item>
         <item name="android:layout_height">50dp</item>
@@ -224,5 +306,10 @@
         <item name="android:button">@null</item>
     </style>
 
+    <!--anim-->
+    <style name="anim_popupwindow">
+        <item name="android:windowEnterAnimation">@anim/pop_show</item>
+        <item name="android:windowExitAnimation">@anim/pop_hide</item>
+    </style>
 
 </resources>

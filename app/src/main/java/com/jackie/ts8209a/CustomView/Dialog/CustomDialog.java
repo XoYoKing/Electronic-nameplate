@@ -22,7 +22,6 @@ public class CustomDialog extends Dialog {
     public static final int VERTICAL_LIST = 3;
     public static final int HORIZONTAL_LIST = 4;
 
-
     protected CustomDialog(Context context) {
         super(context);
     }
@@ -73,14 +72,15 @@ public class CustomDialog extends Dialog {
                         btnThird = (Button) layout.findViewById(R.id.custom_dialog_third_btn);
                 }
             }else if(type == VERTICAL_LIST || type == HORIZONTAL_LIST){
+                btnFirst = (Button) layout.findViewById(R.id.custom_dialog_first_btn);
                 layList = (LinearLayout)layout.findViewById(R.id.custom_dialog_list_lay);
             }
         }
 
-        public Builder setTitle(boolean enable,String title){
+        public Builder setTitle(boolean showTitle,String title){
             if(layTitle == null || tvTitle == null)
                 return this;
-            if(enable){
+            if(showTitle){
                 layTitle.setVisibility(View.VISIBLE);
                 if(title != null)
                     tvTitle.setText(title);
@@ -100,6 +100,7 @@ public class CustomDialog extends Dialog {
         public Builder setFisrtBtn(String content){
             if(btnFirst == null)
                 return this;
+            btnFirst.setVisibility(View.VISIBLE);
             btnFirst.setText(content);
             return this;
         }
@@ -139,6 +140,12 @@ public class CustomDialog extends Dialog {
                 btnThird.setOnClickListener(listener);
             return this;
         }
+//
+//        public Builder setConfirmButton(boolean btnEnable){
+//            if((type == VERTICAL_LIST || type == HORIZONTAL_LIST) && btnFirst != null)
+//                btnFirst.setVisibility(btnEnable ? View.VISIBLE : View.GONE);
+//            return this;
+//        }
 
         public CustomDialog creatDialog(){
             dialog.setContentView(layout);

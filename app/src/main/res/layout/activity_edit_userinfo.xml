@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.jackie.ts8209a.Activity.EditUserInfoActivity"
-    style="@style/activity">
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LocalNameActivity"
+    style="@style/activity"
+    tools:context="com.jackie.ts8209a.Activity.EditUserInfoActivity" >
+
+    <!-- 姓名、公司、职位输入区域 -->
 
     <TextView
         style="@style/page_title"
-        android:text="@string/edit_user_info"
-        />
+        android:text="@string/edit_user_info" />
 
-    <!-- 姓名、公司、职位输入区域 -->
     <EditText
         android:id="@+id/edit_user_name_et"
         style="@style/userinfo"
@@ -32,9 +33,9 @@
     <RadioGroup
         android:id="@+id/edit_choice_tick_rg"
         android:layout_width="60dp"
-        android:layout_height="400dp"
+        android:layout_height="410dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="110dp"
         android:layout_toRightOf="@id/edit_user_name_et"
         android:orientation="vertical" >
 
@@ -56,80 +57,97 @@
     <RelativeLayout
         android:id="@+id/edit_set_para_lay"
         android:layout_width="366dp"
-        android:layout_height="400dp"
+        android:layout_height="410dp"
         android:layout_marginLeft="608dp"
         android:layout_marginTop="116dp"
         android:background="@drawable/bg_80574b3f_r">
 
         <!-- 预览区域 -->
-        <RelativeLayout
-            android:id="@+id/edit_preview_set_lay"
-            android:layout_width="280dp"
-            android:layout_height="164dp"
+        <AbsoluteLayout
+            android:id="@+id/edit_custom_np_preview_lay"
+            android:layout_width="256dp"
+            android:layout_height="150dp"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:background="#00FFFFFF"
-            android:padding="3dp">
+            android:layout_marginTop="38dp"
+            android:background="#00FFFFFF" >
 
-            <TextView
-                style="@style/nameplate_preview_text"
-                android:id="@+id/edit_preview_set_user_tv"
-                android:layout_centerInParent="true"/>
-
-            <TextView
-                style="@style/nameplate_preview_text"
-                android:id="@+id/edit_preview_set_comp_tv"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"/>
-
-            <TextView
-                style="@style/nameplate_preview_text"
-                android:id="@+id/edit_preview_set_pos_tv"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"/>
-
-            <Button
-                android:id="@+id/edit_preview_set_btn"
+            <ImageView
+                android:id="@+id/edit_custom_np_bg_iv"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/btn_preview_set_nameplate"/>
+                android:layout_height="match_parent" />
 
-        </RelativeLayout>
+            <TextView
+                style="@style/nameplate_preview_text"
+                android:id="@+id/edit_preview_user_tv"/>
 
+            <TextView
+                style="@style/nameplate_preview_text"
+                android:id="@+id/edit_preview_comp_tv"/>
 
+            <TextView
+                style="@style/nameplate_preview_text"
+                android:id="@+id/edit_preview_pos_tv"/>
+
+        </AbsoluteLayout>
+
+        <ImageView
+            android:id="@+id/edit_rdy_made_np_preview_iv"
+            android:layout_width="256dp"
+            android:layout_height="150dp"
+            android:layout_alignTop="@id/edit_custom_np_preview_lay"
+            android:layout_alignLeft="@id/edit_custom_np_preview_lay"/>
+
+        <Button
+            android:id="@+id/edit_preview_set_btn"
+            android:layout_width="256dp"
+            android:layout_height="150dp"
+            android:layout_alignTop="@id/edit_custom_np_preview_lay"
+            android:layout_alignLeft="@id/edit_custom_np_preview_lay"
+            android:background="@drawable/btn_preview_set_nameplate"/>
 
         <TextView
             style="@style/edit_info_text"
+            android:layout_width="256dp"
+            android:layout_marginBottom="5dp"
+            android:layout_above="@id/edit_preview_set_btn"
+            android:layout_centerHorizontal="true"
             android:text="@string/click_to_preview_nameplate"
-            android:layout_marginTop="5dp"
-            android:textSize="20sp"
-            android:layout_below="@id/edit_preview_set_lay"
-            android:layout_alignLeft="@id/edit_preview_set_lay"/>
-
+            android:textSize="18sp" />
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="90dp"
-            android:layout_marginTop="210dp"
-            android:padding="5dp"
-            android:background="#564A40" >
+            android:id="@+id/edti_custom_np_para_lay"
+            android:visibility="visible"
+            style="@style/edti_nameplate_para_lay">
+
+            <TextView
+                android:id="@+id/edti_custom_np_para_title_tv"
+                style="@style/edit_info_button"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginBottom="8dp"
+                android:layout_centerHorizontal="true"
+                android:background="#564A40"
+                android:text="使用自定义铭牌" />
 
             <Button
                 android:id="@+id/edit_font_style_btn"
                 style="@style/edit_info_button"
                 android:layout_width="140dp"
+                android:layout_below="@id/edti_custom_np_para_title_tv"
                 android:layout_marginLeft="34dp"/>
 
             <Button
                 android:id="@+id/edit_font_size_btn"
                 style="@style/edit_info_button"
                 android:layout_width="60dp"
+                android:layout_below="@id/edti_custom_np_para_title_tv"
                 android:layout_marginLeft="194dp"/>
 
             <Button
                 android:id="@+id/edit_font_color_btn"
                 style="@style/edit_info_button"
                 android:layout_width="60dp"
+                android:layout_below="@id/edti_custom_np_para_title_tv"
                 android:layout_marginLeft="274dp"/>
 
             <TextView
@@ -151,25 +169,61 @@
                 android:layout_width="60dp"
                 android:layout_below="@id/edit_font_color_btn"
                 android:layout_alignLeft="@id/edit_font_color_btn"
-                android:text="@string/font_color"/>
+                android:text="@string/color"/>
+
+
+            <ImageButton
+                android:id="@+id/edit_choice_setting_bg_ibtn"
+                style="@style/edit_info_button"
+                android:layout_width="85dp"
+                android:layout_height="50dp"
+                android:layout_below="@id/edit_font_size_btn"
+                android:layout_alignLeft="@id/edit_font_size_btn"
+                android:layout_marginTop="56dp"
+                android:layout_marginLeft="18dp"/>
+
+            <TextView
+                style="@style/edit_info_text"
+                android:text="设置背景"
+                android:layout_toLeftOf="@id/edit_choice_setting_bg_ibtn"
+                android:layout_alignTop="@id/edit_choice_setting_bg_ibtn"
+                android:layout_marginTop="12dp"
+                android:layout_marginRight="20dp"/>
+
         </RelativeLayout>
 
-        <TextView
-            android:id="@+id/edit_bg_color_tv"
-            style="@style/edit_info_text"
-            android:layout_width="wrap_content"
-            android:layout_marginLeft="60dp"
-            android:layout_marginTop="350dp"
-            android:text="@string/select_bg_color" />
+        <RelativeLayout
+            android:id="@+id/edti_ready_made_np_para_lay"
+            android:visibility="gone"
+            style="@style/edti_nameplate_para_lay">
 
-        <Button
-            android:id="@+id/edit_bg_color_btn"
-            style="@style/edit_info_button"
-            android:layout_width="80dp"
-            android:layout_marginLeft="25dp"
-            android:layout_alignBaseline="@id/edit_bg_color_tv"
-            android:layout_toRightOf="@id/edit_bg_color_tv"/>
+            <TextView
+                android:id="@+id/edti_ready_made_np_para_title_tv"
+                style="@style/edit_info_button"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginBottom="8dp"
+                android:layout_centerHorizontal="true"
+                android:background="#564A40"
+                android:text="使用系统下发铭牌" />
 
+            <Button
+                android:id="@+id/edit_choice_np_btn"
+                style="@style/edit_info_button"
+                android:layout_width="230dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="30dp"
+                android:layout_below="@id/edti_ready_made_np_para_title_tv"/>
+
+            <TextView
+                style="@style/edit_info_text"
+                android:layout_below="@id/edit_choice_np_btn"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="18dp"
+                android:textSize="23sp"
+                android:text="选择铭牌"/>
+
+        </RelativeLayout>
     </RelativeLayout>
 
     <Button
@@ -184,7 +238,11 @@
         android:textColor="#FFFFFF"
         android:textSize="24sp"/>
 
-    <include layout="@layout/inc_status_bar"/>
-    <include layout="@layout/inc_return_button"/>
+
+    <include layout="@layout/inc_status_bar" />
+
+    <include layout="@layout/inc_return_button" />
+
     <include layout="@layout/inc_prompt_box" />
+
 </RelativeLayout>

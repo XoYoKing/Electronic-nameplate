@@ -33,7 +33,8 @@
         <HorizontalScrollView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="8">
+            android:layout_weight="8"
+            android:padding="8dp">
 
             <LinearLayout
                 android:id="@+id/custom_dialog_list_lay"
@@ -43,10 +44,18 @@
                 android:orientation="horizontal"
                 android:padding="5dp">
 
-
             </LinearLayout>
-
         </HorizontalScrollView>
+
+        <Button
+            android:id="@+id/custom_dialog_first_btn"
+            style="@style/custom_dialog_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:padding="5dp"
+            android:visibility="gone"/>
 
 
     </LinearLayout>
