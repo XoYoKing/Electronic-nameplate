@@ -9,8 +9,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.jackie.ts8209a.Activity.AppActivity;
 import com.jackie.ts8209a.Application.APP;
 import com.jackie.ts8209a.CustomView.View.MoveTextView;
 import com.jackie.ts8209a.Drive.RA8876L;
@@ -28,6 +31,7 @@ import java.io.IOException;
  */
 
 public class NameplateManager {
+    private static final String TAG = "NameplateManager";
     public static NameplatePara Para = new NameplatePara();
 
     private static NameplateManager Nameplate = new NameplateManager();
@@ -45,6 +49,53 @@ public class NameplateManager {
 
     public static NameplateManager getNameplateManager() {
         return Nameplate;
+    }
+
+    public void init(final Context context){
+
+            new Thread() {
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+
+                        ProgressBar pBar = new ProgressBar(context);
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(30, 30);
+                        pBar.setLayoutParams(params);
+
+                        AppActivity.PromptBox.BuildPrompt("INIT_NAMEPLATE").Text("正在初始化电子铭牌").View(pBar);
+//                      Thread.sleep(50);
+//					    Log.i("RA8876 init", "Rst 8876");
+//                      MCU.sendCommand(McuHandler.RST_8876);
+                        RA8876L.devHandshake();
+                        Thread.sleep(500);
+                        RA8876L.setOninitFinishListener(new RA8876L.OnInitFinishListener() {
+
+                            @Override
+                            public void onInitFinish() {
+                                Log.i(TAG, "Init Finish");
+
+                                try{
+//							mActivity.PromptBox.BuildPrompt("INIT_NAMEPLATE").Text((String)getResources().getText(R.string.nameplate_is_initializing)).Time(4).TimeOut(3000);
+                                    RA8876L.setOnSetPicFinishListener(new RA8876L.OnSetPicFinishListener() {
+                                        @Override
+                                        public void onSetPicFinish() {
+//                                            MCU.sendCommand(McuHandler.BACKLIGHT_88_ON);
+                                            AppActivity.PromptBox.removePrompt("INIT_NAMEPLATE");
+                                        }
+                                    });
+                                    setNamePlateByByteData();
+
+//							Thread.sleep(15000);
+                                }catch(Exception e){}
+                            }
+                        });
+                        RA8876L.devInit();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                };
+            }.start();
     }
 
     public void preview(final Context context) {
@@ -135,7 +186,7 @@ public class NameplateManager {
     public void setNamePlateByByteData() {
         byte[] imgData = readFile();
         if (imgData == null){
-            imgData = new byte[1920*480*3];
+            imgData = new byte[1024*600*3];
             for(int i=0;i<imgData.length;i++)
                 imgData[i] = (byte)0xFF;
         }
@@ -255,10 +306,10 @@ public class NameplateManager {
             for (int i = 0; i < 3; i++) {
                 tvPreview1[i].setText(Para.strContent[i]);
                 tvPreview1[i].setTextColor(Para.fontColor[i]);
-                tvPreview1[i].setTextSize((int) (Para.fontsize[i] * 4));
+                tvPreview1[i].setTextSize((int) (Para.fontsize[i] * 2.84));
                 tvPreview1[i].setTypeface(FontManager.getFontManager().getFontType(Para.fontstyle[i]));
-                tvPreview1[i].setX((float) (Para.fontPosX[i]*1.875));
-                tvPreview1[i].setY((float) (Para.fontPosY[i]*1.875));
+                tvPreview1[i].setX((float) (Para.fontPosX[i]*1.333));
+                tvPreview1[i].setY((float) (Para.fontPosY[i]*1.333));
             }
 
             new Thread() {

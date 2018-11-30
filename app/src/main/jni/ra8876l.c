@@ -52,13 +52,13 @@ static const char *TAG = "RA8876L";
 #define TIMEOUT_WARNNING 1
 
 
-#define OSC_FREQ	10	// OSC clock frequency, unit: MHz.
-#define DRAM_FREQ	133	// SDRAM clock frequency, unit: MHz. 
-#define CORE_FREQ	120	// Core (system) clock frequency, unit: MHz. 
-#define SCAN_FREQ	50	// Panel Scan clock frequency, unit: MHz.
-#define Panel_width   480
-#define Panel_length 1920
-#define canvus_width  480
+#define OSC_FREQ	    10	// OSC clock frequency, unit: MHz.
+#define DRAM_FREQ	    133	// SDRAM clock frequency, unit: MHz.
+#define CORE_FREQ	    120	// Core (system) clock frequency, unit: MHz.
+#define SCAN_FREQ	    50	// Panel Scan clock frequency, unit: MHz.
+#define Panel_width     1024
+#define Panel_length    600
+#define canvus_width    1024
 
 #define	cSetb0		0x01
 #define	cSetb1		0x02
@@ -84,7 +84,7 @@ static const char *TAG = "RA8876L";
 
 //#define PackSize 230400
 //#define PackSize 921600
-#define PackSize 2764800
+#define PackSize 1843200
 
 static const char *device = "/dev/spidev0.0";
 static uint8_t mode;
@@ -759,6 +759,26 @@ static void VSYNC_Low_Active(void) {
 	DataWrite(temp);
 }
 
+void HSYNC_High_Active(void)
+{
+    uint8_t temp;
+
+    CmdWrite(0x13);
+    temp = DataRead();
+    temp |= cSetb7;
+    DataWrite(temp);
+}
+
+void VSYNC_High_Active(void)
+{
+    uint8_t temp;
+
+    CmdWrite(0x13);
+    temp = DataRead();
+    temp |= cSetb6;
+    DataWrite(temp);
+}
+
 static void DE_High_Active(void) {
 	uint8_t temp;
 
@@ -877,7 +897,7 @@ static void LCD_VSYNC_Pulse_Width(uint16_t HY) {
 
 //Set_LCD_Panel
 static void Set_LCD_Panel(void) {
-	//HSD088IPW1
+	//VS070CXN
 
 	LOGI(__FUNCTION__);
 	Select_LCD_Sync_Mode(); // Enable XVSYNC, XHSYNC, XDE.
@@ -889,12 +909,14 @@ static void Set_LCD_Panel(void) {
 	PDATA_Set_RGB();
 
 	HSYNC_Low_Active();
-
 	VSYNC_Low_Active();
+
+//    HSYNC_High_Active();
+//    VSYNC_High_Active();
 
 	DE_High_Active();
 
-	LCD_HorizontalWidth_VerticalHeight(480, 1920); //INNOLUX 800x480顡�
+	LCD_HorizontalWidth_VerticalHeight(1024, 600); //INNOLUX 800x480顡�
 	LCD_Horizontal_Non_Display(8); //INNOLUX800x600顡�46顡�
 	LCD_HSYNC_Start_Position(120); //INNOLUX800x600顡�16~354顡�//210
 	LCD_HSYNC_Pulse_Width(6); //INNOLUX800x600顡�1~40顡�	 //10
@@ -1793,9 +1815,9 @@ JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_init
 #ifdef ColorDepth_16bit
 	Data_Format_8b_16bpp();
 #endif
-//	MemWrite_Left_Right_Top_Down();
+	MemWrite_Left_Right_Top_Down();
 //	MemWrite_Right_Left_Top_Down();
-	MemWrite_Down_Top_Left_Right();
+//	MemWrite_Down_Top_Left_Right();
 	
 	Graphic_Mode();
 	
@@ -1874,7 +1896,7 @@ JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_sendData
  */
 JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_handShake
   (JNIEnv *env, jclass obj){
-	  LOGI("Handshake to drive");
+	  LOGI("TS-8209A Handshake to drive");
 }
 
 /*

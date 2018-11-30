@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import com.jackie.ts8209a.Drive.RA8876L;
 import com.jackie.ts8209a.Managers.BatteryManager;
 import com.jackie.ts8209a.Managers.FontManager;
+import com.jackie.ts8209a.Managers.NameplateManager;
 import com.jackie.ts8209a.Managers.NetworkManager;
 import com.jackie.ts8209a.RemoteServer.Network;
 import com.jackie.ts8209a.Managers.UserInfoManager;
@@ -47,6 +48,7 @@ public class APP extends Application {
     private WifiManager.WifiInfo wifiInfo;
     private UserInfoManager userInfoManager;
     private NetworkManager networkManager;
+    private NameplateManager nameplateManager;
 
     @Override
     public void onCreate() {
@@ -69,6 +71,8 @@ public class APP extends Application {
 
 //            RA8876L.devHandshake();
 //            RA8876L.devInit();
+            nameplateManager = NameplateManager.getNameplateManager();
+            nameplateManager.init(this);
         }
     }
 

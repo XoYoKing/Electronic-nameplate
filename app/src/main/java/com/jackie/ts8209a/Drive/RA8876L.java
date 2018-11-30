@@ -64,7 +64,7 @@ public class RA8876L {
 
 
     public static void setPic(final View view){
-        Log.d("setPic","w="+view.getMeasuredWidth()+",h="+view.getMeasuredHeight());
+//        Log.d("setPic","w="+view.getMeasuredWidth()+",h="+view.getMeasuredHeight());
 
         viewBmp = getViewBitmap(view);
         imgData = getPixels(viewBmp);
@@ -143,7 +143,7 @@ public class RA8876L {
                 else {
                     // displayOff();
                     beingSend = true;
-                    sendData((short) 0, (short) 0, (short) 480, (short) 1920, imgData, imgData.length);
+                    sendData((short) 0, (short) 0, (short) 1024, (short) 600, imgData, imgData.length);
                     imgData = null;
                     beingSend = false;
                     displayOn();
@@ -192,9 +192,11 @@ public class RA8876L {
     private static int[] pixels = null; // 通过位图的大小创建像素点数组
     //	private static byte[] bytePixels = null;
     private static byte[] getPixels(Bitmap bmp) {
+
         int width = bmp.getWidth(); // 获取位图的宽
         int height = bmp.getHeight(); // 获取位图的高
 
+        Log.d("getPixels","w="+width+",h="+height);
         pixels = new int[width * height]; // 通过位图的大小创建像素点数组
         imgData = new byte[width * height * 3];
         // byte[] bytePixels = new byte[width * height * 2];

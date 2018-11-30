@@ -1,8 +1,9 @@
 apply plugin: 'com.android.application'
 import org.apache.tools.ant.taskdefs.condition.Os
+
 android {
     compileSdkVersion 19
-    buildToolsVersion "28.0.2"
+    buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "com.jackie.ts8209a"
         minSdkVersion 19
@@ -10,30 +11,37 @@ android {
         versionCode 1
         versionName "20181121"
 
-        ndk{
+        ndk {
             moduleName "ra8876l"//指定生成的so文件名
-//            abiFilters "armeabi-v7a"//cpu的类型A
+            abiFilters "armeabi-v7a"//cpu的类型A
             ldLibs "-llog"
         }
 
-        sourceSets.main{
-            jniLibs.srcDir 'src/main/libs'
-            jni.srcDirs = []
-        }
-
-        task ndkBuild(type: Exec) {
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'ndk-build.cmd', '-C', file('src/main/jni').absolutePath
-            } else {
-                commandLine 'ndk-build', '-C', file('src/main/jni').absolutePath
-            }
-        }
-
-        tasks.withType(JavaCompile) {
-            compileTask -> compileTask.dependsOn ndkBuild
-        }
+//        sourceSets.main {
+//            jniLibs.srcDir 'src/main/libs'
+//            jni.srcDirs = []
+//        }
+//
+//        task ndkBuild(type: Exec) {
+//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                commandLine 'ndk-build.cmd', '-C', file('src/main/jni').absolutePath
+//            } else {
+//                commandLine 'ndk-build', '-C', file('src/main/jni').absolutePath
+//            }
+//        }
+//
+//        tasks.withType(JavaCompile) {
+//            compileTask -> compileTask.dependsOn ndkBuild
+//        }
 
     }
+
+    externalNativeBuild{
+        ndkBuild{
+            path "src/main/jni/Android.mk"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -47,6 +55,11 @@ android {
 //            path "CMakeLists.txt"
 //        }
 //    }
+    sourceSets {
+        main {
+            jni.srcDirs = ['src/main/jni', 'src/main/jni/']
+        }
+    }
 }
 
 dependencies {

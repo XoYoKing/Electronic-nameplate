@@ -135,8 +135,8 @@
         <item name="android:shadowRadius">1</item>
     </style>
     <style name="nameplate_dialog_preview_movetext" parent="nameplate_dialog_preview_text">
-        <item name="com.jackie.ts8209a:xMax">800</item>
-        <item name="com.jackie.ts8209a:yMax">469</item>
+        <item name="com.jackie.ts8209a:xMax">768</item>
+        <item name="com.jackie.ts8209a:yMax">450</item>
         <item name="com.jackie.ts8209a:xMin">0</item>
         <item name="com.jackie.ts8209a:yMin">0</item>
     </style>
