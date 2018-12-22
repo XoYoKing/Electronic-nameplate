@@ -4,7 +4,7 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
-        android:layout_width="500dp"
+        android:layout_width="wrap_content"
         android:layout_height="260dp"
         android:background="@drawable/bg_605348_10r"
         android:orientation="vertical">
@@ -34,12 +34,11 @@
         <TextView
             android:id="@+id/custom_dialog_content_tv"
             style="@style/custom_dialog_text_content"
-            android:layout_weight="5"
-            android:text="" />
+            android:layout_weight="5" />
 
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="3"
             android:gravity="center">
@@ -47,26 +46,20 @@
             <Button
                 android:id="@+id/custom_dialog_first_btn"
                 style="@style/custom_dialog_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <Button
                 android:id="@+id/custom_dialog_second_btn"
                 style="@style/custom_dialog_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <Button
                 android:id="@+id/custom_dialog_third_btn"
                 style="@style/custom_dialog_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 

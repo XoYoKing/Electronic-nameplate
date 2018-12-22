@@ -1,6 +1,5 @@
 package com.jackie.ts8209a.CustomView.View;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -10,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jackie.ts8209a.Managers.WifiManager;
+import com.jackie.ts8209a.AppModule.Network.WifiManager;
 import com.jackie.ts8209a.R;
 
 /**

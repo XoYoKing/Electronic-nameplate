@@ -5,12 +5,16 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.IdRes;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.AbsoluteLayout;
 import android.widget.Button;
@@ -27,10 +31,15 @@ import com.jackie.ts8209a.CustomView.Dialog.ColorPickerDialog;
 import com.jackie.ts8209a.CustomView.Dialog.CustomDialog;
 import com.jackie.ts8209a.CustomView.Dialog.ImagePickerDialog;
 import com.jackie.ts8209a.CustomView.Dialog.SeekbarDialog;
-import com.jackie.ts8209a.Managers.FontManager;
-import com.jackie.ts8209a.Managers.NameplateManager;
-import com.jackie.ts8209a.Managers.UserInfoManager;
+import com.jackie.ts8209a.AppModule.Basics.FontManager;
+import com.jackie.ts8209a.AppModule.Basics.NameplateManager;
+import com.jackie.ts8209a.AppModule.Basics.UserInfoManager;
 import com.jackie.ts8209a.R;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.jackie.ts8209a.AppModule.Basics.NameplateManager.*;
 
 
 /**
@@ -45,16 +54,12 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
     private final int EDIT_BG_IMG = 4;
     private final int EDIT_NP_IMG = 5;
 
-    private final int NP_TYPE_CUSTOM_COLOR = 0;
-    private final int NP_TYPE_CUSTOM_BG_IMG = 1;
-    private final int NP_TYPE_RDY_MADE_IMG = 2;
-
-    private final String namePlatePath = "/storage/sdcard0/nameplate/";
-    private final String namePlateBGPath = "/storage/sdcard0/nameplateBG/";
+    private final String NP_PICTURE_PATH = "/storage/sdcard0/nameplate/";
+    private final String NP_BACKGROUND_PATH = "/storage/sdcard0/nameplateBG/";
 
     private boolean btnLongClk = false;
 
-    private NameplateManager Nameplate;
+    private NameplateManager nameplateManager;
     private FontManager Font;
     private UserInfoManager UserInfo;
 
@@ -62,17 +67,21 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
     private RelativeLayout layRdyMadeNpPara;
     private AbsoluteLayout layCustomNpPreview;
 
+    private TextView tvRdyMadeNpName;
+    private TextView tvPreviewHint;
+    private TextView tvLongClickHint;
     private EditText etUserName;
     private EditText etCompName;
     private EditText etUserPos;
 
-    private RadioGroup rgChoiceTick;
+    private RadioGroup rgSelectTick;
 
     private Button btnPreview;
     private Button btnFontStyle;
     private Button btnFontSize;
     private Button btnFontColor;
     private Button btnSave;
+    private Button btnSelectRdyMadeNp;
 
     private ImageButton ibtnBgSetting;
 
@@ -84,6 +93,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
 
     //铭牌背景属性弹窗
     private PopupWindow bgStylePop = null;
+    private Timer hintSwitch;
 
     // 颜色参数缓存
     private String[] strTemp = new String[3];
@@ -109,48 +119,34 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         etUserName = (EditText) findViewById(R.id.edit_user_name_et);
         etCompName = (EditText) findViewById(R.id.edit_comp_name_et);
         etUserPos = (EditText) findViewById(R.id.edit_user_pos_et);
-        rgChoiceTick = (RadioGroup) findViewById(R.id.edit_choice_tick_rg);
+        rgSelectTick = (RadioGroup) findViewById(R.id.edit_select_tick_rg);
         btnPreview = (Button) findViewById(R.id.edit_preview_set_btn);
         btnFontStyle = (Button) findViewById(R.id.edit_font_style_btn);
         btnFontSize = (Button) findViewById(R.id.edit_font_size_btn);
         btnFontColor = (Button) findViewById(R.id.edit_font_color_btn);
-        ibtnBgSetting = (ImageButton) findViewById(R.id.edit_choice_setting_bg_ibtn);
+        ibtnBgSetting = (ImageButton) findViewById(R.id.edit_select_setting_bg_ibtn);
         btnSave = (Button) findViewById(R.id.edit_save);
         layCustomNpPara = (RelativeLayout) findViewById(R.id.edti_custom_np_para_lay);
         layRdyMadeNpPara = (RelativeLayout) findViewById(R.id.edti_ready_made_np_para_lay);
         layCustomNpPreview = (AbsoluteLayout) findViewById(R.id.edit_custom_np_preview_lay);
         ivCustomNpBg = (ImageView) findViewById(R.id.edit_custom_np_bg_iv);
         ivRdyMadeNpImg = (ImageView) findViewById(R.id.edit_rdy_made_np_preview_iv);
+        btnSelectRdyMadeNp = (Button) findViewById(R.id.edit_select_rdy_made_np_btn);
+        tvRdyMadeNpName = (TextView)findViewById(R.id.edit_rdy_made_np_name_tv);
+        tvPreviewHint = (TextView)findViewById(R.id.edit_preview_hint_tv);
+        tvLongClickHint = (TextView)findViewById(R.id.edit_long_click_hint_tv);
 
-        //获取用户信息参数
         UserInfo = UserInfoManager.getUserInfoManager();
-
-        //获取字符控制句柄
         Font = FontManager.getFontManager();
+        nameplateManager = NameplateManager.getNameplateManager();
 
-        //获取电子铭牌控制句柄
-        Nameplate = NameplateManager.getNameplateManager();
-
-        //绑定监听器
-        btnFontColor.setOnClickListener(this);
-        btnFontStyle.setOnClickListener(this);
-        btnFontSize.setOnClickListener(this);
-        ibtnBgSetting.setOnClickListener(this);
-        btnSave.setOnClickListener(this);
-        btnPreview.setOnClickListener(this);
-
-        btnPreview.setOnLongClickListener(this);
-
-        etUserName.addTextChangedListener(new editTextChangeListener(etUserName));
-        etCompName.addTextChangedListener(new editTextChangeListener(etCompName));
-        etUserPos.addTextChangedListener(new editTextChangeListener(etUserPos));
-
-        etUserName.setOnTouchListener(this);
-        etCompName.setOnTouchListener(this);
-        etUserPos.setOnTouchListener(this);
-
-        rgChoiceTick.setOnCheckedChangeListener(this);
-
+        hintSwitch = new Timer();
+        hintSwitch.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hintSwitchHandler.sendEmptyMessage(0);
+            }
+        },3000,5000);
     }
 
     @Override
@@ -169,22 +165,50 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         npImgPath = UserInfo.getNamePlateImage();
 
         //初始化控件状态
-        rgChoiceTick.check(R.id.edit_name_tick_rbtn);
+        rgSelectTick.check(R.id.edit_name_tick_rbtn);
         etUserName.setText(strTemp[EDIT_USER]);
         etCompName.setText(strTemp[EDIT_COMP]);
         etUserPos.setText(strTemp[EDIT_POS]);
         btnFontStyle.setText(FontManager.NAME[fontstyleTemp[EDIT_USER]]);
         btnFontSize.setText(String.format("%02d", fontsizeTemp[EDIT_USER]));
         setBtnColor(btnFontColor, fontColorTemp[EDIT_USER]);
-//        setBtnColor(ibtnBgSetting,bgColorTemp);
         btnSave.setEnabled(false);
 
-//        String path = "/storage/sdcard0/nameplateBG/nameplate_315403491343750.jpg";
-//        File file = new File(path);
-//        ImageView imgView = (ImageView) findViewById(R.id.edit_preview_set_bg_iv);
-//        Glide.with(this).load(file).into(ivCustomNpBg);
+        //绑定监听器
+        btnFontColor.setOnClickListener(this);
+        btnFontStyle.setOnClickListener(this);
+        btnFontSize.setOnClickListener(this);
+        ibtnBgSetting.setOnClickListener(this);
+        btnSave.setOnClickListener(this);
+        btnSelectRdyMadeNp.setOnClickListener(this);
+        btnPreview.setOnClickListener(this);
+
+        btnPreview.setOnLongClickListener(this);
+
+        etUserName.setOnTouchListener(this);
+        etCompName.setOnTouchListener(this);
+        etUserPos.setOnTouchListener(this);
+
+        rgSelectTick.setOnCheckedChangeListener(this);
+
+        etUserName.addTextChangedListener(new editTextChangeListener(etUserName));
+        etCompName.addTextChangedListener(new editTextChangeListener(etCompName));
+        etUserPos.addTextChangedListener(new editTextChangeListener(etUserPos));
 
         editNameplatePreview();
+        switchNameplatePage(npTypeTemp,false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        new Thread(){
+            @Override
+            public void run() {
+                Glide.get(EditUserInfoActivity.this).clearDiskCache();
+            }
+        }.start();
+        hintSwitch.cancel();
     }
 
     @Override
@@ -195,10 +219,11 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 btn = (Button) view;
                 colorPicker(btn);
                 break;
-            case R.id.edit_choice_setting_bg_ibtn:
+            case R.id.edit_select_setting_bg_ibtn:
                 bgStylePopShow();
                 break;
             case R.id.edit_font_size_btn:
+                Log.d(TAG,"Font size btn");
                 btn = (Button) view;
                 fontSizePicker(btn);
                 break;
@@ -214,14 +239,14 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                     btnLongClk = false;
                     break;
                 }
-                Nameplate.setOnPreviewConfirmListener(new NameplateManager.onPreviewConfirmListener() {
+                nameplateManager.setOnPreviewConfirmListener(new NameplateManager.onPreviewConfirmListener() {
 
                     @Override
                     public void onPreviewConfirm(View view) {
                         infoSave();
                     }
                 });
-                Nameplate.setOnPositionChangeListener(new NameplateManager.onPositionChangeListener() {
+                nameplateManager.setOnPositionChangeListener(new NameplateManager.onPositionChangeListener() {
 
                     @Override
                     public void onPositionChange(int type, NameplateManager.NameplatePara para) {
@@ -231,7 +256,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                         btnSave.setEnabled(true);
                     }
                 });
-                Nameplate.preview(EditUserInfoActivity.this);
+                nameplateManager.preview(EditUserInfoActivity.this);
                 break;
             case R.id.edit_pop_bg_style_exit_btn:
                 bgStylePopClose();
@@ -242,7 +267,10 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 break;
             case R.id.edit_pop_bg_style_img_btn:
                 bgStylePopClose();
-                bgImgPicker();
+                npBackgroundImgPicker();
+                break;
+            case R.id.edit_select_rdy_made_np_btn:
+                npRdyMadeImgPicker();
                 break;
         }
     }
@@ -250,24 +278,10 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
     @Override
     public boolean onLongClick(View view) {
         btnLongClk = true;
-        TranslateAnimation showAnim = new TranslateAnimation(0, -370, 0, 0);
-        TranslateAnimation hideAnim = new TranslateAnimation(370, 0, 0, 0);
-        showAnim.setDuration(500);
-        hideAnim.setDuration(500);
-
-        if(npTypeTemp == NP_TYPE_CUSTOM_COLOR || npTypeTemp == NP_TYPE_CUSTOM_BG_IMG){
-            npTypeTemp = NP_TYPE_RDY_MADE_IMG;
-            layRdyMadeNpPara.setVisibility(View.VISIBLE);
-            layCustomNpPara.setVisibility(View.GONE);
-            layRdyMadeNpPara.setAnimation(hideAnim);
-            layCustomNpPara.setAnimation(showAnim);
-        }else if(npTypeTemp == NP_TYPE_RDY_MADE_IMG){
-            npTypeTemp = NP_TYPE_CUSTOM_COLOR;
-            layRdyMadeNpPara.setVisibility(View.GONE);
-            layCustomNpPara.setVisibility(View.VISIBLE);
-            layRdyMadeNpPara.setAnimation(showAnim);
-            layCustomNpPara.setAnimation(hideAnim);
-        }
+        npTypeTemp = (npTypeTemp == NP_TYPE_CUSTOM_BG_IMG || npTypeTemp == NP_TYPE_CUSTOM_COLOR) ? NP_TYPE_RDY_MADE_IMG : NP_TYPE_CUSTOM_COLOR;
+        switchNameplatePage(npTypeTemp,true);
+        editNameplatePreview();
+        btnSave.setEnabled(true);
         return false;
     }
 
@@ -277,15 +291,15 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
             switch (view.getId()) {
                 case R.id.edit_user_name_et:
                     tickType = EDIT_USER;
-                    rgChoiceTick.check(R.id.edit_name_tick_rbtn);
+                    rgSelectTick.check(R.id.edit_name_tick_rbtn);
                     break;
                 case R.id.edit_comp_name_et:
                     tickType = EDIT_COMP;
-                    rgChoiceTick.check(R.id.edit_comp_tick_rbtn);
+                    rgSelectTick.check(R.id.edit_comp_tick_rbtn);
                     break;
                 case R.id.edit_user_pos_et:
                     tickType = EDIT_POS;
-                    rgChoiceTick.check(R.id.edit_pos_tick_rbtn);
+                    rgSelectTick.check(R.id.edit_pos_tick_rbtn);
                     break;
             }
         }
@@ -317,7 +331,12 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
     protected void retBtnClick() {
         if(btnSave.isEnabled()) {
             CustomDialog.Builder builder = new CustomDialog.Builder(this, CustomDialog.TRIPLE_BTN);
-            builder.setTitle(false,null).setContent("设置未保存，是否退出？").setFisrtBtn("退出").setSecondBtn("取消").setThirdBtn("保存并退出").setButtonClickListerner(new View.OnClickListener() {
+            builder.setTitle(false,null)
+                    .setContent("设置未保存，是否退出？")
+                    .setFisrtBtn("退出")
+                    .setSecondBtn("保存并退出")
+                    .setThirdBtn("取消")
+                    .setButtonClickListerner(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (customdialog != null) {
@@ -329,10 +348,10 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                             finish();
                             break;
                         case R.id.custom_dialog_second_btn:
-                            break;
-                        case R.id.custom_dialog_third_btn:
                             infoSave();
                             finish();
+                            break;
+                        case R.id.custom_dialog_third_btn:
                             break;
                     }
                 }
@@ -343,13 +362,12 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
             finish();
     }
 
-    /*
-     * 设置按钮颜色
-	 */
+    //设置按钮颜色
     private void setBtnColor(Button btn, int color) {
         setViewColor(btn, color, 255);
     }
 
+    //设置按钮颜色
     private void setBtnColor(ImageButton ibtn, int color) {
         ibtn.setImageDrawable(null);
         setViewColor(ibtn, color, 255);
@@ -384,11 +402,9 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         view.setBackground(btnDraw);
     }
 
-    /*
-     * POP设置背景属性（图片or纯色）
-     */
+    //打开会话框设置铭牌背景类型（图片or纯色）
     private void bgStylePopShow() {
-        View layout = View.inflate(this, R.layout.pop_bg_style_choice, null);
+        View layout = View.inflate(this, R.layout.pop_bg_style_select, null);
         bgStylePop = new PopupWindow(layout, 366, 210);
 
         layout.findViewById(R.id.edit_pop_bg_style_exit_btn).setOnClickListener(this);
@@ -405,15 +421,14 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         bgStylePop.showAtLocation(ibtnBgSetting, Gravity.NO_GRAVITY, 608, 316);
     }
 
+    //关闭铭牌类型设置会话框
     private void bgStylePopClose() {
         if (bgStylePop != null && bgStylePop.isShowing())
             bgStylePop.dismiss();
         bgStylePop = null;
     }
 
-    /*
-     * 保存用户信息参数
-	 */
+    //保存用户信息参数
     private void infoSave() {
         UserInfo.setStr(strTemp);
         UserInfo.setStyle(fontstyleTemp);
@@ -425,15 +440,11 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         UserInfo.setNamePlateBGImg(bgImgPath);
         UserInfo.setNamePlateImage(npImgPath);
 
-
         btnSave.setEnabled(false);
-        PromptBox.BuildPrompt("SAVE_SUCCESS").Text((String) getApplicationContext().getResources().getText(R.string.save_successfully)).Time(1).TimeOut(3000);
+        PromptBox.BuildPrompt("SAVE_SUCCESS").Text(getString(R.string.save_successfully)).Time(1).TimeOut(3000);
     }
 
-    /*
-	 * 更新预览区域铭牌内容
-	 * 可选更新选项：type
-	 */
+	//更新预览区域铭牌内容
     private void editNameplatePreview(int editItem) {
         int[] idTemp = {R.id.edit_preview_user_tv, R.id.edit_preview_comp_tv, R.id.edit_preview_pos_tv};
 
@@ -448,7 +459,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 tvPreviwUser.setTypeface(Font.getFontType(fontstyleTemp[editItem]));
                 tvPreviwUser.setX(fontPosX[editItem] / 3);
                 tvPreviwUser.setY(fontPosY[editItem] / 3);
-                Nameplate.Para.setPara(editItem, strTemp[editItem], fontColorTemp[editItem], fontsizeTemp[editItem], fontstyleTemp[editItem], fontPosX[editItem], fontPosY[editItem]);
+                NameplateManager.Para.setPara(editItem, strTemp[editItem], fontColorTemp[editItem], fontsizeTemp[editItem], fontstyleTemp[editItem], fontPosX[editItem], fontPosY[editItem]);
                 break;
             case EDIT_BG_COLOR:
                 ivRdyMadeNpImg.setVisibility(View.INVISIBLE);
@@ -456,7 +467,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 ivCustomNpBg.setVisibility(View.INVISIBLE);
                 layCustomNpPreview.setBackgroundColor(bgColorTemp);
                 setBtnColor(ibtnBgSetting,bgColorTemp);
-                Nameplate.Para.setBgColor(bgColorTemp);
+                NameplateManager.Para.setBgColor(bgColorTemp);
                 break;
             case EDIT_BG_IMG:
                 ivRdyMadeNpImg.setVisibility(View.INVISIBLE);
@@ -465,20 +476,19 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 layCustomNpPreview.setBackgroundColor(getResources().getColor(R.color.transparent_color));
                 setBtnImage(ibtnBgSetting,R.drawable.ico_wenj_h);
                 Glide.with(EditUserInfoActivity.this).load(bgImgPath).into(ivCustomNpBg);
-                Nameplate.Para.setBgImg(bgImgPath);
+                NameplateManager.Para.setBgImg(bgImgPath);
                 break;
             case EDIT_NP_IMG:
                 layCustomNpPreview.setVisibility(View.INVISIBLE);
                 ivRdyMadeNpImg.setVisibility(View.VISIBLE);
                 Glide.with(EditUserInfoActivity.this).load(npImgPath).into(ivRdyMadeNpImg);
-                Nameplate.Para.setNpImg(npImgPath);
+                NameplateManager.Para.setNpImg(npImgPath);
+                tvRdyMadeNpName.setText(getString(R.string.file_name)+"\n"+npImgPath.substring(npImgPath.lastIndexOf("/")+1,npImgPath.length()));
                 break;
         }
     }
 
-    /*
-     * 加载预览区域铭牌全部内容
-	 */
+    //加载预览区域铭牌全部内容
     private void editNameplatePreview() {
         switch (npTypeTemp) {
             case NP_TYPE_CUSTOM_COLOR:
@@ -490,26 +500,52 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 for (int i = 0; i < 3; i++) {
                     editNameplatePreview(i);
                 }
-                editNameplatePreview(4);
+                editNameplatePreview(EDIT_BG_IMG);
                 break;
             case NP_TYPE_RDY_MADE_IMG:
-                editNameplatePreview(5);
+                editNameplatePreview(EDIT_NP_IMG);
                 break;
             default:
                 npTypeTemp = NP_TYPE_CUSTOM_COLOR;
                 editNameplatePreview();
                 break;
         }
-        Nameplate.Para.setNpType(npTypeTemp);
+        NameplateManager.Para.setNpType(npTypeTemp);
     }
 
-    /*
-	 * 启动颜色选择器
-	 */
+    //切换铭牌设置页面
+    private void switchNameplatePage(int type, boolean isAnim){
+        TranslateAnimation showAnim = null;
+        TranslateAnimation hideAnim = null;
+        if(isAnim) {
+            showAnim = new TranslateAnimation(0, -370, 0, 0);
+            hideAnim = new TranslateAnimation(370, 0, 0, 0);
+            showAnim.setDuration(500);
+            hideAnim.setDuration(500);
+        }
+
+        if(type == NP_TYPE_CUSTOM_COLOR || type == NP_TYPE_CUSTOM_BG_IMG){
+            layRdyMadeNpPara.setVisibility(View.GONE);
+            layCustomNpPara.setVisibility(View.VISIBLE);
+            if(isAnim) {
+                layRdyMadeNpPara.setAnimation(showAnim);
+                layCustomNpPara.setAnimation(hideAnim);
+            }
+        }else if(type == NP_TYPE_RDY_MADE_IMG){
+            layRdyMadeNpPara.setVisibility(View.VISIBLE);
+            layCustomNpPara.setVisibility(View.GONE);
+            if(isAnim) {
+                layRdyMadeNpPara.setAnimation(hideAnim);
+                layCustomNpPara.setAnimation(showAnim);
+            }
+        }
+    }
+
+	//启动颜色选择器
     private void colorPicker(final View view) {
         ColorPickerDialog dialog = new ColorPickerDialog(
                 EditUserInfoActivity.this,
-                (view.getId() == R.id.edit_choice_setting_bg_ibtn ? bgColorTemp : fontColorTemp[tickType]), null,
+                (view.getId() == R.id.edit_select_setting_bg_ibtn ? bgColorTemp : fontColorTemp[tickType]), null,
                 new ColorPickerDialog.OnColorChangedListener() {
 
                     @Override
@@ -520,7 +556,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                             fontColorTemp[tickType] = color;
                             editNameplatePreview(tickType);
                             setBtnColor((Button) view, color);
-                        } else if (view.getId() == R.id.edit_choice_setting_bg_ibtn) {
+                        } else if (view.getId() == R.id.edit_select_setting_bg_ibtn) {
                             bgColorTemp = color;
                             editNameplatePreview(EDIT_BG_COLOR);
 //                            setBtnColor((ImageButton) view, color);
@@ -532,28 +568,45 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         dialog.show();
     }
 
-    /*
-	 * 启动背景图选择器
-	 */
-    private void bgImgPicker() {
+    //启动背景图选择器
+    private void npBackgroundImgPicker() {
         ImagePickerDialog picker = new ImagePickerDialog(this);
-//        ImageButton ibtn = (ImageButton)view;
-        picker.creatPicker("请选择背景图", namePlatePath, new ImagePickerDialog.OnImageConfirmListener() {
+        picker.creatPicker("请选择背景图", NP_BACKGROUND_PATH, new ImagePickerDialog.OnImageConfirmListener() {
             @Override
             public void imgConfirm(String imgPath) {
-                setBtnImage(ibtnBgSetting, R.drawable.ico_wenj_h);
-                bgImgPath = imgPath;
-                npTypeTemp = NP_TYPE_CUSTOM_BG_IMG;
-                editNameplatePreview();
-                btnSave.setEnabled(true);
-//                Log.d(TAG, imgPath);
+                if (imgPath == null) {
+                    PromptBox.BuildPrompt("NP_PICTURE_PATH_EMPTY").Text("设备无已下载的铭牌背景").Time(1).TimeOut(3000);
+                } else {
+                    setBtnImage(ibtnBgSetting, R.drawable.ico_wenj_h);
+                    bgImgPath = imgPath;
+                    npTypeTemp = NP_TYPE_CUSTOM_BG_IMG;
+                    editNameplatePreview();
+                    btnSave.setEnabled(true);
+                }
             }
         });
     }
 
-    /*
-	 * 字体大小选择器
-	 */
+    // 启动背景图选择器
+    private void npRdyMadeImgPicker() {
+        ImagePickerDialog picker = new ImagePickerDialog(this);
+        picker.creatPicker("请选择预设铭牌图片", NP_PICTURE_PATH, new ImagePickerDialog.OnImageConfirmListener() {
+            @Override
+            public void imgConfirm(String imgPath) {
+                if (imgPath == null) {
+                    PromptBox.BuildPrompt("NP_PICTURE_PATH_EMPTY").Text("设备无已下载的铭牌图片").Time(1).TimeOut(3000);
+                } else {
+                    setBtnImage(ibtnBgSetting, R.drawable.ico_wenj_h);
+                    npImgPath = imgPath;
+                    npTypeTemp = NP_TYPE_RDY_MADE_IMG;
+                    editNameplatePreview();
+                    btnSave.setEnabled(true);
+                }
+            }
+        });
+    }
+
+	// 字体大小选择器
     private void fontSizePicker(final Button btn) {
 
         final SeekbarDialog dialog;
@@ -575,9 +628,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         dialog.show();
     }
 
-    /*
-	 * 字体风格选择器
-	 */
+	//字体风格选择器
     private void fontStylePicker(final Button btn) {
         FontManager.Picker fontPicker;
         int type = fontstyleTemp[tickType];
@@ -586,10 +637,10 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         fontPicker.checkedItem(type).setConfirmListener(new FontManager.pickerConfirmListener() {
 
             @Override
-            public void fontPick(int choice, String content) {
+            public void fontPick(int select, String content) {
                 if (content != null) {
                     btn.setText(content);
-                    fontstyleTemp[tickType] = choice;
+                    fontstyleTemp[tickType] = select;
                     editNameplatePreview(tickType);
                     btnSave.setEnabled(true);
                 }
@@ -597,7 +648,28 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
         }).show(EditUserInfoActivity.this);
     }
 
+    private Handler hintSwitchHandler = new Handler(){
 
+        @Override
+        public void handleMessage(Message msg) {
+            AlphaAnimation showAnim = new AlphaAnimation(0,1);
+            AlphaAnimation hideAnim = new AlphaAnimation(1,0);
+            showAnim.setDuration(800);
+            hideAnim.setDuration(500);
+            if(tvPreviewHint.getVisibility() == View.VISIBLE){
+                tvPreviewHint.setVisibility(View.GONE);
+                tvLongClickHint.setVisibility(View.VISIBLE);
+                tvPreviewHint.setAnimation(hideAnim);
+                tvLongClickHint.setAnimation(showAnim);
+            }else{
+                tvPreviewHint.setVisibility(View.VISIBLE);
+                tvLongClickHint.setVisibility(View.GONE);
+                tvPreviewHint.setAnimation(showAnim);
+                tvLongClickHint.setAnimation(hideAnim);
+            }
+        }
+    };
+    //EditText监听器
     private class editTextChangeListener implements TextWatcher {
 
         private EditText edittext;
@@ -611,15 +683,12 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
             switch (edittext.getId()) {
                 case R.id.edit_user_name_et:
                     strTemp[EDIT_USER] = s.toString();
-
                     break;
                 case R.id.edit_comp_name_et:
                     strTemp[EDIT_COMP] = s.toString();
-
                     break;
                 case R.id.edit_user_pos_et:
                     strTemp[EDIT_POS] = s.toString();
-
                     break;
                 default:
                     break;

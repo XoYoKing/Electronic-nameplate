@@ -19,7 +19,7 @@
     </style>
     <style name="ip_config_dialog_item_layout" parent="layout">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">65dp</item>
+        <item name="android:layout_height">60dp</item>
         <item name="android:orientation">horizontal</item>
     </style>
     <style name="meetinginfo_content_layout" parent="layout">
@@ -65,7 +65,7 @@
         <item name="android:layout_height">0dp</item>
     </style>
     <style name="custom_dialog_text_title" parent="custom_dialog_text">
-        <item name="android:textSize">23sp</item>
+        <item name="android:textSize">26sp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingTop">8dp</item>
@@ -79,7 +79,7 @@
         <item name="android:layout_width">145dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_marginLeft">0dp</item>
-        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:layout_marginRight">5dp</item>
         <item name="android:gravity">center_vertical|right</item>
     </style>
     <style name="ip_config_dialog_text_content" parent="custom_dialog_text_content">
@@ -103,6 +103,15 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_marginTop">8dp</item>
     </style>
+    <style name="edit_hint_text" parent="edit_info_text">
+        <item name="android:textColor">#EEEEEE</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:layout_width">256dp</item>
+        <item name="android:layout_above">@id/edit_preview_set_btn</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_marginBottom">5dp</item>
+    </style>
     <style name="setting_item_text" parent="text">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">0dp</item>
@@ -112,6 +121,12 @@
         <item name="android:gravity">right</item>
     </style>
     <style name="setting_item_num_text" parent="setting_item_text">
+        <item name="android:gravity">left</item>
+    </style>
+    <style name="setting_network_item_text" parent="setting_item_text">
+        <item name="android:textSize">24sp</item>
+    </style>
+    <style name="setting_network_item_num_text" parent="setting_network_item_text">
         <item name="android:gravity">left</item>
     </style>
     <style name="meetinginfo_content_title" parent="text">
@@ -268,7 +283,7 @@
 
     <!--     RadioButton style  -->
     <style name="radiobutton"></style>
-    <style name="edit_choice_tick" parent="radiobutton">
+    <style name="edit_select_tick" parent="radiobutton">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">0dp</item>
         <item name="android:layout_weight">1</item>

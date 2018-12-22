@@ -14,7 +14,7 @@ public class ShowNameActivity extends AppActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_showname);
 
-        statusBarEnable = false;
+        stateBarEnable = false;
         returnEnable = false;
     }
 }

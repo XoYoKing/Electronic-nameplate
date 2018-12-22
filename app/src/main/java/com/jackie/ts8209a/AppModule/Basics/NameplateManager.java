@@ -1,4 +1,4 @@
-package com.jackie.ts8209a.Managers;
+package com.jackie.ts8209a.AppModule.Basics;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -9,12 +9,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.jackie.ts8209a.Activity.AppActivity;
-import com.jackie.ts8209a.Application.APP;
 import com.jackie.ts8209a.CustomView.View.MoveTextView;
 import com.jackie.ts8209a.Drive.RA8876L;
 import com.jackie.ts8209a.R;
@@ -25,6 +26,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by kuangyt on 2018/10/23.
@@ -33,6 +36,10 @@ import java.io.IOException;
 public class NameplateManager {
     private static final String TAG = "NameplateManager";
     public static NameplatePara Para = new NameplatePara();
+
+    public static final int NP_TYPE_CUSTOM_COLOR = 0;
+    public static final int NP_TYPE_CUSTOM_BG_IMG = 1;
+    public static final int NP_TYPE_RDY_MADE_IMG = 2;
 
     private static NameplateManager Nameplate = new NameplateManager();
     private onPreviewConfirmListener previewConfirmListener = null;
@@ -129,9 +136,7 @@ public class NameplateManager {
     }
 
     private void update(Context context,final nameplateDialog dialog){
-//        final APP app = (APP) ((Activity) context).getApplication();
         dialog.setUpdating();
-//        app.MCU.sendCommand(McuHandler.BACKLIGHT_88_OFF);
         dialog.getNameplate(new Handler() {
             public void handleMessage(Message msg) {
                 final View view = (View) msg.obj;
@@ -195,7 +200,7 @@ public class NameplateManager {
     }
 
     public interface onPreviewConfirmListener {
-        abstract void onPreviewConfirm(View view);
+        void onPreviewConfirm(View view);
     }
 
     public void setOnPreviewConfirmListener(onPreviewConfirmListener listener) {
@@ -203,7 +208,7 @@ public class NameplateManager {
     }
 
     public interface onPositionChangeListener{
-        abstract void onPositionChange(int type,NameplatePara para);
+        void onPositionChange(int type,NameplatePara para);
     }
 
     public void setOnPositionChangeListener(onPositionChangeListener listener){
@@ -256,6 +261,7 @@ public class NameplateManager {
 
         private View dialogLayout;
         private View layBackground;
+        private ImageView ivBackground;
         private MoveTextView[] tvPreview = new MoveTextView[3];
 
         public nameplateDialog(Context context) {
@@ -269,6 +275,7 @@ public class NameplateManager {
             tvPreview[2] = (MoveTextView) dialogLayout.findViewById(R.id.nameplate_preview_pos_tv);
 
             layBackground = dialogLayout.findViewById(R.id.nameplate_preview_bg_lay);
+            ivBackground = (ImageView) dialogLayout.findViewById(R.id.nameplate_preview_bg_iv);
 
             this.setContentView(dialogLayout);
             this.setCanceledOnTouchOutside(true); // 用户能通过点击对话框之外的地方取消对话框显示
@@ -280,51 +287,91 @@ public class NameplateManager {
             (dialogLayout.findViewById(R.id.nameplate_updata_lay)).setVisibility(View.GONE);
             (dialogLayout.findViewById(R.id.nameplate_preview_lay)).setVisibility(View.VISIBLE);
 
-            layBackground.setBackgroundColor(Para.bgColor);
+            switch (Para.npType){
+                case NP_TYPE_CUSTOM_COLOR:
+                case NP_TYPE_CUSTOM_BG_IMG:
+                    if(Para.npType == NP_TYPE_CUSTOM_COLOR) {
+                        ivBackground.setVisibility(View.GONE);
+                        layBackground.setBackgroundColor(Para.bgColor);
+                    }
+                    else if(Para.npType == NP_TYPE_CUSTOM_BG_IMG) {
+                        ivBackground.setVisibility(View.VISIBLE);
+                        Glide.with(getContext()).load(Para.bgImgPath).into(ivBackground);
+                    }
 
-            for (int i = 0; i < 3; i++) {
-                tvPreview[i].setText(Para.strContent[i]);
-                tvPreview[i].setTextColor(Para.fontColor[i]);
-                tvPreview[i].setTextSize((int) (Para.fontsize[i] * 2.13));
-                tvPreview[i].setTypeface(FontManager.getFontManager().getFontType(Para.fontstyle[i]));
-                tvPreview[i].setOnMovementFinishListener(moveListener);
-                tvPreview[i].setX(Para.fontPosX[i]);
-                tvPreview[i].setY(Para.fontPosY[i]);
+                    for (int i = 0; i < 3; i++) {
+                        tvPreview[i].setVisibility(View.VISIBLE);
+                        tvPreview[i].setText(Para.strContent[i]);
+                        tvPreview[i].setTextColor(Para.fontColor[i]);
+                        tvPreview[i].setTextSize((int) (Para.fontsize[i] * 2.13));
+                        tvPreview[i].setTypeface(FontManager.getFontManager().getFontType(Para.fontstyle[i]));
+                        tvPreview[i].setOnMovementFinishListener(moveListener);
+                        tvPreview[i].setX(Para.fontPosX[i]);
+                        tvPreview[i].setY(Para.fontPosY[i]);
 //                tvPreview[i].setMoveRange(1024, 0, 256, 0);
+                    }
+                    break;
+                case NP_TYPE_RDY_MADE_IMG:
+                    ivBackground.setVisibility(View.VISIBLE);
+                    Glide.with(getContext()).load(Para.npImgPath).into(ivBackground);
+                    for (int i = 0; i < 3; i++) {
+                        tvPreview[i].setVisibility(View.GONE);
+                    }
+                    break;
             }
+
         }
 
         public void getNameplate(final Handler handler) {
+            ImageView ivBackground;
+            View layBackground;
+            TextView[] tvPreview = new TextView[3];
 
-            (dialogLayout.findViewById(R.id.nameplate_layout)).setBackgroundColor(Para.bgColor);
+            layBackground = dialogLayout.findViewById(R.id.nameplate_background_lay);
+            ivBackground = (ImageView) dialogLayout.findViewById(R.id.nameplate_background_iv);
 
-            TextView[] tvPreview1 = new TextView[3];
-            tvPreview1[0] = (TextView) dialogLayout.findViewById(R.id.nameplate_Person);
-            tvPreview1[1] = (TextView) dialogLayout.findViewById(R.id.nameplate_Company);
-            tvPreview1[2] = (TextView) dialogLayout.findViewById(R.id.nameplate_Position);
+            tvPreview[0] = (TextView) dialogLayout.findViewById(R.id.nameplate_cerson_tv);
+            tvPreview[1] = (TextView) dialogLayout.findViewById(R.id.nameplate_company_tv);
+            tvPreview[2] = (TextView) dialogLayout.findViewById(R.id.nameplate_cosition_tv);
 
-            for (int i = 0; i < 3; i++) {
-                tvPreview1[i].setText(Para.strContent[i]);
-                tvPreview1[i].setTextColor(Para.fontColor[i]);
-                tvPreview1[i].setTextSize((int) (Para.fontsize[i] * 2.84));
-                tvPreview1[i].setTypeface(FontManager.getFontManager().getFontType(Para.fontstyle[i]));
-                tvPreview1[i].setX((float) (Para.fontPosX[i]*1.333));
-                tvPreview1[i].setY((float) (Para.fontPosY[i]*1.333));
+            switch (Para.npType){
+                case NP_TYPE_CUSTOM_COLOR:
+                case NP_TYPE_CUSTOM_BG_IMG:
+                    if(Para.npType == NP_TYPE_CUSTOM_COLOR) {
+                        ivBackground.setVisibility(View.GONE);
+                        layBackground.setBackgroundColor(Para.bgColor);
+                    }
+                    else if(Para.npType == NP_TYPE_CUSTOM_BG_IMG) {
+                        ivBackground.setVisibility(View.VISIBLE);
+                        Glide.with(getContext()).load(Para.bgImgPath).into(ivBackground);
+                    }
+
+                    for (int i = 0; i < 3; i++) {
+                        tvPreview[i].setText(Para.strContent[i]);
+                        tvPreview[i].setTextColor(Para.fontColor[i]);
+                        tvPreview[i].setTextSize((int) (Para.fontsize[i] * 2.84));
+                        tvPreview[i].setTypeface(FontManager.getFontManager().getFontType(Para.fontstyle[i]));
+                        tvPreview[i].setX((float) (Para.fontPosX[i]*1.333));
+                        tvPreview[i].setY((float) (Para.fontPosY[i]*1.333));
+                    }
+                    break;
+                case NP_TYPE_RDY_MADE_IMG:
+                    ivBackground.setVisibility(View.VISIBLE);
+                    Glide.with(getContext()).load(Para.npImgPath).into(ivBackground);
+                    for (int i = 0; i < 3; i++) {
+                        tvPreview[i].setVisibility(View.GONE);
+                    }
+                    break;
             }
 
-            new Thread() {
+            (new Timer()).schedule(new TimerTask() {
+                @Override
                 public void run() {
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    // RA8876L.setPic(dialogLayout.findViewById(R.id.nameplate_layout));
                     Message msg = new Message();
-                    msg.obj = dialogLayout.findViewById(R.id.nameplate_layout);
+                    msg.obj = dialogLayout.findViewById(R.id.nameplate_background_lay);
                     handler.sendMessage(msg);
-                };
-            }.start();
+                }
+            },500);
         }
 
         public void setPreviewBtnListener(android.view.View.OnClickListener listener) {

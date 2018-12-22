@@ -31,7 +31,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        android:name="com.jackie.ts8209a.Application.APP">
+        android:name="com.jackie.ts8209a.AppModule.APP">
 
         <activity android:name=".Activity.MainActivity">
             <intent-filter>
@@ -50,17 +50,17 @@
         <activity android:name=".Activity.ShowNameActivity"/>
         <activity android:name=".Activity.SmsActivity" android:windowSoftInputMode="adjustUnspecified|stateHidden"/>
 
-        //电池信息系统广播
-        <receiver
-            android:name=".Managers.BatteryManager$betteryStatusReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-                <action android:name="android.intent.action.BATTERY_CHANGED" />
-            </intent-filter>
-        </receiver>
+        <!--//电池信息系统广播-->
+        <!--<receiver-->
+            <!--android:name=".AppModule.Basics.BatteryManager$betteryStatusReceiver"-->
+            <!--android:enabled="true"-->
+            <!--android:exported="true">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.ACTION_POWER_CONNECTED" />-->
+                <!--<action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />-->
+                <!--<action android:name="android.intent.action.BATTERY_CHANGED" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <!--<receiver-->
             <!--android:infoName=".Application.WifiManager$wifiStatusReceiver"-->

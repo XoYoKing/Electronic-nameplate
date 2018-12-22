@@ -13,7 +13,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -23,15 +22,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jackie.ts8209a.Application.APP;
-import com.jackie.ts8209a.Managers.BatteryManager;
-import com.jackie.ts8209a.Managers.NetworkManager;
+import com.jackie.ts8209a.AppModule.APP;
+import com.jackie.ts8209a.AppModule.Basics.BatteryManager;
+import com.jackie.ts8209a.AppModule.Network.EthernetManager;
+import com.jackie.ts8209a.AppModule.Network.NetDevManager;
+import com.jackie.ts8209a.AppModule.Network.NetworkManager;
 import com.jackie.ts8209a.RemoteServer.Network;
-import com.jackie.ts8209a.Managers.WifiManager;
+import com.jackie.ts8209a.AppModule.Network.WifiManager;
 import com.jackie.ts8209a.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static com.jackie.ts8209a.AppModule.Network.NetworkManager.*;
 
 /**
  * Created by kuangyt on 2018/8/21.
@@ -63,11 +66,11 @@ public class AppActivity extends Activity {
 
     protected String TAG = getClass().getSimpleName();
     protected boolean returnEnable = true;
-    protected boolean statusBarEnable = true;
+    protected boolean stateBarEnable = true;
     protected APP App;
 
     protected PowerManager.WakeLock wakeLock;
-    protected statusBarHandler statusBar;
+    protected stateBarHandler stateBar;
     protected Button btnReturn;
 
     protected BatteryManager batteryManager;
@@ -88,7 +91,7 @@ public class AppActivity extends Activity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                | View.SYSTEM_UI_FLAG_FULLSCREEN // hide state bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         overridePendingTransition(R.anim.fadein, R.anim.fadeout);
@@ -97,15 +100,14 @@ public class AppActivity extends Activity {
         try {
             App = (APP) getApplication();
             batteryManager = BatteryManager.getBatteryManager();
-            wifiManager = WifiManager.getWifiManager();
             networkManager = NetworkManager.getNetworkManager();
         } catch (Exception e) {
         }
 
         keepWake();
 
-        if(statusBarEnable)
-            statusBar = new statusBarHandler(this);
+        if(stateBarEnable)
+            stateBar = new stateBarHandler(this);
 
         initBroadcast();
     }
@@ -116,8 +118,8 @@ public class AppActivity extends Activity {
         wakeLock.acquire(); //设置保持唤醒
         PromptBox.creatPromptBox(this);
 
-        if(statusBarEnable) {
-            statusBar.configStatusBar();
+        if(stateBarEnable) {
+            stateBar.configStatusBar();
         }
 
         if(returnEnable){
@@ -152,7 +154,7 @@ public class AppActivity extends Activity {
 //        wakeLock.acquire(); //设置保持唤醒
     }
 
-    protected class statusBarHandler{
+    protected class stateBarHandler {
 
 //        private int batLevel;
 //        private boolean batCharge;
@@ -160,12 +162,12 @@ public class AppActivity extends Activity {
         private TextView tvBatLevel;
         private ImageView ivBatLevel;
         private ImageView ivWifi;
-        private ImageView ivWiredNet;
+        private ImageView ivEthNet;
         private ImageView ivNetwork;
 
         private Context context;
 
-        public statusBarHandler(Context context){
+        public stateBarHandler(Context context){
             this.context = context;
         }
 
@@ -175,16 +177,25 @@ public class AppActivity extends Activity {
             tvBatLevel = (TextView)activity.findViewById(R.id.stabar_batlevel_tv);
             ivBatLevel = (ImageView) activity.findViewById(R.id.stabar_batlevel_iv);
             ivWifi = (ImageView)activity.findViewById(R.id.stabar_wifi_iv);
-            ivWiredNet = (ImageView)activity.findViewById(R.id.stabar_wired_net_iv);
+            ivEthNet = (ImageView)activity.findViewById(R.id.stabar_ether_net_iv);
             ivNetwork = (ImageView)activity.findViewById(R.id.stabar_network_iv);
 
-            batteryManager.setOnBatteryStatusListener(new betteryStatusListener());
-            wifiManager.setOnWifiInfoListener(new wifiInfoListener());
             networkManager.setOnNetworkStatusListener(new networkStatusListener());
 
             setBatLevelDisplay(batteryManager.getLevel(),batteryManager.getCharge());
-            setWifiInfoDisplay(wifiManager.getWifiInfo().networkEnable(),wifiManager.getWifiInfo().RSSI());
             setNetworkStaDisplay(networkManager.getNetworkStatus() == Network.STA_CONNECTED);
+
+            NetDevManager.NetDevInfo netDevInfo = networkManager.getNetDevInfo();
+            if(netDevInfo != null){
+//                Log.d(TAG,netDevInfo.getDevName() + " : " + netDevInfo.getDevEn());
+                if(netDevInfo.getDevName().equals(EthernetManager.DEV_NAME)){
+                    setWifiInfoDisplay(false,0);
+                    setEthInfoDisplay(netDevInfo.getNetEn());
+                }else if(netDevInfo.getDevName().equals(WifiManager.DEV_NAME)){
+                    setEthInfoDisplay(false);
+                    setWifiInfoDisplay(netDevInfo.getDevEn(),netDevInfo.getRssi());
+                }
+            }
         }
 
         private void setBatLevelDisplay(int level ,boolean charge){
@@ -206,9 +217,6 @@ public class AppActivity extends Activity {
                     ivBatLevel.setImageLevel(0);
                 }
             }
-
-
-
         }
 
         private void setWifiInfoDisplay(boolean enable,int rssi){
@@ -226,7 +234,14 @@ public class AppActivity extends Activity {
                 }
             }
             else
-                ivWifi.setVisibility(View.INVISIBLE);
+                ivWifi.setVisibility(View.GONE);
+        }
+
+        private void setEthInfoDisplay(boolean enable){
+            if(enable)
+                ivEthNet.setVisibility(View.VISIBLE);
+            else
+                ivEthNet.setVisibility(View.GONE);
         }
 
         private void setNetworkStaDisplay(boolean display){
@@ -234,22 +249,6 @@ public class AppActivity extends Activity {
                 ivNetwork.setVisibility(View.VISIBLE);
             else
                 ivNetwork.setVisibility(View.GONE);
-        }
-
-        private class betteryStatusListener implements BatteryManager.OnBatteryStatusListener {
-
-            @Override
-            public void OnBatteryStatus(boolean charge, int level, int sta, int vol) {
-                setBatLevelDisplay(level,charge);
-            }
-        }
-
-        private class wifiInfoListener implements WifiManager.OnWifiInfoListener{
-
-            @Override
-            public void OnWifiInfo(WifiManager.WifiInfo wifiInfo) {
-                setWifiInfoDisplay(wifiInfo.networkEnable(),wifiInfo.RSSI());
-            }
         }
 
         private class networkStatusListener implements NetworkManager.OnNetworkStatusListener{
@@ -284,6 +283,8 @@ public class AppActivity extends Activity {
         intentFilter.addAction(APP.ACTION_STAR_ACTIVITY);
         intentFilter.addAction(APP.ACTION_FINISH_ACTIVITY);
         intentFilter.addAction(APP.ACTION_REFRESH_ACTIVITY);
+        intentFilter.addAction(APP.ACTION_NETWORK_INFO_UPDATE);
+        intentFilter.addAction(APP.ACTION_BATTERY_INFO_UPDATE);
     }
 
     protected void broadcastProcessing(Intent intent){
@@ -304,6 +305,21 @@ public class AppActivity extends Activity {
                 && (getClass().equals(intent.getExtras().get("CLASS")) || intent.getExtras().get("CLASS") == null)) {
 
             onResume();
+        }else if(intent.getAction().equals(APP.ACTION_NETWORK_INFO_UPDATE)){
+            Bundle bundle = intent.getBundleExtra("BUNDLE");
+            String devName = bundle.getString(DEV_NAME);
+
+            if(devName.equals(WifiManager.DEV_NAME)) {
+                stateBar.setEthInfoDisplay(false);
+                stateBar.setWifiInfoDisplay(bundle.getBoolean(DEV_EN), bundle.getInt(RSSI));
+            }
+            else if(devName.equals(EthernetManager.DEV_NAME)) {
+                stateBar.setWifiInfoDisplay(false,0);
+                stateBar.setEthInfoDisplay(bundle.getBoolean(NETWORK_EN));
+            }
+        }else if(intent.getAction().equals(APP.ACTION_BATTERY_INFO_UPDATE)){
+            Bundle bundle = intent.getBundleExtra("BUNDLE");
+            stateBar.setBatLevelDisplay(bundle.getInt(BatteryManager.BAT_LEVEL),bundle.getBoolean(BatteryManager.BAT_CHARGE));
         }
     }
 

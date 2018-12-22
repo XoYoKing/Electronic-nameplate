@@ -1,50 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.jackie.ts8209a.Activity.SettingActivity"
-    style="@style/activity">
+    style="@style/activity"
+    tools:context="com.jackie.ts8209a.Activity.SettingActivity">
 
     <TextView
         style="@style/page_title"
-        android:text="系统设置"
-        />
+        android:text="系统设置" />
 
     <!-- 选择设置菜单 -->
-
     <RadioGroup
         android:id="@+id/setting_item_choice_rg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="90dp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <RadioButton
             android:id="@+id/setting_item_ip_rbtn"
             style="@style/setting_item_choice"
-            android:text="@string/ip_address" />
+            android:text="@string/network_config" />
 
         <RadioButton
             android:id="@+id/setting_item_light_rbtn"
             style="@style/setting_item_choice"
             android:text="@string/backlight" />
 
-        <RadioButton
-            android:id="@+id/setting_item_wifi_rbtn"
-            style="@style/setting_item_choice"
-            android:text="@string/wifi_config"/>
+        <!--<RadioButton-->
+        <!--android:id="@+id/setting_item_wifi_rbtn"-->
+        <!--style="@style/setting_item_choice"-->
+        <!--android:text="@string/wifi_config" />-->
 
         <RadioButton
             android:id="@+id/setting_item_app_config_rbtn"
             style="@style/setting_item_choice"
-            android:text="@string/app_config"/>
+            android:text="@string/app_config" />
     </RadioGroup>
 
+    <!--分隔线和滑块-->
     <LinearLayout
         android:id="@+id/setting_item_choice_iv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="130dp" >
+        android:layout_marginTop="130dp">
 
         <View
             android:layout_width="120dp"
@@ -62,89 +61,237 @@
         android:background="#634d41"
         android:contentDescription="@string/app_name" />
 
+    <!--网络配置页面-->
     <RelativeLayout
-        android:id="@+id/setting_item_ip_lay"
+        android:id="@+id/setting_item_network_lay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/setting_item_choice_iv"
-        android:layout_alignParentStart="true">
+        android:visibility="visible">
 
-        <LinearLayout
-            android:id="@+id/setting_ip_title_lay"
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="288dp"
-            android:layout_marginLeft="350dp"
-            android:orientation="vertical"
-            android:layout_marginTop="68dp">
-
-            <TextView
-                style="@style/setting_item_text"
-                android:text="@string/dev_id" />
-
-            <TextView
-                style="@style/setting_item_text"
-                android:text="@string/server_ip" />
-
-            <TextView
-                style="@style/setting_item_text"
-                android:text="@string/server_port" />
-
-            <TextView
-                style="@style/setting_item_text"
-                android:text="@string/local_ip" />
-
-            <TextView
-                style="@style/setting_item_text"
-                android:text="@string/dhcp" />
-
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/setting_ip_config_btn"
-            style="@style/edit_info_button"
-            android:layout_below="@id/setting_ip_title_lay"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="IP地址配置"/>
+            android:layout_margin="10dp"
+            android:text="服务器"
+            android:textColor="#AAAAAA"
+            android:textSize="20sp" />
 
         <!--ip等参数-->
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="288dp"
-            android:layout_alignTop="@id/setting_ip_title_lay"
-            android:layout_toRightOf="@id/setting_ip_title_lay"
+            android:id="@+id/setting_ip_content_lay"
+            android:layout_width="380dp"
+            android:layout_height="130dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="38dp"
             android:orientation="vertical"
             android:paddingLeft="20dp">
 
             <TextView
                 android:id="@+id/setting_dev_id_num_tv"
-                style="@style/setting_item_num_text" />
+                style="@style/setting_network_item_num_text" />
 
             <TextView
                 android:id="@+id/setting_serv_ip_num_tv"
-                style="@style/setting_item_num_text" />
+                style="@style/setting_network_item_num_text" />
 
             <TextView
                 android:id="@+id/setting_serv_port_num_tv"
-                style="@style/setting_item_num_text" />
-
-            <TextView
-                android:id="@+id/setting_local_ip_num_tv"
-                style="@style/setting_item_num_text"/>
-
-            <TextView
-                android:id="@+id/setting_local_dhcp_tv"
-                style="@style/setting_item_num_text" />
+                style="@style/setting_network_item_num_text" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/setting_serv_ip_title_lay"
+            android:layout_width="300dp"
+            android:layout_height="130dp"
+            android:layout_alignTop="@id/setting_ip_content_lay"
+            android:layout_toLeftOf="@id/setting_ip_content_lay"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/setting_network_item_text"
+                android:text="@string/dev_id" />
+
+            <TextView
+                style="@style/setting_network_item_text"
+                android:text="@string/server_ip" />
+
+            <TextView
+                style="@style/setting_network_item_text"
+                android:text="@string/server_port" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/setting_serv_ip_cfg_btn"
+            style="@style/edit_info_button"
+            android:layout_alignBottom="@id/setting_ip_content_lay"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="50dp"
+            android:text="@string/server_ip_config" />
+
+        <View
+            android:layout_width="880dp"
+            android:layout_height="1dp"
+            android:layout_below="@id/setting_ip_content_lay"
+            android:layout_centerHorizontal="true"
+            android:background="#11FFFFFF"
+            android:contentDescription="@string/app_name" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/setting_ip_content_lay"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:text="网络配置"
+            android:textColor="#AAAAAA"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/setting_net_cfg_lay"
+            android:layout_width="820dp"
+            android:layout_height="180dp"
+            android:layout_below="@id/setting_ip_content_lay"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="60dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/setting_net_cfg_title_lay"
+                android:layout_width="0dp"
+                android:layout_height="188dp"
+                android:layout_weight="6"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/setting_network_item_text"
+                    android:text="@string/net_type" />
+
+                <TextView
+                    style="@style/setting_network_item_text"
+                    android:text="@string/local_ip" />
+
+                <TextView
+                    style="@style/setting_network_item_text"
+                    android:text="@string/gateway" />
+
+                <TextView
+                    style="@style/setting_network_item_text"
+                    android:text="@string/netmask" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/setting_net_cfg_content_lay"
+                android:layout_width="0dp"
+                android:layout_height="188dp"
+                android:layout_weight="10"
+                android:orientation="vertical"
+                android:paddingLeft="20dp">
+
+                <TextView
+                    android:id="@+id/setting_net_type_tv"
+                    style="@style/setting_network_item_num_text" />
+
+                <TextView
+                    android:id="@+id/setting_local_ip_tv"
+                    style="@style/setting_network_item_num_text" />
+
+                <TextView
+                    android:id="@+id/setting_gateway_tv"
+                    style="@style/setting_network_item_num_text" />
+
+                <TextView
+                    android:id="@+id/setting_netmask_tv"
+                    style="@style/setting_network_item_num_text"
+                    android:text="255.255.255.255"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/setting_wifi_cfg_title_lay"
+                android:layout_width="0dp"
+                android:layout_height="138dp"
+                android:layout_weight="6"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/setting_network_item_text"
+                    android:text="@string/wifi_ssid" />
+
+                <TextView
+                    style="@style/setting_network_item_text"
+                    android:text="@string/signal" />
+
+                <TextView
+                    style="@style/setting_network_item_text"
+                    android:text="@string/mac" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/setting_wifi_content_lay"
+                android:layout_width="0dp"
+                android:layout_height="138dp"
+                android:layout_weight="16"
+                android:orientation="vertical"
+                android:paddingLeft="20dp">
+
+                <TextView
+                    android:id="@+id/setting_ssid_tv"
+                    style="@style/setting_network_item_num_text" />
+
+                <TextView
+                    android:id="@+id/setting_rssi_tv"
+                    style="@style/setting_network_item_num_text" />
+
+                <TextView
+                    android:id="@+id/setting_mac_tv"
+                    style="@style/setting_network_item_num_text" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/setting_local_ip_btn"
+            style="@style/edit_info_button"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/setting_net_cfg_lay"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="26dp"
+            android:text="@string/local_ip_config" />
+
+        <Button
+            android:id="@+id/setting_wifi_cfg_btn"
+            style="@style/edit_info_button"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/setting_local_ip_btn"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="30dp"
+            android:text="@string/wifi_config" />
+
+        <Button
+            android:id="@+id/setting_wifi_disconnect_btn"
+            style="@style/edit_info_button"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="250dp"
+            android:text="@string/wifi_disconnect_and_unsave" />
+
     </RelativeLayout>
 
+    <!--亮度设置页面-->
     <RelativeLayout
         android:id="@+id/setting_item_light_lay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/setting_line"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
@@ -174,97 +321,50 @@
             android:textSize="22sp" />
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/setting_item_wifi_lay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/setting_line"
-        android:visibility="gone" >
-
-        <Switch
-            android:id="@+id/setting_wifi_sw"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
-            android:layout_marginTop="160dp"
-            android:text="@string/wifi_switch"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/setting_ssid_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/setting_wifi_sw"
-            android:layout_below="@id/setting_wifi_sw"
-            android:layout_marginTop="30dp"
-            android:text="@string/wifi_select"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:id="@+id/setting_wifi_msg_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="600dp"
-            android:layout_marginTop="160dp"
-            android:text="@string/wifi_status"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/setting_disconnect_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/setting_wifi_msg_tv"
-            android:layout_below="@id/setting_wifi_msg_tv"
-            android:layout_marginTop="30dp"
-            android:text="@string/wifi_disconnect_and_unsave"
-            android:textColor="#FFFFFF" />
-
-
-    </RelativeLayout>
-
+    <!--应用配置页面-->
     <RelativeLayout
         android:id="@+id/setting_item_app_config_lay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/setting_line"
-        android:visibility="gone" >
+        android:visibility="gone">
 
 
-            <LinearLayout
-                android:id="@+id/setting_config_title_lay"
-                android:layout_width="wrap_content"
-                android:layout_height="300dp"
-                android:layout_marginTop="68dp"
-                android:layout_marginLeft="158dp"
-                android:layout_marginRight="30dp"
-                android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/setting_config_title_lay"
+            android:layout_width="wrap_content"
+            android:layout_height="300dp"
+            android:layout_marginLeft="158dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="68dp"
+            android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/setting_sys_version_tv"
-                    style="@style/setting_item_text"
-                    android:text="@string/sys_version" />
+            <TextView
+                android:id="@+id/setting_sys_version_tv"
+                style="@style/setting_item_text"
+                android:text="@string/sys_version" />
 
-                <TextView
-                    android:id="@+id/setting_version_tv"
-                    style="@style/setting_item_text"
-                    android:text="@string/app_version" />
+            <TextView
+                android:id="@+id/setting_version_tv"
+                style="@style/setting_item_text"
+                android:text="@string/app_version" />
 
-                <TextView
-                    android:id="@+id/setting_language_tv"
-                    style="@style/setting_item_text"
-                    android:paddingTop="8dp"
-                    android:text="@string/sys_language" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/setting_language_tv"
+                style="@style/setting_item_text"
+                android:paddingTop="8dp"
+                android:text="@string/sys_language" />
+        </LinearLayout>
 
 
         <LinearLayout
             android:id="@+id/setting_config_para_lay"
             android:layout_width="wrap_content"
             android:layout_height="200dp"
-            android:layout_marginRight="300dp"
-            android:orientation="vertical"
             android:layout_alignTop="@id/setting_config_title_lay"
-            android:layout_toRightOf="@id/setting_config_title_lay">
+            android:layout_marginRight="300dp"
+            android:layout_toRightOf="@id/setting_config_title_lay"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/setting_sys_version_num_tv"
@@ -280,9 +380,9 @@
         <Button
             android:id="@+id/setting_language_btn"
             style="@style/edit_info_button"
-            android:text="@string/lang_cn_en"
             android:layout_below="@id/setting_config_para_lay"
             android:layout_toRightOf="@id/setting_config_title_lay"
+            android:text="@string/lang_cn_en"
             android:textColor="#EEEEEE" />
 
 
@@ -290,8 +390,8 @@
             android:id="@+id/setting_admin_config_lay"
             android:layout_width="300dp"
             android:layout_height="match_parent"
-            android:layout_toRightOf="@id/setting_config_para_lay"
             android:layout_alignTop="@id/setting_config_para_lay"
+            android:layout_toRightOf="@id/setting_config_para_lay"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -312,8 +412,10 @@
     </RelativeLayout>
 
 
-    <include layout="@layout/inc_status_bar"/>
-    <include layout="@layout/inc_return_button"/>
+    <include layout="@layout/inc_status_bar" />
+
+    <include layout="@layout/inc_return_button" />
+
     <include layout="@layout/inc_prompt_box" />
 
 

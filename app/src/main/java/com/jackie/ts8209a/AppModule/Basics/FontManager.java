@@ -1,8 +1,7 @@
-package com.jackie.ts8209a.Managers;
+package com.jackie.ts8209a.AppModule.Basics;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.util.Log;
 
 import com.jackie.ts8209a.CustomView.Dialog.SelectorDialog;
 

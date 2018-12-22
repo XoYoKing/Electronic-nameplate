@@ -1,26 +1,19 @@
-package com.jackie.ts8209a.Application;
+package com.jackie.ts8209a.AppModule;
 
 import android.app.ActivityManager;
 import android.app.Application;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Messenger;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
-import com.jackie.ts8209a.Drive.RA8876L;
-import com.jackie.ts8209a.Managers.BatteryManager;
-import com.jackie.ts8209a.Managers.FontManager;
-import com.jackie.ts8209a.Managers.NameplateManager;
-import com.jackie.ts8209a.Managers.NetworkManager;
-import com.jackie.ts8209a.RemoteServer.Network;
-import com.jackie.ts8209a.Managers.UserInfoManager;
-import com.jackie.ts8209a.Managers.WifiManager;
+import com.jackie.ts8209a.AppModule.Basics.BatteryManager;
+import com.jackie.ts8209a.AppModule.Basics.FontManager;
+import com.jackie.ts8209a.AppModule.Basics.NameplateManager;
+import com.jackie.ts8209a.AppModule.Network.NetworkManager;
+import com.jackie.ts8209a.AppModule.Basics.UserInfoManager;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -37,15 +30,15 @@ public class APP extends Application {
     private static final String PROCESS_NAME = "com.jackie.ts8209a";
 
     //软件本地广播标志 Broadcast static value(BSV)
-    public static final String ACTION_MAIN = PROCESS_NAME+".localbroadcast";
-    public static final String ACTION_STAR_ACTIVITY = ACTION_MAIN +".activity.start";
-    public static final String ACTION_FINISH_ACTIVITY = ACTION_MAIN +".activity.finish";
-    public static final String ACTION_REFRESH_ACTIVITY = ACTION_MAIN +".activity.refresh";
+    public static final String ACTION_MAIN = PROCESS_NAME + ".localbroadcast";
+    public static final String ACTION_STAR_ACTIVITY = ACTION_MAIN + ".activity.start";
+    public static final String ACTION_FINISH_ACTIVITY = ACTION_MAIN + ".activity.finish";
+    public static final String ACTION_REFRESH_ACTIVITY = ACTION_MAIN + ".activity.refresh";
+    public static final String ACTION_NETWORK_INFO_UPDATE = ACTION_MAIN + ".network.infoupdate";
+    public static final String ACTION_BATTERY_INFO_UPDATE = ACTION_MAIN + ".battery.infoupdate";
 
     //
     private BatteryManager batteryManager;
-    private WifiManager wifiManager;
-    private WifiManager.WifiInfo wifiInfo;
     private UserInfoManager userInfoManager;
     private NetworkManager networkManager;
     private NameplateManager nameplateManager;
@@ -59,6 +52,8 @@ public class APP extends Application {
             sendBroadcast(new Intent("com.android.action.hide_statusbar"));
             sendBroadcast(new Intent("com.android.action.hide_navigationbar"));
 
+            LocalBroadcast.init(this);
+
             userInfoInit();
 
             powerInit();
@@ -67,42 +62,51 @@ public class APP extends Application {
 
             FontInit();
 
-            LocalBroadcast.init(this);
+            NameplateInit();
 
-//            RA8876L.devHandshake();
-//            RA8876L.devInit();
-            nameplateManager = NameplateManager.getNameplateManager();
-            nameplateManager.init(this);
+//            testFunc();
         }
     }
+
+//    private void testFunc(){
+//        ethernetManager = EthernetManager.getEthernetManager();
+//        final EthernetManager.EthInfo ethInfo = ethernetManager.getEthInfo();
+//        (new Timer()).schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                int [] ip = ethInfo.getIp();
+//                int [] gw = ethInfo.getGateway();
+//                Log.d(TAG, "ether:" + ethInfo.getEthEn() +
+//                        " network:" + ethInfo.getNetworkEn() +
+//                        " dncp:" + ethInfo.getDhcpEn() +
+//                        " ip:" + ip[0] + "." + ip[1] + "." + ip[2] + "." + ip[3] +
+//                        " gw:" + gw[0] + "." + gw[1] + "." + gw[2] + "." + gw[3]);
+//            }
+//        },5000,5000);
+//
+//    }
 
     private void powerInit() {
         batteryManager = BatteryManager.getBatteryManager();
-        batteryManager.startGetBatteryStaRegular();
+        batteryManager.init(this);
     }
 
     private void networkInit() {
-        try {
-            wifiManager = WifiManager.initWifiManager(this);
-            wifiInfo = wifiManager.getWifiInfo();
-            startService(new Intent(this, Network.class));
-            bindService(new Intent(this, Network.class), new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    networkManager = NetworkManager.initManager(new Messenger(service));
-                }
+        networkManager = NetworkManager.getNetworkManager();
+        networkManager.init(this);
 
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-
-                }
-            }, BIND_AUTO_CREATE);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
+    private void userInfoInit() {
+        userInfoManager = UserInfoManager.getUserInfoManager();
+        userInfoManager.init(this);
+    }
+
+    private void FontInit() {
+        FontManager.getFontManager().loadFontType();
+    }
+
+    //判断是否为APP主进程
     private boolean isAppMainProcess() {
         try {
             int pid = android.os.Process.myPid();
@@ -120,41 +124,37 @@ public class APP extends Application {
         }
     }
 
-    private void userInfoInit() {
-        userInfoManager = UserInfoManager.getUserInfoManager();
-        userInfoManager.init(this);
+    private void NameplateInit() {
+        nameplateManager = NameplateManager.getNameplateManager();
+        nameplateManager.init(this);
     }
 
-    private void FontInit(){
-        FontManager.getFontManager().loadFontType();
-    }
-
-    public static class LocalBroadcast{
+    public static class LocalBroadcast {
         private static LocalBroadcastManager broadcastManager;
 
-        private static void init(Context context){
+        private static void init(Context context) {
             broadcastManager = LocalBroadcastManager.getInstance(context);
         }
 
-        public static void send(String action, Bundle value){
+        public static void send(String action, Bundle value) {
             Intent intent = new Intent(action);
             intent.putExtra("BUNDLE", value);
             broadcastManager.sendBroadcast(intent);
         }
 
-        public static void send(String action,Class<?> value){
+        public static void send(String action, Class<?> value) {
             Intent intent = new Intent(action);
             intent.putExtra("CLASS", value);
             broadcastManager.sendBroadcast(intent);
         }
 
-        public static void send(String action, String value){
+        public static void send(String action, String value) {
             Intent intent = new Intent(action);
             intent.putExtra("STRING", value);
             broadcastManager.sendBroadcast(intent);
         }
 
-        public static void send(String action,int value){
+        public static void send(String action, int value) {
             Intent intent = new Intent(action);
             intent.putExtra("INTEGER", value);
             broadcastManager.sendBroadcast(intent);

@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.*;
 import android.util.Log;
 
-import com.jackie.ts8209a.Application.*;
+import com.jackie.ts8209a.AppModule.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,8 +38,9 @@ public class Network extends Service {
 
     /***************** 设备参数变量 *********************/
     private int wifiRssi = 0;
-    private String wifiMac = "";
-    private boolean wifiEnable = false;
+    private String devMac = "";
+    private boolean netDevEn = false;
+    private boolean networkEn = false;
     private int batLevel = 0;
     private int devId = 0;
     private int devBrightness = 0;
@@ -62,14 +63,15 @@ public class Network extends Service {
     public static final int CMD_RECEIVE_DATA = 22;
 
     //******************* 设备信息字段 ***********************/
-    public static final String DEV_RSSI = "RSSI";
-    public static final String DEV_MAC = "MAC";
-    public static final String DEV_WIFIEN = "WIFIENABLE";
-    public static final String DEV_BATLEV = "BATLEVEL";
-    public static final String DEV_ID = "DEVID";
-    public static final String DEV_BRIGHT = "DEVBRIGHTNESS";
-    public static final String DEV_SERVIP = "SERVERIP";
-    public static final String DEV_SERVPO = "SERVERPORT";
+    public static final String DEV_RSSI = "DEV_WIFI_RSSI";
+    public static final String DEV_MAC = "DEV_MAC_ADDR";
+    public static final String DEV_NETDEV_EN = "NETWORK_DEVICE_ENABLE";
+    public static final String DEV_BATLEV = "BAT_LEVEL";
+    public static final String DEV_ID = "DEVICE_ID";
+    public static final String DEV_BRIGHT = "DEV_BRIGHTNESS";
+    public static final String DEV_SERVIP = "SERVER_IP";
+    public static final String DEV_SERVPO = "SERVER_PORT";
+    public static final String DEV_NETWORK_EN = "ETHERNET_ENABLE";
 
     //***************** 服务器指令字段 *********************/
     //指令字段 Device -> Server
@@ -133,8 +135,9 @@ public class Network extends Service {
             switch (msg.what){
                 case CMD_UPDATA_DEV_INFO:
                     wifiRssi = bundle.getInt(DEV_RSSI);
-                    wifiMac = bundle.getString(DEV_MAC);
-                    wifiEnable = bundle.getBoolean(DEV_WIFIEN);
+                    devMac = bundle.getString(DEV_MAC);
+                    netDevEn = bundle.getBoolean(DEV_NETDEV_EN);
+                    networkEn = bundle.getBoolean(DEV_NETWORK_EN);
                     batLevel = bundle.getInt(DEV_BATLEV);
                     devId = bundle.getInt(DEV_ID);
                     devBrightness = bundle.getInt(DEV_BRIGHT);
@@ -195,7 +198,7 @@ public class Network extends Service {
                         json.put("iWifi",wifiRssi);
                         break;
                     case REQ_TS_DEVICE_REG:
-                        json.put("strMac",wifiMac);
+                        json.put("strMac", devMac);
                         break;
                     case REQ_TS_GET_USERINFO:break;
                     case REQ_TS_GET_USERLIST:break;
@@ -602,7 +605,7 @@ public class Network extends Service {
                 sendStatus(STA_CONNECTING);
                 while (true) {
                     try {
-                        while (!wifiEnable)
+                        while (!(netDevEn || networkEn))
                             sleep(1000);
                         Thread.sleep(i > 0 ? 1500 : 0);
                         socket = new Socket(ip, port);

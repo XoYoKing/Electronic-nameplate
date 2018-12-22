@@ -26,7 +26,7 @@
             android:src="@drawable/ico_fwq_n"/>
 
         <ImageView
-            android:id="@+id/stabar_wired_net_iv"
+            android:id="@+id/stabar_ether_net_iv"
             style="@style/status_icon_view"
             android:src="@drawable/ico_wx_n"/>
 

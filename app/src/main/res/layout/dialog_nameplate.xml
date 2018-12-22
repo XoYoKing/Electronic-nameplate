@@ -23,6 +23,12 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@id/nameplate_preview_title">
 
+            <ImageView
+                android:id="@+id/nameplate_preview_bg_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#00FFFFFF"/>
+
             <com.jackie.ts8209a.CustomView.View.MoveTextView
                 android:id="@+id/nameplate_preview_comp_tv"
                 style="@style/nameplate_dialog_preview_movetext"/>

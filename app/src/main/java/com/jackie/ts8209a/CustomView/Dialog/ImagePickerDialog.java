@@ -7,7 +7,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
-import com.jackie.ts8209a.Application.Func;
+import com.jackie.ts8209a.AppModule.Tools.FilePath;
 import com.jackie.ts8209a.R;
 
 import java.io.File;
@@ -35,7 +35,13 @@ public class ImagePickerDialog implements View.OnClickListener,DialogInterface.O
         builder.setFisrtBtn("确定");
         builder.setButtonClickListerner(this);
 
-        String[] allNameplateBG = Func.FilePath.getFilesAbsolutePath(path, ".jpg");
+        String[] allNameplateBG = FilePath.getFilesAbsolutePath(path, ".jpg");
+        if(allNameplateBG == null){
+            if(this.listener != null)
+                this.listener.imgConfirm(null);
+            return;
+        }
+
         ibtn = new ImageButton[allNameplateBG.length];
 
         for (int i = 0; i < allNameplateBG.length; i++) {
