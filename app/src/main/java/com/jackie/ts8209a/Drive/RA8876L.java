@@ -32,7 +32,6 @@ public class RA8876L {
     }
 
     private RA8876L(){
-
     }
 
 
@@ -172,20 +171,20 @@ public class RA8876L {
         imgDataListener = listener;
     }
 
-    public static interface OnInitFinishListener{
-        abstract public void onInitFinish();
+    public interface OnInitFinishListener{
+        void onInitFinish();
     }
 
-    public static interface OnSetPicFinishListener{
-        abstract public void onSetPicFinish();
+    public interface OnSetPicFinishListener{
+        void onSetPicFinish();
     }
 
-    public static interface OnSetPicTimeOutListener{
-        abstract public void onSetPicTimeOut();
+    public interface OnSetPicTimeOutListener{
+        void onSetPicTimeOut();
     }
 
-    public static interface OnImgDataListener{
-        abstract public void onImgData(byte[] data);
+    public interface OnImgDataListener{
+        void onImgData(byte[] data);
     }
 
 

@@ -53,7 +53,7 @@ public class FontManager {
         return Font;
     }
 
-    public void loadFontType(){
+    public void init(){
         for(int i=0;i<FontType.length;i++){
             try{
                 typefaceCN[i] = Typeface.createFromFile(PATH+FILE[i]);

@@ -7,7 +7,6 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -17,10 +16,10 @@ import com.jackie.ts8209a.Activity.AppActivity;
 import com.jackie.ts8209a.Activity.MainActivity;
 import com.jackie.ts8209a.Activity.MeetingInfoActivity;
 import com.jackie.ts8209a.AppModule.APP;
+import com.jackie.ts8209a.AppModule.Basics.PowerManager;
 import com.jackie.ts8209a.AppModule.Tools.Cmd;
-import com.jackie.ts8209a.AppModule.Basics.BatteryManager;
 import com.jackie.ts8209a.AppModule.Basics.UserInfoManager;
-import com.jackie.ts8209a.RemoteServer.Network;
+import com.jackie.ts8209a.Servers.Network;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,12 +38,12 @@ import static com.jackie.ts8209a.Activity.AppActivity.SYS_SMS_MSG;
 import static com.jackie.ts8209a.Activity.AppActivity.USER_LIST;
 import static com.jackie.ts8209a.Activity.MeetingInfoActivity.MEETING_INFO;
 import static com.jackie.ts8209a.AppModule.Tools.Cmd.KEY_RES;
-import static com.jackie.ts8209a.RemoteServer.Network.EVT_TS_CENTERCONTROL;
-import static com.jackie.ts8209a.RemoteServer.Network.EVT_TS_MEETINGINFO;
-import static com.jackie.ts8209a.RemoteServer.Network.EVT_TS_REQSERVICE_ACK;
-import static com.jackie.ts8209a.RemoteServer.Network.EVT_TS_SENDMSG;
-import static com.jackie.ts8209a.RemoteServer.Network.RSP_TS_GET_USERINFO;
-import static com.jackie.ts8209a.RemoteServer.Network.RSP_TS_GET_USERLIST;
+import static com.jackie.ts8209a.Servers.Network.EVT_TS_CENTERCONTROL;
+import static com.jackie.ts8209a.Servers.Network.EVT_TS_MEETINGINFO;
+import static com.jackie.ts8209a.Servers.Network.EVT_TS_REQSERVICE_ACK;
+import static com.jackie.ts8209a.Servers.Network.EVT_TS_SENDMSG;
+import static com.jackie.ts8209a.Servers.Network.RSP_TS_GET_USERINFO;
+import static com.jackie.ts8209a.Servers.Network.RSP_TS_GET_USERLIST;
 
 /**
  * Created by kuangyt on 2018/9/12.
@@ -68,7 +67,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener{
     private NetDevManager netDevManager;
     private NetDevManager.NetDevInfo netDevInfo;
     private UserInfoManager userInfoManager;
-    private BatteryManager batteryManager;
+    private PowerManager powerManager;
     private static APP App;
 
     private static NetworkManager networkManager = new NetworkManager();
@@ -85,7 +84,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener{
     public void init(APP app){
         App = app;
 
-        batteryManager = BatteryManager.getBatteryManager();
+        powerManager = PowerManager.getPowerManager();
         userInfoManager = UserInfoManager.getUserInfoManager();
 
         Cmd.execCmd("netcfg",new Handler(){
@@ -95,10 +94,8 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener{
                 String res = bundle.getString(KEY_RES);
                 if(res.contains(EthernetManager.DEV_NAME)){
                     netDevManager = EthernetManager.getEthernetManager();
-//                    Log.d(TAG,"Ethernet init");
                 }else{
                     netDevManager = WifiManager.getWifiManager();
-//                    Log.d(TAG,"WIFI init");
                 }
                 netDevManager.init(App);
                 netDevInfo = netDevManager.getDevInfo();
@@ -111,7 +108,6 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener{
                 }
             }
         });
-
         App.startService(new Intent(App, Network.class));
         App.bindService(new Intent(App, Network.class), new ServiceConnection() {
             @Override
@@ -125,8 +121,6 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener{
 
             }
         }, BIND_AUTO_CREATE);
-
-
 //        wifiInfo = wifiManager.getWifiInfo();
 //        ethInfo = ethernetManager.getEthInfo();
     }
@@ -286,7 +280,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener{
         Bundle bundle = new Bundle();
         bundle.putInt(Network.DEV_ID, userInfoManager.getDeviceID());
         bundle.putInt(Network.DEV_BRIGHT, userInfoManager.getBrightness());
-        bundle.putInt(Network.DEV_BATLEV, batteryManager.getLevel());
+        bundle.putInt(Network.DEV_BATLEV, powerManager.getLevel());
         bundle.putInt(Network.DEV_RSSI, netDevInfo.rssi);
         bundle.putString(Network.DEV_MAC, netDevInfo.mac);
         bundle.putBoolean(Network.DEV_NETDEV_EN, netDevInfo.devEn);

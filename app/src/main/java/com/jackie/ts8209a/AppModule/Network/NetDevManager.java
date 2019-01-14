@@ -4,18 +4,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import com.jackie.ts8209a.AppModule.APP;
 import com.jackie.ts8209a.AppModule.Tools.Cmd;
-import com.jackie.ts8209a.AppModule.Tools.Ordinary;
+import com.jackie.ts8209a.AppModule.Tools.General;
 
 import java.util.Locale;
 import java.util.Timer;
 
-import static com.jackie.ts8209a.AppModule.Tools.Ordinary.addrStrToInt;
+import static com.jackie.ts8209a.AppModule.Tools.General.addrStrToInt;
 
 /**
  * Created by kuangyt on 2018/12/12.
@@ -59,6 +61,7 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
 
         setIntentFilter();
         App.registerReceiver(new networkBroadcastReceiver(),intentFilter);
+
     }
 
     protected abstract void startup();
@@ -202,6 +205,21 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
 
     protected abstract void action(Message msg);
 
+    private void connectManager(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) App.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo != null){
+            int type = networkInfo.getType();
+
+            Log.d(TAG,"activity network = "+ type);
+
+            if(type == ConnectivityManager.TYPE_WIFI)
+                Log.d(TAG,"activity network wifi");
+            else if(type == ConnectivityManager.TYPE_ETHERNET)
+                Log.d(TAG,"activity netork ethernet");
+        }
+    }
+
     @Override
     public void onResult(String cmd, String res, int value) {
         final String con_result = "dhcp."+devName()+".result";
@@ -216,7 +234,7 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
             if (cmd.contains(IFCONFIG) && res.contains("ip") && res.contains("mask")) {
                 int[] ip = addrStrToInt(res.substring(res.indexOf("ip ") + 3, res.indexOf(" mask")));
                 int[] mask = addrStrToInt(res.substring(res.indexOf("mask ") + 5, res.indexOf(" flags")));
-                if((infoListener != null) && (!Ordinary.ContrastArray(ip,netDevInfo.ip) || !Ordinary.ContrastArray(mask,netDevInfo.mask))){
+                if((infoListener != null) && (!General.ContrastArray(ip,netDevInfo.ip) || !General.ContrastArray(mask,netDevInfo.mask))){
                     netDevInfo.ip = ip;
                     netDevInfo.mask = mask;
                     infoListener.infoUpdate(devName());
@@ -224,7 +242,7 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
             } else if (cmd.contains(GETPROP) && res.contains(con_result) && res.contains(con_gw)) {
                 int gw[] = netDevInfo.dhcp ? addrStrToInt(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip))) : netDevInfo.gw;
                 boolean netEn = ((res.substring(res.indexOf(index_result) + index_result.length(), res.indexOf(index_serv))).equals("ok"));
-                if((infoListener != null) && (!Ordinary.ContrastArray(gw,netDevInfo.gw) || netDevInfo.netEn != netEn)){
+                if((infoListener != null) && (!General.ContrastArray(gw,netDevInfo.gw) || netDevInfo.netEn != netEn)){
                     netDevInfo.netEn = netEn;
                     netDevInfo.gw = gw;
                     infoListener.infoUpdate(devName());

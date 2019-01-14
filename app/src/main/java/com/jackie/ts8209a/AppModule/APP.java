@@ -9,11 +9,12 @@ import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
-import com.jackie.ts8209a.AppModule.Basics.BatteryManager;
-import com.jackie.ts8209a.AppModule.Basics.FontManager;
 import com.jackie.ts8209a.AppModule.Basics.NameplateManager;
+import com.jackie.ts8209a.AppModule.Basics.PowerManager;
+import com.jackie.ts8209a.AppModule.Basics.FontManager;
 import com.jackie.ts8209a.AppModule.Network.NetworkManager;
 import com.jackie.ts8209a.AppModule.Basics.UserInfoManager;
+import com.jackie.ts8209a.AppModule.Tools.Printf;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -35,13 +36,7 @@ public class APP extends Application {
     public static final String ACTION_FINISH_ACTIVITY = ACTION_MAIN + ".activity.finish";
     public static final String ACTION_REFRESH_ACTIVITY = ACTION_MAIN + ".activity.refresh";
     public static final String ACTION_NETWORK_INFO_UPDATE = ACTION_MAIN + ".network.infoupdate";
-    public static final String ACTION_BATTERY_INFO_UPDATE = ACTION_MAIN + ".battery.infoupdate";
-
-    //
-    private BatteryManager batteryManager;
-    private UserInfoManager userInfoManager;
-    private NetworkManager networkManager;
-    private NameplateManager nameplateManager;
+    public static final String ACTION_POWER_INFO_UPDATE = ACTION_MAIN + ".power.infoupdate";
 
     @Override
     public void onCreate() {
@@ -52,58 +47,47 @@ public class APP extends Application {
             sendBroadcast(new Intent("com.android.action.hide_statusbar"));
             sendBroadcast(new Intent("com.android.action.hide_navigationbar"));
 
+            //初始化APP本地广播功能
             LocalBroadcast.init(this);
 
-            userInfoInit();
+            //初始化设备用户信息
+            UserInfoManager.getUserInfoManager().init(this);
 
-            powerInit();
+            //初始化电源管理模块
+            PowerManager.getPowerManager().init(this);
 
-            networkInit();
+            //初始化网络管理模块
+            NetworkManager.getNetworkManager().init(this);
 
-            FontInit();
+            //初始化字体管理模块
+            FontManager.getFontManager().init();
 
-            NameplateInit();
+            //初始化电子铭牌管理模块
+            NameplateManager.getNameplateManager().init(this);
+            nameplateParaInit();
 
-//            testFunc();
+            //初始化串口debug
+            Printf.init();
         }
     }
 
-//    private void testFunc(){
-//        ethernetManager = EthernetManager.getEthernetManager();
-//        final EthernetManager.EthInfo ethInfo = ethernetManager.getEthInfo();
-//        (new Timer()).schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                int [] ip = ethInfo.getIp();
-//                int [] gw = ethInfo.getGateway();
-//                Log.d(TAG, "ether:" + ethInfo.getEthEn() +
-//                        " network:" + ethInfo.getNetworkEn() +
-//                        " dncp:" + ethInfo.getDhcpEn() +
-//                        " ip:" + ip[0] + "." + ip[1] + "." + ip[2] + "." + ip[3] +
-//                        " gw:" + gw[0] + "." + gw[1] + "." + gw[2] + "." + gw[3]);
-//            }
-//        },5000,5000);
-//
-//    }
+    private void nameplateParaInit(){
+        NameplateManager nameplateManager = NameplateManager.getNameplateManager();
+        UserInfoManager userInfoManager = UserInfoManager.getUserInfoManager();
 
-    private void powerInit() {
-        batteryManager = BatteryManager.getBatteryManager();
-        batteryManager.init(this);
-    }
+        String str[] = userInfoManager.getStr();
+        int color[] = userInfoManager.getColor();
+        int style[] = userInfoManager.getStyle();
+        int size[] = userInfoManager.getSize();
+        float x[] = userInfoManager.getPosX();
+        float y[] = userInfoManager.getPosY();
+        for(int i=0;i<3;i++)
+            nameplateManager.para.setPara(i,str[i],color[i],size[i],style[i],x[i],y[i]);
 
-    private void networkInit() {
-        networkManager = NetworkManager.getNetworkManager();
-        networkManager.init(this);
-
-    }
-
-    private void userInfoInit() {
-        userInfoManager = UserInfoManager.getUserInfoManager();
-        userInfoManager.init(this);
-    }
-
-    private void FontInit() {
-        FontManager.getFontManager().loadFontType();
+        nameplateManager.para.setNpType(userInfoManager.getNamePlateType());
+        nameplateManager.para.setBgColor(userInfoManager.getNamePlateBGColor());
+        nameplateManager.para.setBgImg(userInfoManager.getNamePlateBGImg());
+        nameplateManager.para.setNpImg(userInfoManager.getNamePlateImage());
     }
 
     //判断是否为APP主进程
@@ -122,11 +106,6 @@ public class APP extends Application {
             e.printStackTrace();
             return true;
         }
-    }
-
-    private void NameplateInit() {
-        nameplateManager = NameplateManager.getNameplateManager();
-        nameplateManager.init(this);
     }
 
     public static class LocalBroadcast {

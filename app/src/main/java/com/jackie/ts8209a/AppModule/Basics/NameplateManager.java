@@ -35,7 +35,7 @@ import java.util.TimerTask;
 
 public class NameplateManager {
     private static final String TAG = "NameplateManager";
-    public static NameplatePara Para = new NameplatePara();
+    public NameplatePara para = new NameplatePara();
 
     public static final int NP_TYPE_CUSTOM_COLOR = 0;
     public static final int NP_TYPE_CUSTOM_BG_IMG = 1;
@@ -58,51 +58,43 @@ public class NameplateManager {
         return Nameplate;
     }
 
-    public void init(final Context context){
+    public void init(final Context context) {
 
-            new Thread() {
-                public void run() {
-                    try {
-                        Thread.sleep(1000);
+        new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                    ProgressBar pBar = new ProgressBar(context);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(30, 30);
+                    pBar.setLayoutParams(params);
+                    AppActivity.PromptBox.BuildPrompt("INIT_NAMEPLATE").Text("正在初始化电子铭牌").View(pBar);
+                    RA8876L.devHandshake();
+                    Thread.sleep(500);
+                    RA8876L.setOninitFinishListener(new RA8876L.OnInitFinishListener() {
 
-                        ProgressBar pBar = new ProgressBar(context);
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(30, 30);
-                        pBar.setLayoutParams(params);
-
-                        AppActivity.PromptBox.BuildPrompt("INIT_NAMEPLATE").Text("正在初始化电子铭牌").View(pBar);
-//                      Thread.sleep(50);
-//					    Log.i("RA8876 init", "Rst 8876");
-//                      MCU.sendCommand(McuHandler.RST_8876);
-                        RA8876L.devHandshake();
-                        Thread.sleep(500);
-                        RA8876L.setOninitFinishListener(new RA8876L.OnInitFinishListener() {
-
-                            @Override
-                            public void onInitFinish() {
-                                Log.i(TAG, "Init Finish");
-
-                                try{
-//							mActivity.PromptBox.BuildPrompt("INIT_NAMEPLATE").Text((String)getResources().getText(R.string.nameplate_is_initializing)).Time(4).TimeOut(3000);
-                                    RA8876L.setOnSetPicFinishListener(new RA8876L.OnSetPicFinishListener() {
-                                        @Override
-                                        public void onSetPicFinish() {
-//                                            MCU.sendCommand(McuHandler.BACKLIGHT_88_ON);
-                                            AppActivity.PromptBox.removePrompt("INIT_NAMEPLATE");
-                                        }
-                                    });
-                                    setNamePlateByByteData();
-
-//							Thread.sleep(15000);
-                                }catch(Exception e){}
+                        @Override
+                        public void onInitFinish() {
+                            Log.i(TAG, "Init Finish");
+                            try {
+                                RA8876L.setOnSetPicFinishListener(new RA8876L.OnSetPicFinishListener() {
+                                    @Override
+                                    public void onSetPicFinish() {
+                                        AppActivity.PromptBox.removePrompt("INIT_NAMEPLATE");
+                                    }
+                                });
+                                setNamePlateByByteData();
+                            } catch (Exception e) {
                             }
-                        });
-                        RA8876L.devInit();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                        }
+                    });
+                    RA8876L.devInit();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
-                };
-            }.start();
+            ;
+        }.start();
     }
 
     public void preview(final Context context) {
@@ -287,33 +279,33 @@ public class NameplateManager {
             (dialogLayout.findViewById(R.id.nameplate_updata_lay)).setVisibility(View.GONE);
             (dialogLayout.findViewById(R.id.nameplate_preview_lay)).setVisibility(View.VISIBLE);
 
-            switch (Para.npType){
+            switch (para.npType){
                 case NP_TYPE_CUSTOM_COLOR:
                 case NP_TYPE_CUSTOM_BG_IMG:
-                    if(Para.npType == NP_TYPE_CUSTOM_COLOR) {
+                    if(para.npType == NP_TYPE_CUSTOM_COLOR) {
                         ivBackground.setVisibility(View.GONE);
-                        layBackground.setBackgroundColor(Para.bgColor);
+                        layBackground.setBackgroundColor(para.bgColor);
                     }
-                    else if(Para.npType == NP_TYPE_CUSTOM_BG_IMG) {
+                    else if(para.npType == NP_TYPE_CUSTOM_BG_IMG) {
                         ivBackground.setVisibility(View.VISIBLE);
-                        Glide.with(getContext()).load(Para.bgImgPath).into(ivBackground);
+                        Glide.with(getContext()).load(para.bgImgPath).into(ivBackground);
                     }
 
                     for (int i = 0; i < 3; i++) {
                         tvPreview[i].setVisibility(View.VISIBLE);
-                        tvPreview[i].setText(Para.strContent[i]);
-                        tvPreview[i].setTextColor(Para.fontColor[i]);
-                        tvPreview[i].setTextSize((int) (Para.fontsize[i] * 2.13));
-                        tvPreview[i].setTypeface(FontManager.getFontManager().getFontType(Para.fontstyle[i]));
+                        tvPreview[i].setText(para.strContent[i]);
+                        tvPreview[i].setTextColor(para.fontColor[i]);
+                        tvPreview[i].setTextSize((int) (para.fontsize[i] * 2.13));
+                        tvPreview[i].setTypeface(FontManager.getFontManager().getFontType(para.fontstyle[i]));
                         tvPreview[i].setOnMovementFinishListener(moveListener);
-                        tvPreview[i].setX(Para.fontPosX[i]);
-                        tvPreview[i].setY(Para.fontPosY[i]);
+                        tvPreview[i].setX(para.fontPosX[i]);
+                        tvPreview[i].setY(para.fontPosY[i]);
 //                tvPreview[i].setMoveRange(1024, 0, 256, 0);
                     }
                     break;
                 case NP_TYPE_RDY_MADE_IMG:
                     ivBackground.setVisibility(View.VISIBLE);
-                    Glide.with(getContext()).load(Para.npImgPath).into(ivBackground);
+                    Glide.with(getContext()).load(para.npImgPath).into(ivBackground);
                     for (int i = 0; i < 3; i++) {
                         tvPreview[i].setVisibility(View.GONE);
                     }
@@ -330,34 +322,34 @@ public class NameplateManager {
             layBackground = dialogLayout.findViewById(R.id.nameplate_background_lay);
             ivBackground = (ImageView) dialogLayout.findViewById(R.id.nameplate_background_iv);
 
-            tvPreview[0] = (TextView) dialogLayout.findViewById(R.id.nameplate_cerson_tv);
+            tvPreview[0] = (TextView) dialogLayout.findViewById(R.id.nameplate_person_tv);
             tvPreview[1] = (TextView) dialogLayout.findViewById(R.id.nameplate_company_tv);
-            tvPreview[2] = (TextView) dialogLayout.findViewById(R.id.nameplate_cosition_tv);
+            tvPreview[2] = (TextView) dialogLayout.findViewById(R.id.nameplate_position_tv);
 
-            switch (Para.npType){
+            switch (para.npType){
                 case NP_TYPE_CUSTOM_COLOR:
                 case NP_TYPE_CUSTOM_BG_IMG:
-                    if(Para.npType == NP_TYPE_CUSTOM_COLOR) {
+                    if(para.npType == NP_TYPE_CUSTOM_COLOR) {
                         ivBackground.setVisibility(View.GONE);
-                        layBackground.setBackgroundColor(Para.bgColor);
+                        layBackground.setBackgroundColor(para.bgColor);
                     }
-                    else if(Para.npType == NP_TYPE_CUSTOM_BG_IMG) {
+                    else if(para.npType == NP_TYPE_CUSTOM_BG_IMG) {
                         ivBackground.setVisibility(View.VISIBLE);
-                        Glide.with(getContext()).load(Para.bgImgPath).into(ivBackground);
+                        Glide.with(getContext()).load(para.bgImgPath).into(ivBackground);
                     }
 
                     for (int i = 0; i < 3; i++) {
-                        tvPreview[i].setText(Para.strContent[i]);
-                        tvPreview[i].setTextColor(Para.fontColor[i]);
-                        tvPreview[i].setTextSize((int) (Para.fontsize[i] * 2.84));
-                        tvPreview[i].setTypeface(FontManager.getFontManager().getFontType(Para.fontstyle[i]));
-                        tvPreview[i].setX((float) (Para.fontPosX[i]*1.333));
-                        tvPreview[i].setY((float) (Para.fontPosY[i]*1.333));
+                        tvPreview[i].setText(para.strContent[i]);
+                        tvPreview[i].setTextColor(para.fontColor[i]);
+                        tvPreview[i].setTextSize((int) (para.fontsize[i] * 2.84));
+                        tvPreview[i].setTypeface(FontManager.getFontManager().getFontType(para.fontstyle[i]));
+                        tvPreview[i].setX((float) (para.fontPosX[i]*1.333));
+                        tvPreview[i].setY((float) (para.fontPosY[i]*1.333));
                     }
                     break;
                 case NP_TYPE_RDY_MADE_IMG:
                     ivBackground.setVisibility(View.VISIBLE);
-                    Glide.with(getContext()).load(Para.npImgPath).into(ivBackground);
+                    Glide.with(getContext()).load(para.npImgPath).into(ivBackground);
                     for (int i = 0; i < 3; i++) {
                         tvPreview[i].setVisibility(View.GONE);
                     }
@@ -403,11 +395,11 @@ public class NameplateManager {
                         break;
                 }
 
-                Para.fontPosX[type] = x;
-                Para.fontPosY[type] = y;
+                para.fontPosX[type] = x;
+                para.fontPosY[type] = y;
 
                 if(positionChangeListener != null)
-                    positionChangeListener.onPositionChange(type,Para);
+                    positionChangeListener.onPositionChange(type, para);
             }
         };
     }

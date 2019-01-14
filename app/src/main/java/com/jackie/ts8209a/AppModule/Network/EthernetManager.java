@@ -1,12 +1,11 @@
 package com.jackie.ts8209a.AppModule.Network;
 
+import android.content.Intent;
 import android.os.Message;
 import android.util.Log;
 
 import com.jackie.ts8209a.AppModule.APP;
 import com.jackie.ts8209a.AppModule.Tools.Cmd;
-import com.jackie.ts8209a.AppModule.Tools.Ordinary;
-import com.jackie.ts8209a.R;
 
 import java.util.Locale;
 import java.util.Timer;
@@ -43,12 +42,6 @@ public class EthernetManager extends NetDevManager{
             @Override
             public void run() {
                 getNetDevSta();
-//                Log.d(TAG, "ether:" + netDevInfo.ethEn +
-//                        "\nnetwork:" + netDevInfo.netEn +
-//                        "\ndncp:" + netDevInfo.dhcp +
-//                        "\nip:" + addrIntToStr(netDevInfo.ip) +
-//                        "\nmask:" + addrIntToStr(netDevInfo.mask) +
-//                        "\ngateway:" + addrIntToStr(netDevInfo.gw));
             }
         }, 5000, getNetDevStaTime);
     }
@@ -57,12 +50,14 @@ public class EthernetManager extends NetDevManager{
     protected void startup() {
         String cmd = String.format(Locale.ENGLISH,"netcfg %s %s",DEV_NAME,"up");
         Cmd.execCmd(cmd);
+        App.sendBroadcast(new Intent("com.android.action.enable_ethernet"));
     }
 
     @Override
     protected void shutdown() {
         String cmd = String.format(Locale.ENGLISH,"netcfg %s %s",DEV_NAME,"down");
         Cmd.execCmd(cmd);
+        App.sendBroadcast(new Intent("com.android.action.disable_ethernet"));
     }
 
     @Override

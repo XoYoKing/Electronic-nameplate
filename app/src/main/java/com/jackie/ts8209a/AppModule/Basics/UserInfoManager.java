@@ -6,12 +6,14 @@ import android.graphics.Color;
 import android.util.Log;
 
 import com.jackie.ts8209a.AppModule.APP;
+import com.jackie.ts8209a.AppModule.Tools.Printf;
 
 /**
  * Created by kuangyt on 2018/8/27.
  */
 
 public class UserInfoManager {
+    private final String TAG = this.getClass().getSimpleName();
     /************* 存取类型类型静态变量  **************/
     public static final int USER = 0;
     public static final int COMP = 1;
@@ -111,7 +113,7 @@ public class UserInfoManager {
         }
         serverPort = userInfo.getInt(keyServerPort, 8000);
         NamePlateBGColor = userInfo.getInt(keyNamePlateBGColor, Color.RED);
-        dhcp = userInfo.getBoolean(keyDhcp, false);
+        dhcp = userInfo.getBoolean(keyDhcp, true);
         language = userInfo.getString(keyLanguage, "zh");
         brightness = userInfo.getInt(keyBrightness, 50);
         ssid = userInfo.getString(keyWifiSsid, "");
@@ -174,7 +176,8 @@ public class UserInfoManager {
                         }
 
                         saving = false;
-                        Log.d("UserInfoManager", "User info has been saved");
+//                        Log.d(TAG, "User info has been saved");
+                        Printf.d(TAG,"User info has been saved");
                     }
                 }
             }.start();

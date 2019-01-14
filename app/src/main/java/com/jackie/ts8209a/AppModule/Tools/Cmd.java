@@ -5,9 +5,11 @@ package com.jackie.ts8209a.AppModule.Tools;
  */
 
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.util.LogPrinter;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -131,7 +133,6 @@ public class Cmd {
         private String cmd;
         private Handler handler;
     }
-
 
     public interface cmdResultListener {
         void onResult(String cmd, String res, int value);

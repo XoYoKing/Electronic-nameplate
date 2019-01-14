@@ -459,7 +459,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 tvPreviwUser.setTypeface(Font.getFontType(fontstyleTemp[editItem]));
                 tvPreviwUser.setX(fontPosX[editItem] / 3);
                 tvPreviwUser.setY(fontPosY[editItem] / 3);
-                NameplateManager.Para.setPara(editItem, strTemp[editItem], fontColorTemp[editItem], fontsizeTemp[editItem], fontstyleTemp[editItem], fontPosX[editItem], fontPosY[editItem]);
+                nameplateManager.para.setPara(editItem, strTemp[editItem], fontColorTemp[editItem], fontsizeTemp[editItem], fontstyleTemp[editItem], fontPosX[editItem], fontPosY[editItem]);
                 break;
             case EDIT_BG_COLOR:
                 ivRdyMadeNpImg.setVisibility(View.INVISIBLE);
@@ -467,7 +467,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 ivCustomNpBg.setVisibility(View.INVISIBLE);
                 layCustomNpPreview.setBackgroundColor(bgColorTemp);
                 setBtnColor(ibtnBgSetting,bgColorTemp);
-                NameplateManager.Para.setBgColor(bgColorTemp);
+                nameplateManager.para.setBgColor(bgColorTemp);
                 break;
             case EDIT_BG_IMG:
                 ivRdyMadeNpImg.setVisibility(View.INVISIBLE);
@@ -476,13 +476,13 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 layCustomNpPreview.setBackgroundColor(getResources().getColor(R.color.transparent_color));
                 setBtnImage(ibtnBgSetting,R.drawable.ico_wenj_h);
                 Glide.with(EditUserInfoActivity.this).load(bgImgPath).into(ivCustomNpBg);
-                NameplateManager.Para.setBgImg(bgImgPath);
+                nameplateManager.para.setBgImg(bgImgPath);
                 break;
             case EDIT_NP_IMG:
                 layCustomNpPreview.setVisibility(View.INVISIBLE);
                 ivRdyMadeNpImg.setVisibility(View.VISIBLE);
                 Glide.with(EditUserInfoActivity.this).load(npImgPath).into(ivRdyMadeNpImg);
-                NameplateManager.Para.setNpImg(npImgPath);
+                nameplateManager.para.setNpImg(npImgPath);
                 tvRdyMadeNpName.setText(getString(R.string.file_name)+"\n"+npImgPath.substring(npImgPath.lastIndexOf("/")+1,npImgPath.length()));
                 break;
         }
@@ -510,7 +510,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 editNameplatePreview();
                 break;
         }
-        NameplateManager.Para.setNpType(npTypeTemp);
+        nameplateManager.para.setNpType(npTypeTemp);
     }
 
     //切换铭牌设置页面
@@ -693,7 +693,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnClickLis
                 default:
                     break;
             }
-//            editNameplatePreview(tickType);
+            editNameplatePreview(tickType);
             btnSave.setEnabled(true);
         }
 

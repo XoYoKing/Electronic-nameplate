@@ -94,5 +94,6 @@
     <string name="nameplate_is_updating">电子铭牌正在更新</string>
     <string name="color_picker_title">点击色环选择颜色;下方选择色调;点击中心确定选择</string>
     <string name="set_font_size">字体大小设置</string>
+    <string name="show_nameplate">显示铭牌</string>
 
 </resources>

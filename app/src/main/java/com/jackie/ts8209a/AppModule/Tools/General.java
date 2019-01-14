@@ -6,7 +6,7 @@ import static java.lang.String.format;
  * Created by kuangyt on 2018/12/7.
  */
 
-public class Ordinary {
+public class General {
 
     public static String Byte2Str(byte [] buf){
         String string = "";

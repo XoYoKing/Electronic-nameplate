@@ -385,6 +385,44 @@
             android:text="@string/lang_cn_en"
             android:textColor="#EEEEEE" />
 
+        <!--<Button-->
+            <!--android:id="@+id/setting_cpu_savepower_btn"-->
+            <!--style="@style/edit_info_button"-->
+            <!--android:layout_below="@id/setting_language_btn"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:text="低功耗" />-->
+
+        <!--<Button-->
+            <!--android:id="@+id/setting_cpu_normalpower_btn"-->
+            <!--style="@style/edit_info_button"-->
+            <!--android:layout_below="@id/setting_language_btn"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:layout_toRightOf="@id/setting_cpu_savepower_btn"-->
+            <!--android:text="正常功耗" />-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/setting_cpu_freq_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/setting_language_btn"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:layout_toRightOf="@id/setting_cpu_normalpower_btn"-->
+            <!--android:textSize="26sp"-->
+            <!--android:textColor="#FFFFFF"-->
+            <!--/>-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/setting_cpu_power_mode_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/setting_language_btn"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:layout_toRightOf="@id/setting_cpu_freq_tv"-->
+            <!--android:textSize="26sp"-->
+            <!--android:textColor="#FFFFFF"-->
+            <!--/>-->
+
+
 
         <LinearLayout
             android:id="@+id/setting_admin_config_lay"

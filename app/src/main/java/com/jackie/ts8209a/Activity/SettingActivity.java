@@ -5,7 +5,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -18,38 +17,27 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.jackie.ts8209a.AppModule.APP;
-import com.jackie.ts8209a.AppModule.Network.EthernetManager;
 import com.jackie.ts8209a.AppModule.Network.NetDevManager;
 import com.jackie.ts8209a.AppModule.Network.WifiManager;
 import com.jackie.ts8209a.AppModule.Tools.Cmd;
-import com.jackie.ts8209a.AppModule.Network.NetworkManager;
-import com.jackie.ts8209a.AppModule.Basics.UserInfoManager;
-import com.jackie.ts8209a.AppModule.Tools.Ordinary;
+import com.jackie.ts8209a.AppModule.Tools.General;
 import com.jackie.ts8209a.CustomView.Dialog.IpConfig;
 import com.jackie.ts8209a.R;
 
-import java.util.Timer;
-
-import static com.jackie.ts8209a.AppModule.Network.NetworkManager.DEV_EN;
 import static com.jackie.ts8209a.AppModule.Network.NetworkManager.DEV_NAME;
 import static com.jackie.ts8209a.AppModule.Network.NetworkManager.GATEWAY;
 import static com.jackie.ts8209a.AppModule.Network.NetworkManager.IPADDR;
 import static com.jackie.ts8209a.AppModule.Network.NetworkManager.MAC;
 import static com.jackie.ts8209a.AppModule.Network.NetworkManager.NETMASK;
-import static com.jackie.ts8209a.AppModule.Network.NetworkManager.NETWORK_EN;
 import static com.jackie.ts8209a.AppModule.Network.NetworkManager.RSSI;
 import static com.jackie.ts8209a.AppModule.Network.NetworkManager.SSID;
-import static com.jackie.ts8209a.AppModule.Tools.Ordinary.addrIntToStr;
+import static com.jackie.ts8209a.AppModule.Tools.General.addrIntToStr;
 
 /**
  * Created by kuangyt on 2018/8/21.
  */
 
 public class SettingActivity extends AppActivity implements RadioGroup.OnCheckedChangeListener,View.OnClickListener {
-
-    private NetworkManager networkManager;
-    private NetDevManager.NetDevInfo netDevInfo;
-    private UserInfoManager userInfo;
 
     private final int[] layItemId = {R.id.setting_item_network_lay,R.id.setting_item_light_lay,R.id.setting_item_app_config_lay};
     private RelativeLayout[] layItem = new RelativeLayout[layItemId.length];
@@ -87,6 +75,12 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
     private Button btnAppUpdating;
     private LinearLayout layAdminMode;
 
+    //save power
+//    private Button btnSavePower;
+//    private Button btnNormalPower;
+//    private TextView tvCpuFreq;
+//    private TextView tvCpuPowerMode;
+
 //    private Timer wifiUpdateTime;
 
     private int location = 0;
@@ -95,10 +89,6 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-
-        networkManager = NetworkManager.getNetworkManager();
-        netDevInfo = networkManager.getNetDevInfo();
-        userInfo = UserInfoManager.getUserInfoManager();
 
         //页面选项
         for(int i=0;i<layItemId.length;i++){
@@ -141,6 +131,12 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
         btnSwitchDevMode = (Button)findViewById(R.id.setting_switch_dev_mode_btn);
         btnAppUpdating = (Button)findViewById(R.id.setting_app_updating_btn);
 
+
+        //save power
+//        btnSavePower = (Button)findViewById(R.id.setting_cpu_savepower_btn);
+//        btnNormalPower = (Button)findViewById(R.id.setting_cpu_normalpower_btn);
+//        tvCpuFreq = (TextView)findViewById(R.id.setting_cpu_freq_tv);
+//        tvCpuPowerMode = (TextView)findViewById(R.id.setting_cpu_power_mode_tv);
     }
 
     @Override
@@ -200,6 +196,9 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+
+//        btnSavePower.setOnClickListener(this);
+//        btnNormalPower.setOnClickListener(this);
     }
 
     @Override
@@ -220,7 +219,7 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                     @Override
                     public void ipConfigConfirm(IpConfig.ipConfigPara para) {
                         tvDevId.setText(String.valueOf(para.devId));
-                        tvServIp.setText(Ordinary.addrIntToStr(para.servIP));
+                        tvServIp.setText(General.addrIntToStr(para.servIP));
                         tvServPort.setText(String.valueOf(para.servPort));
 
                         userInfo.setServIp(para.servIP);
@@ -256,9 +255,9 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                         if (para.dhcp) {
                             networkManager.setDhcpEn();
 
-                            tvLocalIp.setText(Ordinary.addrIntToStr(netDevInfo.getIp()));
-                            tvGatewey.setText(Ordinary.addrIntToStr(netDevInfo.getGw()));
-                            tvNetmask.setText(Ordinary.addrIntToStr(netDevInfo.getMask()));
+                            tvLocalIp.setText(General.addrIntToStr(netDevInfo.getIp()));
+                            tvGatewey.setText(General.addrIntToStr(netDevInfo.getGw()));
+                            tvNetmask.setText(General.addrIntToStr(netDevInfo.getMask()));
                         } else {
                             networkManager.setNetworkInfo(para.localIP,para.mask,para.gateway);
 
@@ -266,9 +265,9 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                             userInfo.setGateway(para.gateway);
                             userInfo.setMask(para.mask);
 
-                            tvLocalIp.setText(Ordinary.addrIntToStr(para.localIP));
-                            tvGatewey.setText(Ordinary.addrIntToStr(para.gateway));
-                            tvNetmask.setText(Ordinary.addrIntToStr(para.mask));
+                            tvLocalIp.setText(General.addrIntToStr(para.localIP));
+                            tvGatewey.setText(General.addrIntToStr(para.gateway));
+                            tvNetmask.setText(General.addrIntToStr(para.mask));
                         }
                         networkManager.resetNetwork();
                     }
@@ -328,9 +327,13 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                 tvSsid.setText(bundle.getString(SSID));
                 tvMac.setText(bundle.getString(MAC));
             }
-            tvLocalIp.setText(Ordinary.addrIntToStr(bundle.getIntArray(IPADDR)));
-            tvGatewey.setText(Ordinary.addrIntToStr(bundle.getIntArray(GATEWAY)));
-            tvNetmask.setText(Ordinary.addrIntToStr(bundle.getIntArray(NETMASK)));
+            tvLocalIp.setText(General.addrIntToStr(bundle.getIntArray(IPADDR)));
+            tvGatewey.setText(General.addrIntToStr(bundle.getIntArray(GATEWAY)));
+            tvNetmask.setText(General.addrIntToStr(bundle.getIntArray(NETMASK)));
+        }else if(intent.getAction().equals(APP.ACTION_POWER_INFO_UPDATE)){
+            Bundle bundle = intent.getBundleExtra("BUNDLE");
+//            tvCpuPowerMode.setText(bundle.getBoolean(PowerManager.SAVE_POWER) ? "savepower" : "normalpower");
+//            tvCpuFreq.setText(bundle.getString(PowerManager.CPU_FREQ));
         }
     }
 
@@ -347,7 +350,6 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
 
     private void setSysBrightness(final int brightness) {
         Cmd.execCmd("settings put system screen_brightness " + brightness);
-
     }
 
     private class lightSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
@@ -366,7 +368,7 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
 
         @Override
         public void onStopTrackingTouch(SeekBar bar) {
-			Log.d(TAG,"onStop"+bar.toString());
+//			Log.d(TAG,"onStop"+bar.toString());
             userInfo.setBrightness(num);
             setSysBrightness(num);
         }
@@ -417,7 +419,8 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
 
     }
 
-//    private class setLanguageButtonOnClickListener implements View.OnClickListener {
+
+    //    private class setLanguageButtonOnClickListener implements View.OnClickListener {
 //        private final String[] langStr = { "简体中文", "English", "繁體中文" };
 //
 //        @Override

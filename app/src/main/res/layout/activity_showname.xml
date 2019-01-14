@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.jackie.ts8209a.Activity.ShowNameActivity"
     style="@style/activity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="10dp"
-        android:layout_y="200dp"
-        android:text="姓名"
-        android:textSize="50sp"
-        android:textColor="#FFFFFF"/>
+    <AbsoluteLayout
+        android:id="@+id/showname_background_lay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-</AbsoluteLayout>
+        <Button
+            android:id="@+id/showname_exit_btn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#00FFFFFF"/>
+
+        <ImageView
+            android:id="@+id/showname_background_iv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/app_name" />
+
+        <TextView
+            android:id="@+id/showname_company_tv"
+            style="@style/nameplate_view_text"/>
+
+        <TextView
+            android:id="@+id/showname_person_tv"
+            style="@style/nameplate_view_text"/>
+
+        <TextView
+            android:id="@+id/showname_position_tv"
+            style="@style/nameplate_view_text"/>
+    </AbsoluteLayout>
+
+    <include layout="@layout/inc_return_button" />
+    <include layout="@layout/inc_status_bar"/>
+    <include layout="@layout/inc_prompt_box" />
+
+</RelativeLayout>

@@ -62,12 +62,27 @@
         android:background="@drawable/btn_call_service"
         android:text="@string/call_services"/>
 
-    <!--<Button-->
-        <!--android:id="@+id/main_show_name_btn"-->
-        <!--style="@style/menu_button"-->
-        <!--android:layout_marginLeft="422dp"-->
-        <!--android:layout_marginTop="78dp"-->
-        <!--android:text="铭牌显示"/>-->
+    <ImageButton
+        android:id="@+id/main_show_name_ibtn"
+        android:layout_width="160dp"
+        android:layout_height="38dp"
+        android:layout_marginLeft="844dp"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/ico_mpkj_n"
+        android:paddingRight="120dp"
+        android:background="@drawable/btn_edit_save"
+        android:contentDescription="@string/app_name"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:layout_marginRight="16dp"
+        android:layout_alignRight="@id/main_show_name_ibtn"
+        android:layout_alignTop="@id/main_show_name_ibtn"
+        android:gravity="center"
+        android:text="@string/show_nameplate"
+        android:textColor="#CCCCCC"
+        android:textSize="24sp"/>
 
     <Button
         android:id="@+id/main_sms_btn"
@@ -93,6 +108,7 @@
         android:background="@drawable/btn_setting"
         android:text="@string/sys_setting"/>
 
+    <include layout="@layout/inc_return_button" />
     <include layout="@layout/inc_status_bar"/>
     <include layout="@layout/inc_prompt_box" />
 

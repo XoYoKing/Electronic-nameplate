@@ -1,4 +1,4 @@
-package com.jackie.ts8209a.RemoteServer;
+package com.jackie.ts8209a.Servers;
 
 import android.app.Service;
 import android.content.Intent;

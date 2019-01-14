@@ -217,7 +217,7 @@ public class WifiManager extends NetDevManager{
 //                    Log.d(TAG,DEV_NAME+" network connected");
                     osWifiManager.saveConfiguration();
                     netDevInfo.netEn = true;
-//                    startGetState();//启动wifi信息更新定时器
+//                    startGetState();//启动wifi信息更新定时器   `
                     stopAutoConnect(); //关闭wifi自动连接定时器
                 } else if(state == NetworkInfo.State.DISCONNECTED) {
 //                    Log.d(TAG,DEV_NAME+" network disconnected");

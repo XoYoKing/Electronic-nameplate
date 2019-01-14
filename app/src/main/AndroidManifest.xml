@@ -52,7 +52,7 @@
 
         <!--//电池信息系统广播-->
         <!--<receiver-->
-            <!--android:name=".AppModule.Basics.BatteryManager$betteryStatusReceiver"-->
+            <!--android:name=".AppModule.Basics.PowerManager$betteryStatusReceiver"-->
             <!--android:enabled="true"-->
             <!--android:exported="true">-->
             <!--<intent-filter>-->
@@ -71,8 +71,9 @@
             <!--</intent-filter>-->
 
         <!--</receiver>-->
-        <service android:name=".RemoteServer.Network"
+        <service android:name=".Servers.Network"
                 android:process=":network"/>
+        <service android:name=".Servers.GlobalTouch" />
 
     </application>
 
