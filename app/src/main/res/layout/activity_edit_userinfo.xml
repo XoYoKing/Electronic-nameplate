@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/LocalNameActivity"
     style="@style/activity"
-    tools:context="com.jackie.ts8209a.Activity.EditUserInfoActivity">
+    tools:context="com.itc.ts8209a.activity.EditUserInfoActivity">
 
     <!-- 姓名、公司、职位输入区域 -->
 

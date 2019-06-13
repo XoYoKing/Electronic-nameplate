@@ -20,7 +20,7 @@
 //#include "spidev.h"
 //#include "com_example_tcp_spiDevice.h"
 //#include "ra8876l.h"
-#include "com_jackie_ts8209a_Drive_RA8876L.h"
+#include "com_itc_ts8209a_drive_Ra8876l.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -1780,7 +1780,7 @@ static void SPI_Master_FIFO_Write(const uint8_t *data, uint32_t len,
  * Method:    init
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_init
+JNIEXPORT void JNICALL Java_com_itc_ts8209a_drive_Ra8876l_init
   (JNIEnv *env, jclass obj, jint spd)
 {
 	if(dev >= 0){
@@ -1877,7 +1877,7 @@ JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_init
  */
 
 
-JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_sendData
+JNIEXPORT void JNICALL Java_com_itc_ts8209a_drive_Ra8876l_sendData
 (JNIEnv *env, jclass obj, jshort x, jshort y,jshort w, jshort h, jbyteArray data, jint len){
 	uint32_t i;
 	//jbyte* bBuffer = (*env)->GetByteArrayElements(env,data,0);
@@ -1894,7 +1894,7 @@ JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_sendData
  * Method:    handShake
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_handShake
+JNIEXPORT void JNICALL Java_com_itc_ts8209a_drive_Ra8876l_handShake
   (JNIEnv *env, jclass obj){
 	  LOGI("TS-8209A Handshake to drive");
 }
@@ -1904,7 +1904,7 @@ JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_handShake
  * Method:    displayOn
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_displayOn
+JNIEXPORT void JNICALL Java_com_itc_ts8209a_drive_Ra8876l_displayOn
 (JNIEnv *env, jclass obj) {
 Display_ON();
 }
@@ -1914,7 +1914,7 @@ Display_ON();
  * Method:    displayOff
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_jackie_ts8209a_Drive_RA8876L_displayOff
+JNIEXPORT void JNICALL Java_com_itc_ts8209a_drive_Ra8876l_displayOff
 (JNIEnv *env, jclass obj) {
 Display_OFF();
 }

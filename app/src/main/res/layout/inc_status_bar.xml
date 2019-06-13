@@ -24,27 +24,36 @@
         <ImageView
             android:id="@+id/stabar_network_iv"
             style="@style/status_icon_view"
-            android:src="@drawable/ico_fwq_n"/>
+            android:src="@drawable/ico_fwq_n"
+            android:contentDescription="@string/app_name"/>
 
         <ImageView
             android:id="@+id/stabar_ether_net_iv"
             style="@style/status_icon_view"
-            android:src="@drawable/ico_wx_n"/>
+            android:src="@drawable/ico_wx_n"
+            android:contentDescription="@string/app_name"/>
 
         <ImageView
             android:id="@+id/stabar_wifi_iv"
             style="@style/status_icon_view"
-            android:src="@drawable/iv_wifi_level_list"/>
+            android:src="@drawable/iv_wifi_level_list"
+            android:contentDescription="@string/app_name" />
 
         <ImageView
             android:id="@+id/stabar_batlevel_iv"
             style="@style/imageview"
-            android:src="@drawable/iv_battery_level_list"/>
+            android:src="@drawable/iv_battery_level_list"
+            android:contentDescription="@string/app_name"/>
+
+        <ImageView
+            android:id="@+id/stabar_poe_power_iv"
+            style="@style/imageview"
+            android:src="@drawable/poe"
+            android:contentDescription="@string/app_name"/>
 
         <TextView
             android:id="@+id/stabar_batlevel_tv"
-            style="@style/status_bar"
-            android:text="100%"/>
+            style="@style/status_bar"/>
 
 
     </LinearLayout>

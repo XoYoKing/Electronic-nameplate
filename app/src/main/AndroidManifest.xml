@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jackie.ts8209a">
+    package="com.itc.ts8209a">
 
     //不锁定屏幕
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -31,9 +31,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        android:name="com.jackie.ts8209a.AppModule.APP">
+        android:name="com.itc.ts8209a.app.MyApplication">
 
-        <activity android:name=".Activity.MainActivity">
+        <activity android:name="com.itc.ts8209a.activity.MainActivity" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,12 +43,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Activity.CallServiceActivity" />
-        <activity android:name=".Activity.EditUserInfoActivity" android:windowSoftInputMode="adjustUnspecified|stateHidden"/>
-        <activity android:name=".Activity.MeetingInfoActivity"/>
-        <activity android:name=".Activity.SettingActivity"/>
-        <activity android:name=".Activity.ShowNameActivity"/>
-        <activity android:name=".Activity.SmsActivity" android:windowSoftInputMode="adjustUnspecified|stateHidden"/>
+        <activity android:name="com.itc.ts8209a.activity.CallServiceActivity" android:launchMode="singleTask" />
+        <activity android:name="com.itc.ts8209a.activity.EditUserInfoActivity" android:windowSoftInputMode="adjustUnspecified|stateHidden"/>
+        <activity android:name="com.itc.ts8209a.activity.MeetingInfoActivity" android:launchMode="singleTask"/>
+        <activity android:name="com.itc.ts8209a.activity.SettingActivity" android:launchMode="singleTask"/>
+        <activity android:name="com.itc.ts8209a.activity.ShowNameActivity" android:launchMode="singleTask"/>
+        <activity android:name="com.itc.ts8209a.activity.SmsActivity" android:launchMode="singleTask" android:windowSoftInputMode="adjustUnspecified|stateHidden"/>
 
         <!--//电池信息系统广播-->
         <!--<receiver-->
@@ -63,18 +63,16 @@
         <!--</receiver>-->
 
         <!--<receiver-->
-            <!--android:infoName=".Application.WifiManager$wifiStatusReceiver"-->
+            <!--android:meetName=".Application.WifiManager$wifiStatusReceiver"-->
             <!--android:enabled="true"-->
             <!--android:exported="true">-->
             <!--<intent-filter>-->
-                <!--<action android:infoName=""-->
+                <!--<action android:meetName=""-->
             <!--</intent-filter>-->
 
         <!--</receiver>-->
-        <service android:name=".Servers.Network"
+        <service android:name="com.itc.ts8209a.server.Network"
                 android:process=":network"/>
-        <service android:name=".Servers.GlobalTouch" />
 
     </application>
-
 </manifest>

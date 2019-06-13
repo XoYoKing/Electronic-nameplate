@@ -5,17 +5,17 @@ android {
     compileSdkVersion 19
     buildToolsVersion '28.0.2'
     defaultConfig {
-        applicationId "com.jackie.ts8209a"
+        applicationId "com.itc.ts8209a"
         minSdkVersion 19
         targetSdkVersion 19
         versionCode 1
-        versionName "20190114"
+        versionName "20190613"
 
 //            ndk {
-//            moduleName "serialport"//指定生成的so文件名
-//            abiFilters "armeabi-v7a"//cpu的类型A
-//            ldLibs "-llog"
-//        }
+//                moduleName "serialport"//指定生成的so文件名
+//                abiFilters "armeabi-v7a"//cpu的类型A
+//                ldLibs "-llog"
+//            }
 
     }
 
@@ -24,7 +24,7 @@ android {
 //            path "src/main/jni/Android.mk"
 //        }
 //    }
-//
+
 //    buildTypes {
 //        release {
 //            minifyEnabled false

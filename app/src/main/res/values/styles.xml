@@ -1,4 +1,4 @@
-<resources xmlns:app="http://schemas.android.com/apk/res-auto">
+<resources xmlns:myApplication="http://schemas.android.com/apk/res-auto">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar">
@@ -37,8 +37,14 @@
         <item name="android:layout_height">202dp</item>
         <item name="android:layout_marginTop">200dp</item>
     </style>
+    <style name="setting_network_para_lay" parent="layout">
+        <item name="android:layout_width">366dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
 
-    <!--TextView Style-->
+
     <style name="text">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -113,22 +119,34 @@
         <item name="android:layout_marginBottom">5dp</item>
     </style>
     <style name="setting_item_text" parent="text">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">0dp</item>
-        <item name="android:layout_weight">1</item>
         <item name="android:textColor">#CCCCCC</item>
         <item name="android:textSize">26sp</item>
         <item name="android:gravity">right</item>
     </style>
-    <style name="setting_item_num_text" parent="setting_item_text">
+    <style name="setting_item_text_linear" parent="setting_item_text">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+    <style name="setting_item_title_linear" parent="setting_item_text_linear">
+        <item name="android:gravity">right</item>
+    </style>
+    <style name="setting_item_para_linear" parent="setting_item_text_linear">
         <item name="android:gravity">left</item>
     </style>
-    <style name="setting_network_item_text" parent="setting_item_text">
+    <style name="setting_network_text_linear" parent="setting_item_text_linear">
         <item name="android:textSize">24sp</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginLeft">10dp</item>
     </style>
-    <style name="setting_network_item_num_text" parent="setting_network_item_text">
+    <style name="setting_network_title_linear" parent="setting_network_text_linear">
+        <item name="android:gravity">right</item>
+    </style>
+    <style name="setting_network_para_linear" parent="setting_network_text_linear">
         <item name="android:gravity">left</item>
     </style>
+
     <style name="meetinginfo_content_title" parent="text">
         <item name="android:layout_width">120dp</item>
         <item name="android:textColor">#DDDDDD</item>
@@ -150,10 +168,10 @@
         <item name="android:shadowRadius">1</item>
     </style>
     <style name="nameplate_dialog_preview_movetext" parent="nameplate_dialog_preview_text">
-        <item name="com.jackie.ts8209a:xMax">768</item>
-        <item name="com.jackie.ts8209a:yMax">450</item>
-        <item name="com.jackie.ts8209a:xMin">0</item>
-        <item name="com.jackie.ts8209a:yMin">0</item>
+        <item name="com.itc.ts8209a:xMax">768</item>
+        <item name="com.itc.ts8209a:yMax">450</item>
+        <item name="com.itc.ts8209a:xMin">0</item>
+        <item name="com.itc.ts8209a:yMin">0</item>
     </style>
     <style name="nameplate_view_text" parent="nameplate_dialog_preview_text">
         <item name="android:shadowRadius">2</item>
@@ -223,12 +241,23 @@
         <item name="android:layout_margin">8dp</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
+    <style name="setting_network_btn" parent="edit_info_button">
+        <item name="android:layout_width">234dp</item>
+    </style>
     <style name="nameplate_preview_button" parent="edit_info_button">
         <item name="android:layout_height">46dp</item>
         <item name="android:textSize">22sp</item>
         <item name="android:text"></item>
         <item name="android:layout_marginTop">15dp</item>
         <item name="android:padding">5dp</item>
+    </style>
+    <style name="password_input_btn" parent="button">
+        <item name="android:layout_width">80dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:layout_margin">12dp</item>
+        <item name="android:background">@drawable/btn_password_number</item>
+        <item name="android:textColor">#AAFFFFFF</item>
+        <item name="android:textSize">25sp</item>
     </style>
 
     <!--ImageView Styles-->
@@ -265,7 +294,7 @@
         <item name="android:layout_marginLeft">78dp</item>
         <item name="android:clickable">true</item>
         <item name="android:singleLine">true</item>
-        <item name="android:maxLength">10</item>
+        <item name="android:maxLength">20</item>
         <item name="android:imeOptions">actionDone</item>
     </style>
     <style name="ip_config_dialog_edittext" parent="edittext">
@@ -273,7 +302,7 @@
         <item name="android:textColor">#FFFEFE</item>
         <item name="android:gravity">center</item>
         <item name="android:textSize">20sp</item>
-        <item name="android:inputType">numberDecimal</item>
+        <item name="android:inputType">number</item>
         <item name="android:maxLength">3</item>
         <item name="android:layout_width">80dp</item>
         <item name="android:focusable">true</item>

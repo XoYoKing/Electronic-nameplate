@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.jackie.ts8209a.Activity.SmsActivity"
+    tools:context="com.itc.ts8209a.activity.SmsActivity"
     style="@style/activity">
 
     <TextView
@@ -10,7 +10,7 @@
         />
 
     <ImageButton
-        android:id="@+id/sms_receive_content_btn"
+        android:id="@+id/sms_msg_record_btn"
         android:layout_width="140dp"
         android:layout_height="38dp"
         android:layout_marginLeft="876dp"
@@ -22,12 +22,12 @@
         android:contentDescription="@string/app_name"/>
 
     <TextView
-        android:id="@+id/sms_receive_content_tv"
+        android:id="@+id/sms_msg_record_tv"
         android:layout_width="wrap_content"
         android:layout_height="38dp"
         android:layout_marginRight="10dp"
-        android:layout_alignRight="@id/sms_receive_content_btn"
-        android:layout_alignTop="@id/sms_receive_content_btn"
+        android:layout_alignRight="@id/sms_msg_record_btn"
+        android:layout_alignTop="@id/sms_msg_record_btn"
         android:gravity="center"
         android:textColor="#CCCCCC"
         android:textSize="20sp"
@@ -104,7 +104,7 @@
             android:background="@drawable/bg_1e1b1b_s"
             android:gravity="top|left"
             android:hint="@string/please_input_sms_content"
-            android:maxLength="30"
+            android:maxLength="80"
             android:padding="10dp"
             android:textColor="#FFFFFF"
             android:textSize="22sp" />

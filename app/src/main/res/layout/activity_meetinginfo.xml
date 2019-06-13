@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/activity"
-    tools:context="com.jackie.ts8209a.Activity.MeetingInfoActivity">
+    tools:context="com.itc.ts8209a.activity.MeetingInfoActivity">
 
     <TextView
         style="@style/page_title"

@@ -61,7 +61,7 @@
     <string name="wifi_switch">WIFI开关</string>
     <string name="wifi_select">选择WIFI</string>
     <string name="wifi_status">Wifi状态</string>
-    <string name="wifi_disconnect_and_unsave">断开当前网络并取消保存</string>
+    <string name="disconnect_wifi">断开无线网络</string>
     <string name="sys_version">系统版本</string>
     <string name="app_version">软件版本</string>
     <string name="sys_language">系统语言</string>
@@ -81,6 +81,7 @@
     <string name="please_select_the_addressee">请选择收件人</string>
     <string name="text_messaging_cannot_be_empty">短信发送内容不能为空</string>
     <string name="text_messaging_success">短信发送成功</string>
+    <string name="server_dose_not_connect">未连接服务器</string>
     <string name="select_all">全选</string>
     <string name="info_abstract">摘要:</string>
     <string name="click_for_details">点击查看详情</string>
@@ -95,5 +96,15 @@
     <string name="color_picker_title">点击色环选择颜色;下方选择色调;点击中心确定选择</string>
     <string name="set_font_size">字体大小设置</string>
     <string name="show_nameplate">显示铭牌</string>
+    <string name="admin_password">管理员密码</string>
+    <string name="delete">删 除</string>
+
+    <string name="server_para">服务器参数</string>
+    <string name="dim_screen_time">屏幕休眠时间</string>
+    <string name="second">秒钟</string>
+    <string name="minute">分钟</string>
+    <string name="hour">小时</string>
+    <string name="never">永不</string>
+
 
 </resources>

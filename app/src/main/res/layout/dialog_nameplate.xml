@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="1024dp"
-    android:layout_height="600dp">
+    android:layout_height="600dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:com.itc.ts8209a="http://schemas.android.com/tools">
 
     <RelativeLayout
         android:id="@+id/nameplate_preview_lay"
@@ -29,15 +31,15 @@
                 android:layout_height="match_parent"
                 android:background="#00FFFFFF"/>
 
-            <com.jackie.ts8209a.CustomView.View.MoveTextView
+            <com.itc.ts8209a.activity.view.MoveTextView
                 android:id="@+id/nameplate_preview_comp_tv"
                 style="@style/nameplate_dialog_preview_movetext"/>
 
-            <com.jackie.ts8209a.CustomView.View.MoveTextView
+            <com.itc.ts8209a.activity.view.MoveTextView
                 android:id="@+id/nameplate_preview_user_tv"
                 style="@style/nameplate_dialog_preview_movetext"/>
 
-            <com.jackie.ts8209a.CustomView.View.MoveTextView
+            <com.itc.ts8209a.activity.view.MoveTextView
                 android:id="@+id/nameplate_preview_pos_tv"
                 style="@style/nameplate_dialog_preview_movetext"/>
         </AbsoluteLayout>

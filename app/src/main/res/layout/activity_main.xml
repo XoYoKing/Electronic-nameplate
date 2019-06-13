@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.jackie.ts8209a.Activity.MainActivity"
+    tools:context="com.itc.ts8209a.activity.MainActivity"
     style="@style/activity">
 
     <TextView
-        android:id="@+id/main_page_title"
+        android:id="@+id/main_welcome_word_title"
         style="@style/page_title"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="30dp"
-        android:text="@string/welcome_title"
-        />
+        android:text="@string/welcome_title"/>
 
     <TextView
-        android:id="@+id/main_welcome_content"
+        android:id="@+id/main_welcome_word_tv"
         style="@style/page_title"
-        android:layout_toRightOf="@id/main_page_title"
-        android:layout_marginLeft="10dp"
-        android:text=""
-        />
+        android:layout_toRightOf="@id/main_welcome_word_title"
+        android:layout_marginLeft="10dp"/>
 
     <Button
         android:id="@+id/main_meeting_info_btn"
