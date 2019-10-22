@@ -7,6 +7,7 @@ import android.widget.Button;
 
 import com.itc.ts8209a.activity.view.CustomDialog;
 import com.itc.ts8209a.R;
+import com.itc.ts8209a.server.Network;
 
 /**
  * Created by kuangyt on 2018/8/21.
@@ -88,8 +89,10 @@ public class CallServiceActivity extends AppActivity {
                                 break;
                             case R.id.custom_dialog_second_btn:
                                 networkManager.callService((String) button.getText());
-//						Log.d("Call Service", "Call: " + button.getText());
-                                PromptBox.BuildPrompt("CALLING_SERVICE").Text("正在为您呼叫服务").Time(1).TimeOut(2000);
+                                if (networkManager.getNetworkStatus() != Network.STA_CONNECTED)
+                                    PromptBox.BuildPrompt("SERVER_NOT_CONNECTED").Text(getString(R.string.server_dose_not_connect)).Time(1).TimeOut(3000);
+                                else
+                                    PromptBox.BuildPrompt("CALLING_SERVICE").Text("正在为您呼叫服务").Time(1).TimeOut(2000);
                                 if (askDialog != null) {
                                     askDialog.dismiss();
                                     askDialog = null;

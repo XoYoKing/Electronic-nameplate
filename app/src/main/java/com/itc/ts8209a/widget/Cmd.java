@@ -7,6 +7,7 @@ package com.itc.ts8209a.widget;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,6 +18,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * Android运行linux命令
  */
+
 public class Cmd {
     private static final String TAG = "Cmd";
     private static Deque<CmdBundle> cmdQueue = new LinkedBlockingDeque<CmdBundle>();
@@ -44,12 +46,13 @@ public class Cmd {
         cmdBundle.handler = handler;
         cmdQueue.add(cmdBundle);
 
-        new Thread(new sendCmd()).start();
+        if(!sendCmd.running)
+            new Thread(new sendCmd()).start();
     }
 
     //发送命令
     private static class sendCmd implements Runnable {
-        private boolean sending = false;
+        private static boolean running = false;
         private CmdBundle cmdBundle = null;
         private String result = "";
         private int value;
@@ -58,70 +61,75 @@ public class Cmd {
 
         @Override
         public void run() {
-            if (sending) return;
+            running = true;
+//            Log.d(TAG,"sendCmd Runnable start!!");
 
-            sending = true;
             synchronized (this) {
-                while (cmdQueue.size() > 0) {
+                while(true) {
+                    while (cmdQueue.size() > 0) {
 //                Log.d(TAG,"size:"+cmdQueue.size());
-                    cmdBundle = cmdQueue.poll();
-                    result = "";
-                    value = -1;
-                    dos = null;
-                    dis = null;
+                        cmdBundle = cmdQueue.poll();
+                        result = "";
+                        value = -1;
+                        dos = null;
+                        dis = null;
 
-                    try {
-                        Process p = Runtime.getRuntime().exec("su");// 经过Root处理的android系统即有su命令
-                        dos = new DataOutputStream(p.getOutputStream());
-                        dis = new DataInputStream(p.getInputStream());
+                        try {
+                            Process p = Runtime.getRuntime().exec("su");// 经过Root处理的android系统即有su命令
+                            dos = new DataOutputStream(p.getOutputStream());
+                            dis = new DataInputStream(p.getInputStream());
 
-//                    Log.i(TAG, cmdBundle.cmd);
-                        dos.writeBytes(cmdBundle.cmd + "\n");
-                        dos.flush();
-                        dos.writeBytes("exit\n");
-                        dos.flush();
-                        String line = null;
-                        while ((line = dis.readLine()) != null) {
-//                Log.d("result", line);
-                            result += line;
-                        }
-                        p.waitFor();
-                        value = p.exitValue();
-
-                        Message msg = Message.obtain();
-                        Bundle bundle = new Bundle();
-                        bundle.putString(KEY_CMD,cmdBundle.cmd);
-                        bundle.putString(KEY_RES,result);
-                        bundle.putInt(KEY_VALUE,value);
-                        msg.obj = bundle;
-                        if (cmdBundle.listener != null){
-                            cmdBundle.listener.onResult(cmdBundle.cmd,result,value);
-                        }
-                        else if(cmdBundle.handler != null){
-                            cmdBundle.handler.sendMessage(msg);
-                        }
-                    } catch (Exception e) {
-//                        Log.e(TAG,e+"\nby cmd: "+cmdBundle.cmd);
-                        e.printStackTrace();
-                    } finally {
-                        if (dos != null) {
-                            try {
-                                dos.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
+//                            Log.i(TAG, cmdBundle.cmd);
+                            dos.writeBytes(cmdBundle.cmd + "\n");
+                            dos.flush();
+                            dos.writeBytes("exit\n");
+                            dos.flush();
+                            String line = null;
+                            while ((line = dis.readLine()) != null) {
+                                result += line;
                             }
-                        }
-                        if (dis != null) {
-                            try {
-                                dis.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            p.waitFor();
+                            value = p.exitValue();
+//                            Log.d(TAG,"result :"+ result);
+                            if (cmdBundle.listener != null) {
+                                cmdBundle.listener.onResult(cmdBundle.cmd, result, value);
+                            } else if (cmdBundle.handler != null) {
+                                Message msg = Message.obtain();
+                                Bundle bundle = new Bundle();
+                                bundle.putString(KEY_CMD, cmdBundle.cmd);
+                                bundle.putString(KEY_RES, result);
+                                bundle.putInt(KEY_VALUE, value);
+                                msg.obj = bundle;
+
+                                cmdBundle.handler.sendMessage(msg);
+                            }
+                        } catch (Exception e) {
+//                        Log.e(TAG,e+"\nby cmd: "+cmdBundle.cmd);
+                            e.printStackTrace();
+                        } finally {
+                            if (dos != null) {
+                                try {
+                                    dos.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (dis != null) {
+                                try {
+                                    dis.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-            sending = false;
         }
     }
 

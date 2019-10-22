@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.itc.ts8209a.activity.view.CheckSelectorDialog;
 import com.itc.ts8209a.R;
+import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.module.network.WifiManager;
 import com.itc.ts8209a.server.Network;
 import com.itc.ts8209a.widget.Debug;
@@ -176,6 +177,7 @@ public class SmsActivity extends AppActivity implements TextWatcher{
                 oldSMS.add(sms);
             }
             newSMS.removeAll(newSMS);
+            MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_STABAR);
         }
     }
 
@@ -260,7 +262,7 @@ public class SmsActivity extends AppActivity implements TextWatcher{
 
                     if (id != null) {
                         for (int i = 0; i < id.length; i++) {
-                            Debug.d(TAG, id[i] + " . " + userList.get(id[i]));
+//                            Debug.d(TAG, id[i] + " . " + userList.get(id[i]));
                             networkManager.sendSms(id[i], msgContent);
                         }
                     }

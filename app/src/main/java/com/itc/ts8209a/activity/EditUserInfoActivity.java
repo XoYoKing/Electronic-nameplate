@@ -223,7 +223,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnTouchLis
                 bgStylePopShow();
                 break;
             case R.id.edit_font_size_btn:
-                Debug.d(TAG,"Font size btn");
+//                Debug.d(TAG,"Font size btn");
                 btn = (Button) view;
                 fontSizePicker(btn);
                 break;

@@ -36,7 +36,7 @@ public class EthernetManager extends NetDevManager{
     @Override
     protected void init(MyApplication myApplication) {
         super.init(myApplication);
-        Debug.d(TAG,"Ethernet Initialization");
+//        Debug.d(TAG,"Ethernet Initialization");
 //        netDevInfo = new NetDevInfo();
         netDevInfo.name = DEV_NAME;
         netDevInfo.type = TYPE_WIER_NET;

@@ -67,6 +67,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
 
+
     /**
      * 当UncaughtException发生时会转入该函数来处理
      */
@@ -77,7 +78,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             mDefaultHandler.uncaughtException(thread, ex);
         } else {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 Log.e(TAG, "error : ", e);
             }
@@ -98,19 +99,19 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             return false;
         }
         //使用Toast来显示异常信息
-//        new Thread() {
-//            @Override
-//            public void run() {
-//                Looper.prepare();
-//                Toast.makeText(mContext, "很抱歉,程序出现异常,即将退出.", Toast.LENGTH_LONG).show();
-//                Looper.loop();
-//            }
-//        }.start();
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                Toast.makeText(mContext, "很抱歉,程序出现异常,将自动重启.", Toast.LENGTH_LONG).show();
+                Looper.loop();
+            }
+        }.start();
         //收集设备参数信息
         collectDeviceInfo(mContext);
         //保存日志文件
         saveCrashInfo2File(ex);
-        return false;
+        return true;
     }
 
     /**

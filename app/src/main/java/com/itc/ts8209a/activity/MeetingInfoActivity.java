@@ -9,6 +9,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.itc.ts8209a.R;
+import com.itc.ts8209a.app.MyApplication;
 
 /**
  * Created by kuangyt on 2018/8/21.
@@ -57,14 +58,14 @@ public class MeetingInfoActivity extends AppActivity implements RadioGroup.OnChe
     protected void uiRefresh() {
         super.uiRefresh();
 
-        setMeetInfoContent();
-        setAdminMsg();
-
         meetName = databaseManager.getMeetName();
         meetSlogan = databaseManager.getMeetSlogan();
         meetContent = databaseManager.getMeetContent();
         meetStartTime = databaseManager.getMeetStartTime();
         meetEndTime = databaseManager.getMeetEndTime();
+
+        setMeetInfoContent();
+        setAdminMsg();
     }
 
     @Override
@@ -77,6 +78,8 @@ public class MeetingInfoActivity extends AppActivity implements RadioGroup.OnChe
             case R.id.meetinginfo_page_choice_2_rb:
                 svInfoContent.setVisibility(View.GONE);
                 svAdminMsg.setVisibility(View.VISIBLE);
+                newAdminMsgCount = 0;
+                MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_STABAR);
                 break;
         }
 
@@ -94,7 +97,7 @@ public class MeetingInfoActivity extends AppActivity implements RadioGroup.OnChe
         layAdminMsg.removeAllViews();
         adminMsg = databaseManager.getAdminMsg();
 
-        for (int i = adminMsg.size() - 1; i > 0; i--) {
+        for (int i = adminMsg.size() - 1; i >= 0; i--) {
             String msg = adminMsg.get(i);
 
             LinearLayout layout = new LinearLayout(this);
@@ -123,6 +126,11 @@ public class MeetingInfoActivity extends AppActivity implements RadioGroup.OnChe
             layout.addView(smsContent);
 
             layAdminMsg.addView(layout);
+        }
+
+        if (svAdminMsg.getVisibility() == View.VISIBLE) {
+            newAdminMsgCount = 0;
+            MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_STABAR);
         }
     }
 

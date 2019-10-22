@@ -9,9 +9,16 @@
 
     <TextClock
         style="@style/status_bar"
+        android:id="@+id/stabar_clock_tc"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="15dp"
         android:format24Hour="yyyy-MM-dd  EE  HH:mm"/>
+
+    <TextView
+        android:id="@+id/stabar_prompt_tv"
+        style="@style/status_bar"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"/>
 
     <LinearLayout
         android:layout_width="wrap_content"

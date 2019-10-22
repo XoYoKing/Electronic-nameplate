@@ -4,11 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
-import com.itc.ts8209a.activity.ShowNameActivity;
 import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.module.network.EthernetManager;
 import com.itc.ts8209a.widget.Cmd;
@@ -20,14 +20,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.itc.ts8209a.app.AppConfig.*;
-import static com.itc.ts8209a.app.MyApplication.ACTION_STAR_ACTIVITY;
 import static com.itc.ts8209a.widget.Cmd.KEY_RES;
 
 /**
  * Created by kuangyt on 2018/8/21.
  */
 
-public class PowerManager{
+public class PowerManager {
 
     private static final String TAG = "PowerManager";
 
@@ -44,6 +43,11 @@ public class PowerManager{
 
     private static PowerManager powerManager = new PowerManager();
 
+    private static final int ELECTRIC_QUANTITY_MAX_VOLTAGE = 4000;
+    private static final int ELECTRIC_QUANTITY_MIN_VOLTAGE = 3550;
+    private static final int CHARGING_CORRECTION_VOLTAGE = 350;
+    private static final int BAT_MAX_VOLTAGE = 4180;
+
     private int powMode;
     private int level;
     private int voltage;
@@ -52,40 +56,44 @@ public class PowerManager{
     private boolean savePower = false;
     private String cpuFreq = "";
     private int timeCount;
+    private boolean isGetVoltage = false;
 
-    private PowerManager(){
+    private PowerManager() {
     }
 
     //返回单例
-    public static PowerManager getPowerManager(){
+    public static PowerManager getPowerManager() {
         return powerManager;
     }
 
     //获取电量
-    public int getLevel(){
+    public int getLevel() {
         return level;
     }
 
     //获取电压值
-    public int getVoltage(){
+    public int getVoltage() {
         return voltage;
     }
 
     //获取电池状态
-    public int getStatus(){
+    public int getStatus() {
         return state;
     }
 
     //获取充电状态
-    public boolean getCharge(){
+    public boolean getCharge() {
         return charge;
     }
 
     //获取供电方式
-    public int getPowerMode(){  return powMode;}
+    public int getPowerMode() {
+        return powMode;
+    }
+
 
     //启动定时获取电池电量状态线程
-    public void init(final MyApplication app){
+    public void init(final MyApplication app) {
 
         //暂时没有方法用判断电源输入的方法来确定供电方式，因此只能用判断网络属性来确定供电方式
         Cmd.execCmd("netcfg", new Handler() {
@@ -103,20 +111,21 @@ public class PowerManager{
                     intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
                     intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
                     intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-                    app.registerReceiver(new betteryStatusReceiver(),intentFilter);
+                    app.registerReceiver(new betteryStatusReceiver(), intentFilter);
 
-                    (new Timer()).schedule(new getPowerStatus(),2000, GET_BAT_INFO_TIME);
-                    (new Timer()).schedule(new savePowerTimer(),5000, 1000);
+                    (new Timer()).schedule(new getPowerStatus(), 1000, GET_BAT_INFO_TIME);
+                    (new Timer()).schedule(new savePowerTimer(), 5000, 1000);
                 }
+
                 broadcastPowerInfo();
             }
 
         });
     }
 
-    public void resetSavePowerTime(){
+    public void resetSavePowerTime() {
         timeCount = 0;
-        if(savePower){
+        if (savePower) {
             normalPowerMode();
             savePower = false;
         }
@@ -141,12 +150,16 @@ public class PowerManager{
                 String strLevel = res.substring(res.indexOf("level:"));
                 String strVoltage = res.substring(res.indexOf("voltage:"));
                 String strState = res.substring(res.indexOf("state:"));
-                String strCharge = res.substring(res.indexOf("USB powered:"));
+                String strAcPow = res.substring(res.indexOf("AC powered:"));
+                String strUsbPow = res.substring(res.indexOf("USB powered:"));
+
 
                 strLevel = strLevel.substring(0, strLevel.indexOf("scale"));
                 strVoltage = strVoltage.substring(0, strVoltage.indexOf("current now"));
                 strState = strState.substring(0, strState.indexOf("health"));
-                strCharge = strCharge.substring(0, strCharge.indexOf("Wireless powered"));
+                strAcPow = strAcPow.substring(0, strAcPow.indexOf("USB powered"));
+                strUsbPow = strUsbPow.substring(0, strUsbPow.indexOf("Wireless powered"));
+
 
                 Matcher m1 = Pattern.compile("\\d+").matcher(strLevel);
                 m1.find();
@@ -161,18 +174,31 @@ public class PowerManager{
                 strState = m3.group();
 
 
-                int l = Integer.parseInt(strLevel);
-                int v = Integer.parseInt(strVoltage);
-                int s = Integer.parseInt(strState);
-                boolean c = (strCharge.contains("true"));
+                int vol = Integer.parseInt(strVoltage);
+                int sta = Integer.parseInt(strState);
+                boolean cha = (strUsbPow.contains("true") || strAcPow.contains("true"));
+                int lev = vol == 0 ? 0 : voltageToLevel(vol);
 
-                if (level != l || voltage != v || state != s /* || this.charge != charge*/) {
-                    level = l;
-                    voltage = v;
-                    state = s;
-                    charge = c;
+                Debug.d(TAG, "onResult: vol = " + vol + "  lev = " + lev + " sta = " + sta + "  cha = " + cha);
+
+//                if (voltage != vol || state != sta || charge != cha) {
+//                    level = charge ? (level >= l ? level : level + 1) : (level > l ? level - 1 : level);
+                    if (vol != 0) {
+                        if (!isGetVoltage) {
+                            isGetVoltage = true;
+                            level = lev;
+                        } else {
+                            if (charge)
+                                level = lev > level ? level + 1 : level;
+                            else
+                                level = level > lev ? level - 1 : level;
+                        }
+                    }
+                    voltage = vol;
+                    state = sta;
+                    charge = cha;
                     broadcastPowerInfo();
-                }
+//                }
             }
 
             //从命令返回信息中提取cpu运行状态信息
@@ -190,18 +216,30 @@ public class PowerManager{
         }
     }
 
-    private class savePowerTimer extends TimerTask{
+    private class savePowerTimer extends TimerTask {
 
         @Override
         public void run() {
-            if(!savePower){
-                if(timeCount++ >= ENTER_SAVE_POWER_TIME) {
-                    savePowerMode();
-                    savePower = true;
-                    timeCount = 0;
+            //非充电下
+            if (!charge) {
+                if (!savePower) {
+                    if (timeCount++ >= ENTER_SAVE_POWER_TIME) {
+                        savePowerMode();
+                        savePower = true;
+                        timeCount = 0;
+                    }
+                } else {
+                    if (timeCount++ >= EXIT_SAVE_POWER_TIME) {
+                        normalPowerMode();
+                        savePower = false;
+                        timeCount = 0;
+                    }
                 }
-            }else{
-                if(timeCount++ >= EXIT_SAVE_POWER_TIME) {
+            }
+
+            //当设备处于充电状态
+            else {
+                if (savePower) {
                     normalPowerMode();
                     savePower = false;
                     timeCount = 0;
@@ -209,56 +247,77 @@ public class PowerManager{
             }
         }
     }
+
     //接收系统广播（静态注册），充电状态
-    public class betteryStatusReceiver extends BroadcastReceiver{
+    public class betteryStatusReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-//            Log.d(TAG,action);
             if (action.equals(Intent.ACTION_POWER_CONNECTED)) {
                 charge = true;
             } else if (action.equals(Intent.ACTION_POWER_DISCONNECTED)) {
                 charge = false;
-            }else if(action.equals(Intent.ACTION_BATTERY_CHANGED)){
-                level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL,0);
+            } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+//                level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL,0);
+//                int v = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+                if (!isGetVoltage) {
+                    level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, 0);
+                }
             }
             broadcastPowerInfo();
         }
     }
 
-    private void broadcastPowerInfo(){
+    private void broadcastPowerInfo() {
         Bundle bundle = new Bundle();
-        bundle.putInt(POWER_MODE,powMode);
-        bundle.putInt(BAT_LEVEL,this.level);
-        bundle.putInt(BAT_VOLTAGE,this.voltage);
-        bundle.putInt(BAT_STATE,this.state);
-        bundle.putBoolean(BAT_CHARGE,this.charge);
-        bundle.putBoolean(SAVE_POWER,savePower);
-        bundle.putString(CPU_FREQ,cpuFreq);
-        MyApplication.LocalBroadcast.send(MyApplication.ACTION_POWER_INFO_UPDATE,bundle);
+        bundle.putInt(POWER_MODE, powMode);
+        bundle.putInt(BAT_LEVEL, this.level);
+        bundle.putInt(BAT_VOLTAGE, this.voltage);
+        bundle.putInt(BAT_STATE, this.state);
+        bundle.putBoolean(BAT_CHARGE, this.charge);
+        bundle.putBoolean(SAVE_POWER, savePower);
+        bundle.putString(CPU_FREQ, cpuFreq);
+        MyApplication.LocalBroadcast.send(MyApplication.ACTION_POWER_INFO_UPDATE, bundle);
 
-//        Debug.d(TAG, "Battery: level = " + level + "  voltage = " + voltage + " charge = " + charge + "  cpu_freq = " + cpuFreq);
+        Debug.d(TAG, "PowerInfo Battery: level = " + level + "  voltage = " + voltage + " charge = " + charge + "  cpu_freq = " + cpuFreq);
     }
-//
+
 //    private void broadcastPowerMode(){
 //        Bundle bundle = new Bundle();
 //        bundle.putInt(POWER_MODE,powMode);
 //        MyApplication.LocalBroadcast.send(MyApplication.ACTION_POWER_MODE_UPDATE,bundle);
 //    }
 
-    private void savePowerMode(){
+    private void savePowerMode() {
         String cmd = "echo \"conservative\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
         Cmd.execCmd(cmd);
-//        MyApplication.LocalBroadcast.send(ACTION_STAR_ACTIVITY,ShowNameActivity.class);
         Debug.d(TAG, "savepower mode");
     }
 
-    private void normalPowerMode(){
+    private void normalPowerMode() {
         String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
         Cmd.execCmd(cmd);
         Debug.d(TAG, "normalpower mode");
     }
 
+    private int voltageToLevel(int v) {
+        int level = 0;
+        int correction, max_voltage, min_voltage;
+
+        correction = charge ? CHARGING_CORRECTION_VOLTAGE : 0;
+        max_voltage = ELECTRIC_QUANTITY_MAX_VOLTAGE + correction > BAT_MAX_VOLTAGE ? BAT_MAX_VOLTAGE : ELECTRIC_QUANTITY_MAX_VOLTAGE + correction;
+        min_voltage = ELECTRIC_QUANTITY_MIN_VOLTAGE + correction;
+
+        if (v <= max_voltage && v >= min_voltage) {
+            level = ((v - min_voltage) * 100) / (max_voltage - min_voltage);
+        } else if (v > max_voltage)
+            level = 100;
+
+        else if (v < min_voltage)
+            level = 0;
+
+        return level;
+    }
 }

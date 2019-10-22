@@ -62,7 +62,7 @@ public class Ra8876l {
             imgDataListener.onImgData(imgData);
         }
 
-        Debug.d("setPic","data len="+imgData.length);
+//        Debug.d("setPic","data len="+imgData.length);
 
         setPic(imgData);
 
@@ -184,7 +184,7 @@ public class Ra8876l {
         int width = bmp.getWidth(); // 获取位图的宽
         int height = bmp.getHeight(); // 获取位图的高
 
-        Debug.d("getPixels","w="+width+",h="+height);
+//        Debug.d("getPixels","w="+width+",h="+height);
         pixels = new int[width * height]; // 通过位图的大小创建像素点数组
         imgData = new byte[width * height * 3];
         // byte[] bytePixels = new byte[width * height * 2];

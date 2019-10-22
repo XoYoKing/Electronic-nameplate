@@ -24,6 +24,7 @@ import com.itc.ts8209a.module.power.PowerManager;
 import com.itc.ts8209a.widget.Cmd;
 import com.itc.ts8209a.server.Network;
 import com.itc.ts8209a.widget.Debug;
+import com.itc.ts8209a.widget.General;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,7 +87,8 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
     private Timer sendDevInfoTimer;
     private OnNetworkStatusListener staListener;
     private int networkStatus = Network.STA_DISCONNECTED;
-    private int errCount = 0;
+    private int errCount = 0,netNoneCount = 0;
+    private boolean isTimeUpdate = false;
 
     private NetworkManager() {
     }
@@ -118,6 +120,10 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                 }
             }
         });
+        startNetworkService();
+    }
+
+    public void startNetworkService(){
         app.startService(new Intent(app, Network.class));
         app.bindService(new Intent(app, Network.class), new ServiceConnection() {
             @Override
@@ -149,9 +155,16 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                     public void run() {
                         sendDevInfo();
                     }
-                }, 3000, 5000);
+                }, 2000, 5000);
             }
-            resetNetwork();
+
+            (new Timer()).schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    resetNetwork();
+                }
+            },3000);
+
             new Thread(getSendQueue).start();
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -185,6 +198,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                                             .save();
                                     MyApplication.LocalBroadcast.send(ACTION_NAMEPLATE_UPDATE, filePath);
                                     MyApplication.LocalBroadcast.send(ACTION_REFRESH_ACTIVITY, EditUserInfoActivity.class);
+                                    MyApplication.LocalBroadcast.send(ACTION_REFRESH_ACTIVITY, ShowNameActivity.class);
                                 }
                             }, 500);
 
@@ -222,7 +236,9 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
 //                    Debug.d(TAG,"iCmdEnum:"+iCmdEnum);
                     switch (iCmdEnum) {
                         case RSP_TS_DEVICE_REG:
-
+                            if(bundle.getInt("iResult") == 200){
+                                isTimeUpdate = true;
+                            }
                             break;
                         case EVT_TS_MEETINGINFO:
                             Log.d(TAG,"EVT_TS_MEETINGINFO  "+bundle.getString("strName"));
@@ -235,6 +251,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
 
                             appMsg.what = MEETING_INFO;
                             AppActivity.handler.sendMessage(appMsg);
+                            LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, MeetingInfoActivity.class);
                             break;
                         case RSP_TS_GET_USERINFO:
                             databaseManager.setStr(NameplateManager.USER, bundle.getString("strUserName"))
@@ -303,9 +320,6 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                         case EVT_TS_MEETING_END:
                             appMsg.what = MEETING_END;
                             AppActivity.handler.sendMessage(appMsg);
-                            Cmd.execCmd("rm -rf "+NAMEPLATE_IMG_PATH);
-                            Cmd.execCmd("rm -rf "+NAMEPLATE_BACKGROUND_PATH);
-                            databaseManager.delMeetInfo();
                             resetNetwork();
                             break;
                         case EVT_TS_SENDMSG:
@@ -356,7 +370,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                             msg.setData(bundle);
                             networkMessenger.send(msg);
                         }
-                        Thread.sleep(300);
+                        Thread.sleep(50);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
@@ -404,16 +418,17 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
             bundle.putBoolean(NETWORK_EN, netDevInfo.netEn);
             bundle.putIntArray(NETWORK_LOCAL_IP, netDevInfo.ip);
             sendToNetwork(Network.CMD_UPDATA_DEV_INFO, bundle);
+
+            errCount = 0;
         }catch (Exception e){
             e.printStackTrace();
-            if(errCount++ > 10)
+            if(errCount++ > 30)
                 LocalBroadcast.send(ACTION_HARDFAULT_REBOOT);
         }
     }
 
     public void resetNetwork() {
         sendDevInfo();
-
         Bundle bundle = new Bundle();
         bundle.putIntArray(NETWORK_SERV_IP, databaseManager.getServIp());
         bundle.putInt(NETWORK_SERV_PORT, databaseManager.getServPort());
@@ -446,9 +461,28 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
         staListener = listener;
     }
 
+    public boolean getIsTimeUptate(){
+        return isTimeUpdate;
+    }
     @Override
     public void infoUpdate(String devName) {
         Bundle bundle = new Bundle();
+
+
+        if(netDevInfo.dhcp){
+            if((General.isArrayEmpty(netDevInfo.ip) || General.isArrayEmpty(netDevInfo.mask)) && ++netNoneCount > 5){
+                Log.d(TAG,"reset network device!");
+                netDevManager.setDhcpEn();
+                resetNetwork();
+                netNoneCount = 0;
+            }
+        }else{
+            netDevInfo.ip = databaseManager.getLocalIp();
+            netDevInfo.gw = databaseManager.getGateway();
+            netDevInfo.mask = databaseManager.getMask();
+        }
+
+
         bundle.putString(NET_DRIVE_NAME, devName);
         bundle.putBoolean(NET_DRIVE_EN, netDevInfo.devEn);
         bundle.putBoolean(NETWORK_EN, netDevInfo.netEn);
@@ -459,6 +493,12 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
         bundle.putString(NETWORK_MAC, netDevInfo.mac);
         bundle.putString(WIFI_SSID, netDevInfo.ssid);
         bundle.putInt(WIFI_RSSI, netDevInfo.rssi);
+
+//        Log.d(TAG,"netNoneCount = "+netNoneCount);
+//        Log.d(TAG, "netDevInfo.ip : " + netDevInfo.ip[0] + netDevInfo.ip[1] + netDevInfo.ip[2] + netDevInfo.ip[3] +
+//                "  netDevInfo.mask : " + netDevInfo.mask[0] + netDevInfo.mask[1] + netDevInfo.mask[2] + netDevInfo.mask[3] +
+//                "  netDevInfo.gw : " + netDevInfo.gw[0] + netDevInfo.gw[1] + netDevInfo.gw[2] + netDevInfo.gw[3] +
+//                "  netDevInfo.devEn : " + netDevInfo.devEn + " netDevInfo.netEn : "+netDevInfo.netEn);
 
         MyApplication.LocalBroadcast.send(MyApplication.ACTION_NETWORK_INFO_UPDATE, bundle);
     }

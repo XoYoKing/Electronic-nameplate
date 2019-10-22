@@ -11,7 +11,6 @@ import android.util.Log;
 import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.module.network.WifiManager;
 import com.itc.ts8209a.widget.Cmd;
-import com.itc.ts8209a.widget.Debug;
 import com.itc.ts8209a.widget.General;
 
 import java.io.File;
@@ -165,13 +164,13 @@ public class DatabaseManager {
     /*********************** 初始化数据库  **************************/
     private void databaseInit() {
         try {
-            File file = new File(DATABASE_PATH);
+            File file = new File(DATABASE_ROOT);
 
             if (!file.exists()) {
                 file.mkdirs();
             }
 
-            msgDatabase = SQLiteDatabase.openOrCreateDatabase(DATABASE_PATH + MEETING_MSG_DB_NAME, null);
+            msgDatabase = SQLiteDatabase.openOrCreateDatabase(DATABASE_ROOT + MEETING_MSG_DB_NAME, null);
         }catch (Exception e){
             Log.e(TAG,e+"");
         }
@@ -233,10 +232,10 @@ public class DatabaseManager {
     }
     /******************************** 清空信息 ********************************/
     public void delMeetInfo(){
-        defMeetInfo();
+        resetMeetInfo();
         delMsg();
-        Cmd.execCmd("rm -rf " + DATABASE_PATH + NAMEPLATE_PREF + "*");
-        Cmd.execCmd("rm -rf " + DATABASE_PATH + MEETING_PREF + "*");
+        Cmd.execCmd("rm -rf " + DATABASE_ROOT + NAMEPLATE_PREF + "*");
+        Cmd.execCmd("rm -rf " + DATABASE_ROOT + MEETING_PREF + "*");
     }
 
     public void delMsg(){
@@ -258,7 +257,7 @@ public class DatabaseManager {
     }
 
     /********************************** 读取参数  ********************************/
-    public void defMeetInfo() {
+    public void resetMeetInfo() {
         meetName = "";
         meetSlogan = "";
         meetContent = "";
@@ -279,6 +278,10 @@ public class DatabaseManager {
         }
     }
 
+    public void resetMsg() {
+        databaseLoad();
+    }
+
     private void sharedPreferencesInit(){
         try {
             Field field = ContextWrapper.class.getDeclaredField("mBase");
@@ -288,7 +291,7 @@ public class DatabaseManager {
             field = obj.getClass().getDeclaredField("mPreferencesDir");
             field.setAccessible(true);
 
-            File file = new File(DATABASE_PATH);
+            File file = new File(DATABASE_ROOT);
             field.set(obj,file);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
@@ -395,7 +398,7 @@ public class DatabaseManager {
                         editor.putInt(KEY_SCREEN_DIM_TIME, screenDimTime);
                         editor.apply();
 
-                        Debug.d(TAG, "Device preferences save finish!!");
+//                        Debug.d(TAG, "Device preferences save finish!!");
                     }
                 }
             }).start();
@@ -418,7 +421,7 @@ public class DatabaseManager {
                                 editor.putFloat(KEY_STR_POS_Y + i, strPosY[i]);
                             }
                         } catch (NullPointerException e) {
-                            Debug.d(TAG, "Nameplate preferences save err: " + e);
+//                            Debug.d(TAG, "Nameplate preferences save err: " + e);
                         }
                         editor.putInt(KEY_NAMEPLATE_TYPE, nameplateType);
                         editor.putInt(KEY_BACKGROUND_COLOR, backgroundColor);
@@ -426,7 +429,7 @@ public class DatabaseManager {
                         editor.putString(KEY_NAMEPLATE_PIC, nameplatePic);
                         editor.apply();
 
-                        Debug.d(TAG, "Nameplate preferences save finish");
+//                        Debug.d(TAG, "Nameplate preferences save finish");
                     }
                 }
             }).start();

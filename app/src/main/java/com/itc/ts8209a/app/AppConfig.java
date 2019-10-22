@@ -40,7 +40,7 @@ public class AppConfig {
     public static final String ADMIN_PASSWORD = "10241024";
 
     //数据库保存路径
-    public static final String DATABASE_PATH = DEVICE_ROOT + "database/";
+    public static final String DATABASE_ROOT = DEVICE_ROOT + "database/";
     /******************** 会议相关参数 ******************/
     //会议消息记录数据库文件名
     public static final String MEETING_MSG_DB_NAME = "meetingMsg.db";
@@ -96,7 +96,7 @@ public class AppConfig {
 
     /***************** 电池电量相关参数 ******************/
     //设置定时获取电池状态时间(单位:毫秒)
-    public static final int GET_BAT_INFO_TIME = 30 * 1000;
+    public static final int GET_BAT_INFO_TIME = 20 * 1000;
 
     //进入低功耗模式无操作时间(单位:秒)    10分钟进入低功耗模式
     public static final int ENTER_SAVE_POWER_TIME = 10 * 60;
@@ -107,7 +107,7 @@ public class AppConfig {
 
     /***************** 网络相关参数 ******************/
     //获取网络状态信息时间(单位:毫秒)
-    public static final int GET_NETWOR_STA_TIME = 5 * 1000;//10S
+    public static final int GET_NETWOR_STA_TIME = 10 * 1000;//10S
 
     //服务器文字编码
     public static final String SERV_ENCODING = "GBK";

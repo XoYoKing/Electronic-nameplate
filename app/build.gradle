@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-import org.apache.tools.ant.taskdefs.condition.Os
+//import org.apache.tools.ant.taskdefs.condition.Os
 
 android {
     compileSdkVersion 19
@@ -9,7 +9,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 19
         versionCode 1
-        versionName "20190613"
+        versionName "20190803"
 
 //            ndk {
 //                moduleName "serialport"//指定生成的so文件名

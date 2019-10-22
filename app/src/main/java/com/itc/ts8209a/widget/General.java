@@ -43,6 +43,15 @@ public class General {
         return true;
     }
 
+
+    public static boolean isArrayEmpty(int[] arr){
+        for (int anArr : arr) {
+            if (anArr != 0)
+                return false;
+        }
+        return true;
+    }
+
     //地址类数据字符串转整形数组函数
     public static int[] addrStrToInt(String addr) {
         int[] result = {0,0,0,0};

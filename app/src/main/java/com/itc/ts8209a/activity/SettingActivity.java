@@ -25,6 +25,9 @@ import com.itc.ts8209a.widget.General;
 import com.itc.ts8209a.activity.view.IpConfig;
 import com.itc.ts8209a.R;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import static com.itc.ts8209a.app.AppConfig.APP_NAME;
 import static com.itc.ts8209a.app.AppConfig.DIM_SCREEN_TIME;
 import static com.itc.ts8209a.module.network.NetworkManager.NET_DRIVE_NAME;
@@ -266,8 +269,10 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                         networkManager.sendDevInfo();
                         networkManager.resetNetwork();
 
-                        if(id != para.devId)
-                            databaseManager.defMeetInfo();
+                        if(id != para.devId) {
+                            databaseManager.resetMeetInfo();
+                            databaseManager.resetMsg();
+                        }
 
                     }
                 }).creatIpConfig(para);
@@ -310,7 +315,13 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                             tvNetmask.setText(General.addrIntToStr(para.mask));
                         }
                         databaseManager.save();
-                        networkManager.resetNetwork();
+                        networkManager.sendDevInfo();
+                        (new Timer()).schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                networkManager.resetNetwork();
+                            }
+                        },500);
                     }
                 }).creatIpConfig(para);
                 dialog.show();
@@ -375,8 +386,13 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
             String devName = bundle.getString(NET_DRIVE_NAME);
 
             if(devName.equals(WifiManager.DEV_NAME)) {
-                tvRssi.setText(String.valueOf(bundle.getInt(WIFI_RSSI)) + " db");
-                tvSsid.setText(bundle.getString(WIFI_SSID));
+                String ssid = bundle.getString(WIFI_SSID);
+                tvSsid.setText(ssid);
+                if(ssid.equals(""))
+                    tvRssi.setText("");
+                else
+                    tvRssi.setText(String.valueOf(bundle.getInt(WIFI_RSSI)) + " db");
+
             }
             tvMac.setText(bundle.getString(NETWORK_MAC));
             tvLocalIp.setText(General.addrIntToStr(bundle.getIntArray(NETWORK_LOCAL_IP)));
@@ -384,11 +400,11 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
             tvNetmask.setText(General.addrIntToStr(bundle.getIntArray(NETWORK_MASK)));
         }
 
-        else if(intent.getAction().equals(MyApplication.ACTION_POWER_INFO_UPDATE)){
-            Bundle bundle = intent.getBundleExtra("BUNDLE");
+//        else if(intent.getAction().equals(MyApplication.ACTION_POWER_INFO_UPDATE)){
+//            Bundle bundle = intent.getBundleExtra("BUNDLE");
 //            tvCpuPowerMode.setText(bundle.getBoolean(PowerManager.SAVE_POWER) ? "savepower" : "normalpower");
 //            tvCpuFreq.setText(bundle.getString(PowerManager.CPU_FREQ));
-        }
+//        }
     }
 
     private void setBrightness(int brightness) {

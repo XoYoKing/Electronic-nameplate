@@ -82,7 +82,7 @@ public class WifiManager extends NetDevManager{
     @Override
     protected void init(MyApplication myApplication) {
         super.init(myApplication);
-        Debug.d(TAG,"Wifi Initialization");
+//        Debug.d(TAG,"Wifi Initialization");
 //        netDevInfo = new NetDevInfo();
         netDevInfo.name = DEV_NAME;
         netDevInfo.type = TYPE_WIRELESS;
@@ -121,7 +121,7 @@ public class WifiManager extends NetDevManager{
     @Override
     protected void setDhcpEn() {
         super.setDhcpEn();
-        String cmd = String.format(Locale.ENGLISH,"netcfg %s %s",DEV_NAME,"dhcp");
+        String cmd = String.format(Locale.ENGLISH,"netcfg %s %s",DEV_NAME,"up");
         Cmd.execCmd(cmd);
     }
 
@@ -172,7 +172,7 @@ public class WifiManager extends NetDevManager{
             osWifiManager.disableNetwork(wcg.networkId);
             osWifiManager.disconnect();
             osWifiManager.removeNetwork(wcg.networkId);
-            Debug.d(TAG,"disconnect wifi \""+ssid+"\"");
+//            Debug.d(TAG,"disconnect wifi \""+ssid+"\"");
         }
     }
 
@@ -503,7 +503,7 @@ public class WifiManager extends NetDevManager{
         List<WifiConfiguration> existingConfigs = osWifiManager.getConfiguredNetworks();
         for (WifiConfiguration existingConfig : existingConfigs) {
             removeWifi(existingConfig.SSID.replace("\"",""));
-            Debug.d(TAG,"remove wifi "+existingConfig.SSID);
+//            Debug.d(TAG,"remove wifi "+existingConfig.SSID);
         }
     }
 

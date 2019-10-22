@@ -21,8 +21,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextClock;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.module.nameplate.NameplateManager;
@@ -38,10 +38,8 @@ import com.itc.ts8209a.widget.Cmd;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static com.itc.ts8209a.app.AppConfig.ADMIN_MSG_TABLE_NAME;
+import static com.itc.ts8209a.app.AppConfig.*;
+import static com.itc.ts8209a.app.MyApplication.setCurrentActivity;
 import static com.itc.ts8209a.module.network.NetworkManager.*;
 import static com.itc.ts8209a.module.power.PowerManager.BATTERY_MODE;
 import static com.itc.ts8209a.module.power.PowerManager.POE_MODE;
@@ -71,11 +69,13 @@ public class AppActivity extends Activity implements View.OnClickListener {
 
     /* 会议信息，管理员消息 */
     protected static ArrayList<String> adminMsg;
+    protected static int newAdminMsgCount;
     /* 短消息：用户用户列表 */
     protected static HashMap<Integer,String> userList = null;
     /*  短消息：短消息内容，新旧消息列表 */
     protected static ArrayList<String[]> newSMS = new ArrayList<String[]>();
     protected static ArrayList<String[]> oldSMS;
+
 
     protected String TAG = getClass().getSimpleName();
     protected MyApplication myApplication;
@@ -127,6 +127,7 @@ public class AppActivity extends Activity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         wakeLock.acquire(); //设置保持唤醒
+        setCurrentActivity(this);
         PromptBox.creatPromptBox(this);
 
         btnReturn = (Button) findViewById(R.id.return_btn);
@@ -177,7 +178,9 @@ public class AppActivity extends Activity implements View.OnClickListener {
     protected class stateBarHandler implements NetworkManager.OnNetworkStatusListener {
 
         private RelativeLayout layout;
+        private TextClock tcClock;
         private TextView tvBatLevel;
+        private TextView tvPrompt;
         private ImageView ivBatLevel;
         private ImageView ivWifi;
         private ImageView ivEthNet;
@@ -200,10 +203,12 @@ public class AppActivity extends Activity implements View.OnClickListener {
             ivNetwork = (ImageView)activity.findViewById(R.id.stabar_network_iv);
             layout = (RelativeLayout)activity.findViewById(R.id.stabar_lay);
             ivPoePower = (ImageView)activity.findViewById(R.id.stabar_poe_power_iv);
+            tvPrompt = (TextView)activity.findViewById(R.id.stabar_prompt_tv);
+            tcClock = (TextClock)activity.findViewById(R.id.stabar_clock_tc);
 
             networkManager.setOnNetworkStatusListener(this);
 
-            setBatLevel(powerManager.getLevel(), powerManager.getCharge());
+            setBatLevel(powerManager.getLevel(), powerManager.getCharge(),powerManager.getVoltage()!=0);
             setNetworkStaDisplay(networkManager.getNetworkStatus() == Network.STA_CONNECTED);
 
             NetDevManager.NetDevInfo netDevInfo = networkManager.getNetDevInfo();
@@ -214,12 +219,24 @@ public class AppActivity extends Activity implements View.OnClickListener {
                     setEthInfoDisplay(netDevInfo.getNetEn());
                 }else if(netDevInfo.getDevName().equals(WifiManager.DEV_NAME)){
                     setEthInfoDisplay(false);
-                    setWifiInfoDisplay(netDevInfo.getDevEn(),netDevInfo.getRssi());
+                    if(netDevInfo.getDevEn())
+                     setWifiInfoDisplay( networkManager.getNetDevInfo().getNetEn(),netDevInfo.getRssi());
                 }
             }
 
+            if(networkManager.getIsTimeUptate())
+                tcClock.setVisibility(View.VISIBLE);
+            else
+                tcClock.setVisibility(View.GONE);
+
 
             setPowMode(powerManager.getPowerMode());
+
+            if(!newSMS.isEmpty() || newAdminMsgCount != 0) {
+                String prompt = String.format("您有%s%s",newSMS.isEmpty() ? "" : newSMS.size()+"条未读短消息 ",newAdminMsgCount == 0 ? "" : newAdminMsgCount+"条未读管理员消息");
+                setPrompt(true,prompt);
+            }else
+                setPrompt(false,null);
 
         }
 
@@ -231,9 +248,13 @@ public class AppActivity extends Activity implements View.OnClickListener {
             layout.setVisibility(View.VISIBLE);
         }
 
-        private void setBatLevel(int level , boolean charge){
+        private void setBatLevel(int level , boolean charge,boolean isShowLevelText){
 
-            tvBatLevel.setText(level +"%");
+            if(isShowLevelText) {
+                tvBatLevel.setVisibility(View.VISIBLE);
+                tvBatLevel.setText(level + "%");
+            }else
+                tvBatLevel.setVisibility(View.GONE);
 
             if(charge){
                 ivBatLevel.setImageLevel(5);
@@ -308,10 +329,20 @@ public class AppActivity extends Activity implements View.OnClickListener {
                 ivNetwork.setVisibility(View.GONE);
         }
 
+        private void setPrompt(boolean visible,String prompt){
+            if(visible){
+                tvPrompt.setVisibility(View.VISIBLE);
+                tvPrompt.setText(prompt);
+            }else
+                tvPrompt.setVisibility(View.GONE);
+        }
+
         @Override
         public void OnNetworkStatus(int sta) {
-            if (sta == Network.STA_CONNECTED)
+            if (sta == Network.STA_CONNECTED) {
                 setNetworkStaDisplay(true);
+                tcClock.setVisibility(View.VISIBLE);
+            }
             else
                 setNetworkStaDisplay(false);
         }
@@ -331,7 +362,7 @@ public class AppActivity extends Activity implements View.OnClickListener {
         intentFilter.addAction(MyApplication.ACTION_POWER_INFO_UPDATE);
         intentFilter.addAction(MyApplication.ACTION_HARDFAULT_REBOOT);
         intentFilter.addAction(MyApplication.ACTION_NAMEPLATE_UPDATE);
-
+        intentFilter.addAction(MyApplication.ACTION_REFRESH_STABAR);
     }
 
     //注册广播
@@ -384,6 +415,13 @@ public class AppActivity extends Activity implements View.OnClickListener {
             uiRefresh();
         }
 
+        //刷新状态栏广播
+        else if (intent.getAction().equals(MyApplication.ACTION_REFRESH_STABAR)
+                && isActivityTop()) {
+
+            stateBar.configStatusBar();
+        }
+
         //网络状态更新广播
         else if(intent.getAction().equals(MyApplication.ACTION_NETWORK_INFO_UPDATE)){
             Bundle bundle = intent.getBundleExtra("BUNDLE");
@@ -391,7 +429,7 @@ public class AppActivity extends Activity implements View.OnClickListener {
 
             if(devName.equals(WifiManager.DEV_NAME)) {
                 stateBar.setEthInfoDisplay(false);
-                stateBar.setWifiInfoDisplay(bundle.getBoolean(NET_DRIVE_EN), bundle.getInt(WIFI_RSSI));
+                stateBar.setWifiInfoDisplay(bundle.getBoolean(NETWORK_EN), bundle.getInt(WIFI_RSSI));
             }
             else if(devName.equals(EthernetManager.DEV_NAME)) {
                 stateBar.setWifiInfoDisplay(false,0);
@@ -403,18 +441,12 @@ public class AppActivity extends Activity implements View.OnClickListener {
         else if(intent.getAction().equals(MyApplication.ACTION_POWER_INFO_UPDATE)){
             Bundle bundle = intent.getBundleExtra("BUNDLE");
             stateBar.setPowMode(bundle.getInt(PowerManager.POWER_MODE));
-            stateBar.setBatLevel(bundle.getInt(PowerManager.BAT_LEVEL),bundle.getBoolean(PowerManager.BAT_CHARGE));
+            stateBar.setBatLevel(bundle.getInt(PowerManager.BAT_LEVEL),bundle.getBoolean(PowerManager.BAT_CHARGE),bundle.getInt(PowerManager.BAT_VOLTAGE)!=0);
         }
 
         //重启广播
         else if(intent.getAction().equals(MyApplication.ACTION_HARDFAULT_REBOOT)){
-            Toast.makeText(this,"检测到设备硬件异常，设备将自动重启",Toast.LENGTH_LONG).show();
-            (new Timer()).schedule(new TimerTask() {
-                @Override
-                public void run() {
                     Cmd.execCmd("reboot");
-                }
-            },5000);
         }
 
         //铭牌更新
@@ -753,6 +785,7 @@ public class AppActivity extends Activity implements View.OnClickListener {
 
     public static Handler handler = new Handler() {
         private DatabaseManager databaseManager;
+        private NameplateManager nameplateManager;
 
         @Override
         public void handleMessage(Message msg) {
@@ -791,8 +824,8 @@ public class AppActivity extends Activity implements View.OnClickListener {
                     smsStr[1] = bundle.getString("strContent");
                     newSMS.add(smsStr);
                     PromptBox.BuildPrompt("YOU_HAVE_A_SMS").Text("你有一条来自：" + smsStr[0]+ "的新消息").Time(1).TimeOut(5000);
-
-
+                    MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, SmsActivity.class);
+                    MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_STABAR);
                     databaseManager.saveSmsMsg(smsStr[0],smsStr[1]);
                     break;
                 case SYS_SMS_MSG:
@@ -800,20 +833,34 @@ public class AppActivity extends Activity implements View.OnClickListener {
                     adminMsg = databaseManager.getAdminMsg();
                     String strContent = bundle.getString("strContent");
                     adminMsg.add(strContent);
+                    newAdminMsgCount ++;
                     PromptBox.BuildPrompt("YOU_HAVE_A_SMS").Text("你有一条来自管理员的新消息").Time(1).TimeOut(5000);
                     MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, MeetingInfoActivity.class);
-
+                    MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_STABAR);
                     databaseManager.saveAdminMsg(strContent);
                     break;
-//                case MSG_INIT:
-//                    ArrayList<String> temp1 = bundle.getStringArrayList(ADMIN_MSG_TABLE_NAME);
-//                    if (temp1 != null) adminMsg = temp1;
-//
-//                    ArrayList<String[]> temp2 = (ArrayList<String[]>) msg.obj;
-//                    if (temp2 != null) oldSMS = temp2;
-//                    break;
                 case MEETING_END:
+                    databaseManager = DatabaseManager.getDatabaseManager();
+                    nameplateManager = NameplateManager.getNameplateManager();
+
                     PromptBox.BuildPrompt("MEETING_END").Text("会议已结束").Time(1).TimeOut(5000);
+
+                    databaseManager.delMeetInfo();
+                    if(newSMS != null && !newSMS.isEmpty())
+                        newSMS.clear();
+                    if(userList != null && !userList.isEmpty())
+                        userList.clear();
+                    newAdminMsgCount = 0;
+
+                    nameplateManager.setDefaultNameplate();
+                    nameplateManager.para.setNpType(NAMEPLATE_STYLE_DEF);
+
+                    Cmd.execCmd("rm -rf "+NAMEPLATE_IMG_PATH);
+                    Cmd.execCmd("rm -rf "+NAMEPLATE_BACKGROUND_PATH);
+                    Cmd.execCmd("rm -rf "+NAMEPLATE_BIN_FILE_PATH+NAMEPLATE_BIN_FILE_NAME);
+
+                    MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, SmsActivity.class);
+                    MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, ShowNameActivity.class);
                     MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, MeetingInfoActivity.class);
                     MyApplication.LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, MainActivity.class);
                     break;

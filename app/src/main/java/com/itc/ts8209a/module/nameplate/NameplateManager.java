@@ -188,14 +188,21 @@ public class NameplateManager {
         });
     }
 
-    public void setNamePlateByByteData() {
+    private void setNamePlateByByteData() {
         byte[] imgData = readFile();
         if (imgData == null){
-            imgData = new byte[1024*600*3];
-            for(int i=0;i<imgData.length;i++)
-                imgData[i] = (byte)0xFF;
-        }
-//        Log.i("setNamePlateByByteData","size = "+imgData.length);
+            setDefaultNameplate();
+        }else
+            Ra8876l.setPic(imgData);
+    }
+
+    public void setDefaultNameplate(){
+        byte[] imgData;
+
+        imgData = new byte[1024*600*3];
+        for(int i=0;i<imgData.length;i++)
+            imgData[i] = i % 3 == 2 ? (byte)0xFF : (byte)0x00;
+
         Ra8876l.setPic(imgData);
     }
 

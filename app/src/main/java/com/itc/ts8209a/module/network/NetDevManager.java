@@ -17,6 +17,8 @@ import com.itc.ts8209a.widget.Cmd;
 import com.itc.ts8209a.widget.Debug;
 import com.itc.ts8209a.widget.General;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Timer;
 
@@ -213,7 +215,7 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
         if(networkInfo != null){
             int type = networkInfo.getType();
 
-            Debug.d(TAG,"activity network = "+ type);
+//            Debug.d(TAG,"activity network = "+ type);
 
             if(type == ConnectivityManager.TYPE_WIFI)
                 Debug.d(TAG,"activity network wifi");
@@ -232,30 +234,50 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
         final String index_serv = "][dhcp."+devName()+".server]";
 
         try {
-//            Log.d(TAG,cmd+" : "+res);
-            if (cmd.contains(IFCONFIG) && res.contains("ip") && res.contains("mask")) {
-                int[] ip = addrStrToInt(res.substring(res.indexOf("ip ") + 3, res.indexOf(" mask")));
-                int[] mask = addrStrToInt(res.substring(res.indexOf("mask ") + 5, res.indexOf(" flags")));
-                if((infoListener != null) && (!General.ContrastArray(ip,netDevInfo.ip) || !General.ContrastArray(mask,netDevInfo.mask))){
+            if (cmd.contains(IFCONFIG)) {
+                int[] ip = new int[4],mask = new int[4];
+
+                if(res.contains("ip") && res.contains("mask")) {
+                    ip = addrStrToInt(res.substring(res.indexOf("ip ") + 3, res.indexOf(" mask")));
+                    mask = addrStrToInt(res.substring(res.indexOf("mask ") + 5, res.indexOf(" flags")));
+//                    Log.d(TAG, "ip : " + ip[0] + ip[1] + ip[2] + ip[3] + "  mask : " + mask[0] + mask[1] + mask[2] + mask[3]);
+                }
+                else{
+                    Arrays.fill(ip,0);
+                    Arrays.fill(mask,0);
+                    infoListener.infoUpdate(devName());
+                    return;
+                }
+
+                if ((infoListener != null) && (!General.ContrastArray(ip, netDevInfo.ip) || !General.ContrastArray(mask, netDevInfo.mask))) {
                     netDevInfo.ip = ip;
                     netDevInfo.mask = mask;
                     infoListener.infoUpdate(devName());
                 }
-            } else if (cmd.contains(GETPROP) && res.contains(con_result) && res.contains(con_gw)) {
-                int gw[] = netDevInfo.dhcp ? addrStrToInt(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip))) : netDevInfo.gw;
-                boolean netEn = ((res.substring(res.indexOf(index_result) + index_result.length(), res.indexOf(index_serv))).equals("ok"));
-                if((infoListener != null) && (!General.ContrastArray(gw,netDevInfo.gw) || netDevInfo.netEn != netEn)){
+            } else if (cmd.contains(GETPROP)) {
+                int gw[] = new int[4];
+                boolean netEn;
+
+                if (res.contains(con_gw)) {
+//                    gw = netDevInfo.dhcp ? addrStrToInt(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip))) : netDevInfo.gw;
+                    gw = addrStrToInt(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip)));
+                } else
+                    Arrays.fill(gw, 0);
+
+                netEn = (netDevInfo.type == TYPE_WIER_NET) || ((res.substring(res.indexOf(index_result) + index_result.length(), res.indexOf(index_serv))).equals("ok"));
+//                netEn = res.contains(con_result) && ((res.substring(res.indexOf(index_result) + index_result.length(), res.indexOf(index_serv))).equals("ok"));
+
+//                Log.d(TAG,"gw : "+gw[0]+gw[1]+gw[2]+gw[3]+"  netEn : "+netEn);
+                if ((infoListener != null) && (!General.ContrastArray(gw, netDevInfo.gw) || netDevInfo.netEn != netEn)) {
                     netDevInfo.netEn = netEn;
                     netDevInfo.gw = gw;
                     infoListener.infoUpdate(devName());
                 }
             } else if (cmd.contains(NETCFG)) {
                 boolean devEn = res.contains(devName()) && res.substring(res.indexOf(devName()), res.indexOf(devName()) + 30).contains("UP");
-
                 String devNetcfg = res.substring(res.indexOf(devName()),res.length());
                 String mac = devNetcfg.substring(devNetcfg.indexOf(':')-2,devNetcfg.indexOf(':')+15);
-//                Log.d(TAG,"netcfg get mac = "+mac);
-
+//                Log.d(TAG,"mac : "+mac+"  "+devEn );
                 if(infoListener != null && (devEn != netDevInfo.devEn || netDevInfo.mac == null || !mac.equals(netDevInfo.mac))) {
                     netDevInfo.devEn = devEn;
                     netDevInfo.mac = mac;
