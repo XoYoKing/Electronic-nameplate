@@ -12,6 +12,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.itc.ts8209a.activity.AppActivity;
 import com.itc.ts8209a.activity.EditUserInfoActivity;
 import com.itc.ts8209a.activity.MainActivity;
@@ -30,10 +31,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Deque;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -89,6 +96,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
     private int networkStatus = Network.STA_DISCONNECTED;
     private int errCount = 0,netNoneCount = 0;
     private boolean isTimeUpdate = false;
+    private boolean isNameplateUpdating = false;
 
     private NetworkManager() {
     }
@@ -190,6 +198,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                         if(bundle.getString("type").equals("NP")) {
                             PromptBox.BuildPrompt("IMAGE_NAMEPLATE_UPTATA").Text("已更新图片铭牌").Time(1).TimeOut(3000);
                             final String filePath = bundle.getString("filePath");
+
                             (new Timer()).schedule(new TimerTask() {
                                 @Override
                                 public void run() {
@@ -198,9 +207,16 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                                             .save();
                                     MyApplication.LocalBroadcast.send(ACTION_NAMEPLATE_UPDATE, filePath);
                                     MyApplication.LocalBroadcast.send(ACTION_REFRESH_ACTIVITY, EditUserInfoActivity.class);
+
+                                }
+                            }, 1000);
+
+                            (new Timer()).schedule(new TimerTask() {
+                                @Override
+                                public void run() {
                                     MyApplication.LocalBroadcast.send(ACTION_REFRESH_ACTIVITY, ShowNameActivity.class);
                                 }
-                            }, 500);
+                            }, 2000);
 
                             List<File> list = listFileSortByModifyTime(NAMEPLATE_IMG_PATH+"id_"+ databaseManager.getDeviceID()+"/");
                             if(list.size() > NAMEPLATE_FILE_NUM_MAX){
@@ -238,6 +254,7 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                         case RSP_TS_DEVICE_REG:
                             if(bundle.getInt("iResult") == 200){
                                 isTimeUpdate = true;
+
                             }
                             break;
                         case EVT_TS_MEETINGINFO:
@@ -261,22 +278,37 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                             appMsg.what = USER_INFO;
                             AppActivity.handler.sendMessage(appMsg);
 
-                            String url = bundle.getString("strNameplateUrl");
+                            int randomDelay = 100 + (new Random()).nextInt(5000);
+
+//                            Log.d(TAG,"random delay = "+randomDelay);
+
+                            final String url = bundle.getString("strNameplateUrl");
                             if(url != null){
-                                Bundle downloadBundle = new Bundle();
-                                downloadBundle.putString(DOWNLOAD_PATH,NAMEPLATE_IMG_PATH+"id_"+ databaseManager.getDeviceID()+"/");
-                                downloadBundle.putString(DOWNLOAD_URL,url);
-                                downloadBundle.putString(DOWNLOAD_TYPE,"NP");
-                                sendToNetwork(CMD_HTTP_DOWNLOAD,downloadBundle);
+                                (new Timer()).schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        Bundle downloadBundle = new Bundle();
+                                        downloadBundle.putString(DOWNLOAD_PATH,NAMEPLATE_IMG_PATH+"id_"+ databaseManager.getDeviceID()+"/");
+                                        downloadBundle.putString(DOWNLOAD_URL,url);
+                                        downloadBundle.putString(DOWNLOAD_TYPE,"NP");
+                                        sendToNetwork(CMD_HTTP_DOWNLOAD,downloadBundle);
+                                    }
+                                },randomDelay );
+
                             }
 
-                            url = bundle.getString("strNameplateBGUrl");
+                            final String bgUrl = bundle.getString("strNameplateBGUrl");
                             if(url != null){
-                                Bundle downloadBundle = new Bundle();
-                                downloadBundle.putString(DOWNLOAD_PATH,NAMEPLATE_BACKGROUND_PATH+"id_"+ databaseManager.getDeviceID()+"/");
-                                downloadBundle.putString(DOWNLOAD_URL,url);
-                                downloadBundle.putString(DOWNLOAD_TYPE,"BG");
-                                sendToNetwork(CMD_HTTP_DOWNLOAD,downloadBundle);
+                                (new Timer()).schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        Bundle downloadBundle = new Bundle();
+                                        downloadBundle.putString(DOWNLOAD_PATH,NAMEPLATE_BACKGROUND_PATH+"id_"+ databaseManager.getDeviceID()+"/");
+                                        downloadBundle.putString(DOWNLOAD_URL,bgUrl);
+                                        downloadBundle.putString(DOWNLOAD_TYPE,"BG");
+                                        sendToNetwork(CMD_HTTP_DOWNLOAD,downloadBundle);
+                                    }
+                                }, randomDelay);
                             }
                             break;
                         case RSP_TS_GET_USERLIST:
@@ -319,8 +351,9 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                             break;
                         case EVT_TS_MEETING_END:
                             appMsg.what = MEETING_END;
-                            AppActivity.handler.sendMessage(appMsg);
-                            resetNetwork();
+                            if(databaseManager.getMeetId() != 0)
+                                AppActivity.handler.sendMessage(appMsg);
+//                            resetNetwork();
                             break;
                         case EVT_TS_SENDMSG:
                             appMsg.setData(bundle);
@@ -336,13 +369,14 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                                 databaseManager.delMsg();
                             }
 
-                            else if(meetId == 0){
-                                Log.d(TAG,"meetId = "+meetId);
+                            else if(meetId == 0) {
+                                Log.d(TAG, "meetId = " + meetId);
                                 databaseManager.delMeetInfo();
                             }
                             LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, MainActivity.class);
                             LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, MeetingInfoActivity.class);
                             LocalBroadcast.send(MyApplication.ACTION_REFRESH_ACTIVITY, EditUserInfoActivity.class);
+
                             break;
                     }
                     break;
@@ -412,18 +446,24 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
             bundle.putInt(DEV_ID, databaseManager.getDeviceID());
             bundle.putInt(DEV_BRIGHTNESS, databaseManager.getBrightness());
             bundle.putInt(DEV_BAT_LEVEL, powerManager.getLevel());
+
+            if(netDevInfo == null)
+                netDevInfo = netDevManager.getDevInfo();
+
             bundle.putInt(WIFI_RSSI, netDevInfo.rssi);
             bundle.putString(NETWORK_MAC, netDevInfo.mac);
             bundle.putBoolean(NET_DRIVE_EN, netDevInfo.devEn);
             bundle.putBoolean(NETWORK_EN, netDevInfo.netEn);
             bundle.putIntArray(NETWORK_LOCAL_IP, netDevInfo.ip);
+
             sendToNetwork(Network.CMD_UPDATA_DEV_INFO, bundle);
 
-            errCount = 0;
+//            errCount = 0;
         }catch (Exception e){
+//            Log.d(TAG,"errCount = " + errCount);
             e.printStackTrace();
-            if(errCount++ > 30)
-                LocalBroadcast.send(ACTION_HARDFAULT_REBOOT);
+//            if(errCount++ > 30)
+//                LocalBroadcast.send(ACTION_HARDFAULT_REBOOT);
         }
     }
 
@@ -464,13 +504,17 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
     public boolean getIsTimeUptate(){
         return isTimeUpdate;
     }
+
+
+
+
     @Override
     public void infoUpdate(String devName) {
         Bundle bundle = new Bundle();
 
 
         if(netDevInfo.dhcp){
-            if((General.isArrayEmpty(netDevInfo.ip) || General.isArrayEmpty(netDevInfo.mask)) && ++netNoneCount > 5){
+            if((General.isArrayEmpty(netDevInfo.ip) || General.isArrayEmpty(netDevInfo.mask)) && netNoneCount++ > 5){
                 Log.d(TAG,"reset network device!");
                 netDevManager.setDhcpEn();
                 resetNetwork();

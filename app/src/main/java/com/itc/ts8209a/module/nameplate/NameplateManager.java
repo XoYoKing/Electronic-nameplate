@@ -72,7 +72,7 @@ public class NameplateManager {
         new Thread() {
             public void run() {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(5*1000);
                     ProgressBar pBar = new ProgressBar(context);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(30, 30);
                     pBar.setLayoutParams(params);
@@ -89,6 +89,13 @@ public class NameplateManager {
                                     @Override
                                     public void onSetPicFinish() {
                                         AppActivity.PromptBox.removePrompt("INIT_NAMEPLATE");
+                                    }
+                                });
+                                Ra8876l.setOnSetPicTimeOutListener(new Ra8876l.OnSetPicTimeOutListener() {
+
+                                    @Override
+                                    public void onSetPicTimeOut() {
+                                        MyApplication.LocalBroadcast.send(MyApplication.ACTION_HARDFAULT_REBOOT);
                                     }
                                 });
                                 setNamePlateByByteData();
@@ -184,7 +191,7 @@ public class NameplateManager {
                     }
                 });
                 Ra8876l.setPic(view);
-            };
+            }
         });
     }
 
@@ -192,8 +199,10 @@ public class NameplateManager {
         byte[] imgData = readFile();
         if (imgData == null){
             setDefaultNameplate();
-        }else
+        }else{
+
             Ra8876l.setPic(imgData);
+        }
     }
 
     public void setDefaultNameplate(){

@@ -12,8 +12,6 @@ import android.util.Log;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Deque;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Android运行linux命令
@@ -21,115 +19,128 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class Cmd {
     private static final String TAG = "Cmd";
-    private static Deque<CmdBundle> cmdQueue = new LinkedBlockingDeque<CmdBundle>();
+//    private static Deque<CmdBundle> cmdQueue = new LinkedBlockingDeque<CmdBundle>();
 
     public static final String KEY_CMD = "cmd";
     public static final String KEY_RES = "result";
     public static final String KEY_VALUE = "value";
 
     public static void execCmd(String cmd, cmdResultListener listener) {
-        execCmd(cmd, listener,null);
+        execCmd(cmd, listener, null);
     }
 
     public static void execCmd(String cmd) {
-        execCmd(cmd, null,null);
+        execCmd(cmd, null, null);
     }
 
-    public static void execCmd(String cmd,Handler handler){
-        execCmd(cmd, null,handler);
+    public static void execCmd(String cmd, Handler handler) {
+        execCmd(cmd, null, handler);
     }
 
-    private static void execCmd(String cmd,cmdResultListener listener,Handler handler){
+    private static void execCmd(String cmd, cmdResultListener listener, Handler handler) {
         CmdBundle cmdBundle = new CmdBundle();
         cmdBundle.cmd = cmd;
         cmdBundle.listener = listener;
         cmdBundle.handler = handler;
-        cmdQueue.add(cmdBundle);
+//        cmdQueue.add(cmdBundle);
 
-        if(!sendCmd.running)
-            new Thread(new sendCmd()).start();
+//        if(!ExecuteCmd.running)
+
+        ExecuteCmd exec = new ExecuteCmd();
+        exec.setCmdBundle(cmdBundle);
+
+        new Thread(exec).start();
     }
 
     //发送命令
-    private static class sendCmd implements Runnable {
-        private static boolean running = false;
+    private static class ExecuteCmd implements Runnable {
+        //        private static boolean running = false;
         private CmdBundle cmdBundle = null;
         private String result = "";
         private int value;
         private DataOutputStream dos = null;
         private DataInputStream dis = null;
 
+        public void setCmdBundle(CmdBundle bundle) {
+            cmdBundle = bundle;
+        }
+
         @Override
         public void run() {
-            running = true;
-//            Log.d(TAG,"sendCmd Runnable start!!");
+//            running = true;
+//            Log.d(TAG,"ExecuteCmd Runnable start!!");
 
-            synchronized (this) {
-                while(true) {
-                    while (cmdQueue.size() > 0) {
+//            synchronized (this) {
+//                while(true) {
+//                    while (cmdQueue.size() > 0) {
 //                Log.d(TAG,"size:"+cmdQueue.size());
-                        cmdBundle = cmdQueue.poll();
-                        result = "";
-                        value = -1;
-                        dos = null;
-                        dis = null;
+//                        cmdBundle = cmdQueue.poll();
 
-                        try {
-                            Process p = Runtime.getRuntime().exec("su");// 经过Root处理的android系统即有su命令
-                            dos = new DataOutputStream(p.getOutputStream());
-                            dis = new DataInputStream(p.getInputStream());
+            if (cmdBundle == null)
+                return;
+            result = "";
+            value = -1;
+            dos = null;
+            dis = null;
+
+            try {
+                Process p = Runtime.getRuntime().exec("su");// 经过Root处理的android系统即有su命令
+                dos = new DataOutputStream(p.getOutputStream());
+                dis = new DataInputStream(p.getInputStream());
 
 //                            Log.i(TAG, cmdBundle.cmd);
-                            dos.writeBytes(cmdBundle.cmd + "\n");
-                            dos.flush();
-                            dos.writeBytes("exit\n");
-                            dos.flush();
-                            String line = null;
-                            while ((line = dis.readLine()) != null) {
-                                result += line;
-                            }
-                            p.waitFor();
-                            value = p.exitValue();
+                dos.writeBytes(cmdBundle.cmd + "\n");
+                dos.flush();
+                dos.writeBytes("exit\n");
+                dos.flush();
+                String line = null;
+                while ((line = dis.readLine()) != null) {
+                    result += line;
+                }
+//                p.waitFor();
+                Thread.sleep(500);
+                value = p.exitValue();
 //                            Log.d(TAG,"result :"+ result);
-                            if (cmdBundle.listener != null) {
-                                cmdBundle.listener.onResult(cmdBundle.cmd, result, value);
-                            } else if (cmdBundle.handler != null) {
-                                Message msg = Message.obtain();
-                                Bundle bundle = new Bundle();
-                                bundle.putString(KEY_CMD, cmdBundle.cmd);
-                                bundle.putString(KEY_RES, result);
-                                bundle.putInt(KEY_VALUE, value);
-                                msg.obj = bundle;
+                if (cmdBundle.listener != null) {
+                    cmdBundle.listener.onResult(cmdBundle.cmd, result, value);
+                } else if (cmdBundle.handler != null) {
+                    Message msg = Message.obtain();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KEY_CMD, cmdBundle.cmd);
+                    bundle.putString(KEY_RES, result);
+                    bundle.putInt(KEY_VALUE, value);
+                    msg.obj = bundle;
 
-                                cmdBundle.handler.sendMessage(msg);
-                            }
-                        } catch (Exception e) {
+                    cmdBundle.handler.sendMessage(msg);
+                }
+            } catch (Exception e) {
 //                        Log.e(TAG,e+"\nby cmd: "+cmdBundle.cmd);
-                            e.printStackTrace();
-                        } finally {
-                            if (dos != null) {
-                                try {
-                                    dos.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            if (dis != null) {
-                                try {
-                                    dis.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
+                e.printStackTrace();
+            } finally {
+                if (dos != null) {
                     try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
+                        dos.close();
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
+                if (dis != null) {
+                    try {
+                        dis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
+//                    }
+//                    try {
+//                        Thread.sleep(200);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
         }
     }
 

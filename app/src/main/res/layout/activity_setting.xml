@@ -450,11 +450,13 @@
             <TextView
                 android:id="@+id/setting_sys_version_num_tv"
                 style="@style/setting_item_title_linear"
+                android:gravity="left"
                 android:clickable="true" />
 
             <TextView
                 android:id="@+id/setting_app_version_num_tv"
                 style="@style/setting_item_title_linear"
+                android:gravity="left"
                 android:clickable="true" />
 
         </LinearLayout>

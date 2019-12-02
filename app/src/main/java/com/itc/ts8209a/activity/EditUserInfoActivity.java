@@ -643,7 +643,7 @@ public class EditUserInfoActivity extends AppActivity implements View.OnTouchLis
         int size = fontsizeTemp[tickType];
 
         dialog = new SeekbarDialog(EditUserInfoActivity.this, getResources().getString(R.string.set_font_size));
-        dialog.setProgress(size, 12, 65);
+        dialog.setProgress(size, 12, 99);
         dialog.setonSeekbarConfirmListener(new SeekbarDialog.onSeekbarConfirmListener() {
 
             @Override

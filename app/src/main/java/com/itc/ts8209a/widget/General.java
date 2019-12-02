@@ -20,7 +20,7 @@ public class General {
         return string;
     }
 
-    public static String ByteBuf2String(byte [] buf,int len){
+    public static String Byte2Str(byte [] buf,int len){
         String string = "";
         String str = null;
         int i;
@@ -31,6 +31,18 @@ public class General {
         }
 
         return string;
+    }
+
+    public static int countStr(String str,String s) {
+        int count = 0;
+        for(int i= 0; i<=str.length(); i++){
+            if(str.indexOf(s) == i){
+                str = str.substring(i+1,str.length());
+                count++;
+            }
+        }
+
+        return count;
     }
 
     public static boolean ContrastArray(int[] arr1,int[] arr2){

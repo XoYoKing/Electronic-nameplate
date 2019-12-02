@@ -44,7 +44,7 @@ public class Ra8876l {
         new Thread(){
             public void run() {
                 devHandshake();
-                init(45*1000*1000);
+                init(40*1000*1000);
                 if(initFinishListener != null){
                     initFinishListener.onInitFinish();
                 }

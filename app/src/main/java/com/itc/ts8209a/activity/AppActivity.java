@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextClock;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.module.nameplate.NameplateManager;
 import com.itc.ts8209a.module.power.PowerManager;
@@ -111,12 +112,6 @@ public class AppActivity extends Activity implements View.OnClickListener {
         keepWake();
 
         myApplication = (MyApplication) getApplication();
-        networkManager = NetworkManager.getNetworkManager();
-        netDevInfo = networkManager.getNetDevInfo();
-        databaseManager = DatabaseManager.getDatabaseManager();
-        powerManager = PowerManager.getPowerManager();
-        networkManager = NetworkManager.getNetworkManager();
-        nameplateManager = NameplateManager.getNameplateManager();
 
         stateBar = new stateBarHandler(this);
 
@@ -126,7 +121,16 @@ public class AppActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
+
         wakeLock.acquire(); //设置保持唤醒
+
+        networkManager = NetworkManager.getNetworkManager();
+        netDevInfo = networkManager.getNetDevInfo();
+        databaseManager = DatabaseManager.getDatabaseManager();
+        powerManager = PowerManager.getPowerManager();
+        networkManager = NetworkManager.getNetworkManager();
+        nameplateManager = NameplateManager.getNameplateManager();
+
         setCurrentActivity(this);
         PromptBox.creatPromptBox(this);
 
@@ -301,13 +305,13 @@ public class AppActivity extends Activity implements View.OnClickListener {
             if(enable){
                 ivWifi.setVisibility(View.VISIBLE);
 
-                if (rssi > -50 && rssi < 0) {//最强
+                if (rssi > -70 && rssi < 0) {//最强
                     ivWifi.setImageLevel(0);
-                } else if (rssi > -70 && rssi < -50) {//较强
+                } else if (rssi > -80 && rssi < -70) {//较强
                     ivWifi.setImageLevel(1);
-                } else if (rssi > -80 && rssi < -70) {//较弱
+                } else if (rssi > -85 && rssi < -80) {//较弱
                     ivWifi.setImageLevel(2);
-                } else if (rssi < -80) {//微弱
+                } else if (rssi < -85) {//微弱
                     ivWifi.setImageLevel(3);
                 }
             }
@@ -451,7 +455,9 @@ public class AppActivity extends Activity implements View.OnClickListener {
 
         //铭牌更新
         else if(intent.getAction().equals(MyApplication.ACTION_NAMEPLATE_UPDATE) && isActivityTop()){
+
             String filePath = intent.getStringExtra("STRING");
+            Log.d(TAG,"filePath = " + filePath);
             nameplateManager.para.setNpType(NameplateManager.TYPE_RDY_MADE_PIC);
             nameplateManager.para.setNpImg(filePath);
             nameplateManager.update(this);
@@ -459,11 +465,11 @@ public class AppActivity extends Activity implements View.OnClickListener {
 
     }
 
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        powerManager.resetSavePowerTime();
-        return super.dispatchTouchEvent(ev);
-    }
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        powerManager.resetSavePowerTime();
+//        return super.dispatchTouchEvent(ev);
+//    }
 
     protected boolean isActivityTop() {
         Class<? extends Context> cls = getClass();

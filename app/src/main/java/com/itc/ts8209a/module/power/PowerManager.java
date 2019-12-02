@@ -114,22 +114,25 @@ public class PowerManager {
                     app.registerReceiver(new betteryStatusReceiver(), intentFilter);
 
                     (new Timer()).schedule(new getPowerStatus(), 1000, GET_BAT_INFO_TIME);
-                    (new Timer()).schedule(new savePowerTimer(), 5000, 1000);
+//                    (new Timer()).schedule(new savePowerTimer(), 5000, 1000);
                 }
 
                 broadcastPowerInfo();
             }
 
         });
+
+//        String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
+//        Cmd.execCmd(cmd);
     }
 
-    public void resetSavePowerTime() {
-        timeCount = 0;
-        if (savePower) {
-            normalPowerMode();
-            savePower = false;
-        }
-    }
+//    public void resetSavePowerTime() {
+//        timeCount = 0;
+//        if (savePower) {
+//            normalPowerMode();
+//            savePower = false;
+//        }
+//    }
 
 
     //定时获取设备状态
@@ -138,8 +141,8 @@ public class PowerManager {
         @Override
         public void run() {
             Cmd.execCmd("dumpsys battery", this);
-            Cmd.execCmd("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", this);
-            Cmd.execCmd("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", this);
+//            Cmd.execCmd("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", this);
+//            Cmd.execCmd("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", this);
         }
 
         @Override
@@ -216,37 +219,37 @@ public class PowerManager {
         }
     }
 
-    private class savePowerTimer extends TimerTask {
-
-        @Override
-        public void run() {
-            //非充电下
-            if (!charge) {
-                if (!savePower) {
-                    if (timeCount++ >= ENTER_SAVE_POWER_TIME) {
-                        savePowerMode();
-                        savePower = true;
-                        timeCount = 0;
-                    }
-                } else {
-                    if (timeCount++ >= EXIT_SAVE_POWER_TIME) {
-                        normalPowerMode();
-                        savePower = false;
-                        timeCount = 0;
-                    }
-                }
-            }
-
-            //当设备处于充电状态
-            else {
-                if (savePower) {
-                    normalPowerMode();
-                    savePower = false;
-                    timeCount = 0;
-                }
-            }
-        }
-    }
+//    private class savePowerTimer extends TimerTask {
+//
+//        @Override
+//        public void run() {
+//            //非充电下
+//            if (!charge) {
+//                if (!savePower) {
+//                    if (timeCount++ >= ENTER_SAVE_POWER_TIME) {
+//                        savePowerMode();
+//                        savePower = true;
+//                        timeCount = 0;
+//                    }
+//                } else {
+//                    if (timeCount++ >= EXIT_SAVE_POWER_TIME) {
+//                        normalPowerMode();
+//                        savePower = false;
+//                        timeCount = 0;
+//                    }
+//                }
+//            }
+//
+//            //当设备处于充电状态
+//            else {
+//                if (savePower) {
+//                    normalPowerMode();
+//                    savePower = false;
+//                    timeCount = 0;
+//                }
+//            }
+//        }
+//    }
 
     //接收系统广播（静态注册），充电状态
     public class betteryStatusReceiver extends BroadcastReceiver {
@@ -290,17 +293,17 @@ public class PowerManager {
 //        MyApplication.LocalBroadcast.send(MyApplication.ACTION_POWER_MODE_UPDATE,bundle);
 //    }
 
-    private void savePowerMode() {
-        String cmd = "echo \"conservative\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
-        Cmd.execCmd(cmd);
-        Debug.d(TAG, "savepower mode");
-    }
+//    private void savePowerMode() {
+//        String cmd = "echo \"conservative\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
+//        Cmd.execCmd(cmd);
+//        Debug.d(TAG, "savepower mode");
+//    }
 
-    private void normalPowerMode() {
-        String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
-        Cmd.execCmd(cmd);
-        Debug.d(TAG, "normalpower mode");
-    }
+//    private void normalPowerMode() {
+//        String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
+//        Cmd.execCmd(cmd);
+//        Debug.d(TAG, "normalpower mode");
+//    }
 
     private int voltageToLevel(int v) {
         int level = 0;

@@ -109,6 +109,9 @@ public class AppConfig {
     //获取网络状态信息时间(单位:毫秒)
     public static final int GET_NETWOR_STA_TIME = 10 * 1000;//10S
 
+    //协议头
+    public static final String NET_PROTOCOL_HEAD = "ITCL";
+
     //服务器文字编码
     public static final String SERV_ENCODING = "GBK";
 
@@ -130,6 +133,23 @@ public class AppConfig {
     //默认是否使能DHCP
     public static final boolean DHCP_EN_DEF = true;
 
+    //发送心跳间隔（单位S）
+    public static final int SEND_HARTBEAT_TIME = 30;
+
+    //心跳超时
+    public static final int REC_HARTBEAT_TIMEOUT = SEND_HARTBEAT_TIME * 3;
+
+    //Socket重连时间（单位S）
+    public static final int RESTART_NET_TIME = 30; //(Second)
+
+    //设备重复时间（单位S）
+    public static final int DEV_REGISTE_TIME = 30; //(Second)
+
+    //HTTP请求时间（单位S）
+    public static final int HTTP_REQUEST_INTERVAL = 30;
+
+    //HTTP最大请求次数
+    public static final int HTTP_REQUEST_TIMES = 10;
     /***************** 打印信息相关参数 ******************/
     //Debug功能是否使用Log打印功能
     public static final boolean DEBUG_LOG_EN = true;

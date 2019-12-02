@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.*;
-import android.support.annotation.IntDef;
+import android.os.Handler;
 import android.util.Log;
 
 import com.itc.ts8209a.widget.*;
@@ -26,14 +26,14 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.logging.*;
 
-import static android.R.id.input;
 import static com.itc.ts8209a.app.AppConfig.*;
 import static com.itc.ts8209a.module.network.NetworkManager.*;
 
@@ -108,7 +108,7 @@ public class Network extends Service {
     //设备注册标志
     private boolean devRegistered = false;
     //会议信息获取标志
-    private boolean getMeetInfo = false;
+    private boolean getUserList = false;
     //进程间通讯
     private Messenger replyMessenger;
 
@@ -166,7 +166,7 @@ public class Network extends Service {
                 case CMD_RESET_NETWORK:
                     servIp = bundle.getIntArray(NETWORK_SERV_IP);
                     servPort = bundle.getInt(NETWORK_SERV_PORT);
-                    devRegistered = false;
+
                     restartNetwork();
                     break;
                 case CMD_SET_REPLY:
@@ -213,13 +213,14 @@ public class Network extends Service {
 
 
     public void creatNetwork() {
-        restartNetwork();
+//        restartNetwork();
         networkMonitor = new NetworkMonitor();
         (new Thread(networkMonitor)).start();
     }
 
     public void restartNetwork() {
         devRegistered = false;
+        getUserList = false;
         String ip = servIp[0] + "." + servIp[1] + "." + servIp[2] + "." + servIp[3];
         if (socketHandler != null)
             socketHandler.closeSocket();
@@ -227,11 +228,46 @@ public class Network extends Service {
     }
 
     public void initSocket(String ip, int port) {
-//        Log.i(TAG,"Socket init( "+ip+" : "+port+")");
+        Log.i(TAG,"Socket init( "+ip+" : "+port+")");
         socketHandler = new SocketHandler(ip, port);
         socketHandler.setReceiveHandler(socketRecHandler);
+        socketHandler.setSocketStaHandler(socketStateHandler);
         socketHandler.createSocket();
     }
+
+    private Handler socketStateHandler = new Handler(){
+
+        private void sendStatus(int sta) {
+            if (replyMessenger != null) {
+                try {
+                    Message msg = Message.obtain();
+                    msg.what = CMD_NETWORK_STATUS;
+                    msg.arg1 = sta;
+                    replyMessenger.send(msg);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case STA_CONNECTED:{
+                    Log.d(TAG,"socket is connect");
+                    sendStatus(msg.what);
+                    socketTransHandler.sendEmptyMessage(REQ_TS_DEVICE_REG);
+                }break;
+
+                case STA_DISCONNECTED:
+                default:{
+                    Log.d(TAG,"socket is disconnect");
+                    sendStatus(msg.what);
+                }break;
+            }
+        }
+    };
 
     private Handler socketTransHandler = new Handler() {
         private byte[] head = {0x49, 0x54, 0x43, 0x4C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -299,7 +335,7 @@ public class Network extends Service {
 
         @Override
         public void handleMessage(Message msg) {
-            json = byteToJson((byte[]) msg.obj);
+            json = byteToJson((msg.getData()).getByteArray("JSON"));
 //            Debug.d(TAG,"receive json:"+json.toString());
             if (json != null) {
                 try {
@@ -317,7 +353,7 @@ public class Network extends Service {
                             break;
                         case RSP_TS_DEVICE_REG:
                             int iRes = json.getInt("iResult");
-                            bundle.putInt("iResult",iRes);
+                            bundle.putInt("iResult", iRes);
                             switch (iRes) {
                                 case 200:
                                     SysDateTime.setDateTimeMillis(Long.parseLong(json.getString("strErrorMsg")));
@@ -337,13 +373,12 @@ public class Network extends Service {
                             bundle.putString("strContent", json.getString("strContent"));
                             bundle.putString("strStartTime", json.getString("strStartTime"));
                             bundle.putString("strEndTime", json.getString("strEndTime"));
-                            getMeetInfo = true;
                             break;
                         case EVT_TS_MEETING_BEGIN:
                             break;
                         case EVT_TS_MEETING_END:
                             devRegistered = false;
-                            getMeetInfo = false;
+                            getUserList = false;
                             break;
                         case EVT_TS_QUIT_MEETING:
                             break;
@@ -361,6 +396,7 @@ public class Network extends Service {
                             break;
                         case RSP_TS_GET_USERLIST:
                             bundle.putString("lstDevice", json.getJSONObject("lstDevice").toString());
+                            getUserList = true;
                             break;
                         case EVT_TS_REQSERVICE_ACK:
                             bundle.putString("strContent", json.getString("strContent"));
@@ -384,7 +420,7 @@ public class Network extends Service {
                             if (json.has("iMeetID"))
                                 meetingId = json.getInt("iMeetID");
                             else
-                                meetingId = 1;
+                                meetingId = 0;
 
                             bundle.putInt("iMeetID", meetingId);
                             break;
@@ -430,48 +466,68 @@ public class Network extends Service {
     };
 
     private class NetworkMonitor implements Runnable {
-        private static final int SEND_HARTBEAT_TIME = 9; //15S
-        private static final int REC_HARTBEAT_TIMEOUT = 30; //90S
+//        private static final int SEND_HARTBEAT_TIME = 30; //(Second)
+//        private static final int RESTART_NET_TIME = 30; //(Second)
+//        private static final int DEV_REGISTE_TIME = 30; //(Second)
+//        private static final int REC_HARTBEAT_TIMEOUT = SEND_HARTBEAT_TIME * 3; //(Second)
 
-        //        private boolean running = false;
-        private int sendHartbeatTime = SEND_HARTBEAT_TIME;
+        private int sendHartbeatTime = 0;
         private int recHartbeatTime = 0;
+        private int restartNetworkTime = 0;
+        private int devRegisteTime = DEV_REGISTE_TIME;
 
-        public void sendHartbeatTimeReset() {
-            sendHartbeatTime = SEND_HARTBEAT_TIME;
+
+        private void sendHartbeatTimeReset() {
+            sendHartbeatTime = 0;
         }
 
-        public void recHartbeatTimeReset() {
+        private void recHartbeatTimeReset() {
             recHartbeatTime = 0;
         }
+
 
         @Override
         public void run() {
 //            if(running)
 //                return;
             synchronized ("NetworkMonitor") {
-//                running = true;
                 while (true) {
                     try {
-                        while (!socketHandler.getSocketConnected()) {
-//                            restartNetwork();
-                            Thread.sleep(1000);
+//                        while (socketHandler == null || !socketHandler.isSocketConnected) {
+//                            Thread.sleep(1000);
+//                        }
+                        if (socketHandler == null || !socketHandler.isSocketConnected) {
+                            if(restartNetworkTime++ >= RESTART_NET_TIME) {
+                                restartNetwork();
+                                restartNetworkTime = 0;
+                            }
+//                            Log.d(TAG,"Network monitor restart network");
+//                            Thread.sleep(10*1000);
                         }
-//                        Log.d(TAG,"NetworkMonitor :"+sendHartbeatTime+"  "+recHartbeatTime);
-                        if (sendHartbeatTime-- <= 0) {
-                            socketTransHandler.sendEmptyMessage(REQ_HEARTBEAT);
-                            sendHartbeatTimeReset();
+                        else {
+                            if (!devRegistered) {
+                                if (!netMac.equals("00:00:00:00:00:00") && !(localIp[0] == 0 && localIp[1] == 0 && localIp[2] == 0 && localIp[3] == 0)) {
+                                    if(devRegisteTime++ > DEV_REGISTE_TIME) {
+                                        socketTransHandler.sendEmptyMessage(REQ_TS_DEVICE_REG);
+                                        devRegisteTime = 0;
+                                    }
+//                                    Thread.sleep(30 * 1000);
+                                }
+                            } else {
+                                if (sendHartbeatTime++ >= SEND_HARTBEAT_TIME) {
+                                    socketTransHandler.sendEmptyMessage(REQ_HEARTBEAT);
+                                    if (!getUserList)
+                                        socketTransHandler.sendEmptyMessage(REQ_TS_GET_USERLIST);
+                                    sendHartbeatTimeReset();
+                                }
+
+                                if (recHartbeatTime++ >= REC_HARTBEAT_TIMEOUT) {
+                                    restartNetwork();
+                                    recHartbeatTimeReset();
+                                }
+                            }
                         }
 
-                        if (!devRegistered) {
-                            socketTransHandler.sendEmptyMessage(REQ_TS_DEVICE_REG);
-                            Thread.sleep(5000);
-                        }
-
-                        if (recHartbeatTime++ >= REC_HARTBEAT_TIMEOUT) {
-                            restartNetwork();
-                            recHartbeatTimeReset();
-                        }
                         Thread.sleep(1000);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -502,34 +558,40 @@ public class Network extends Service {
         }
 
         private Runnable saveFileRunnable = new Runnable() {
+            private int retryTime;
+
             @Override
             public void run() {
+                Message msg = Message.obtain();
 
                 synchronized ("saveFileRunnable") {
-                    try {
-                        byte[] data = getImage(url);
-                        Message msg = Message.obtain();
-                        if (data != null) {
+                    retryTime = HTTP_REQUEST_TIMES;
+                    while(retryTime-- > 0) {
+                        try {
+                            byte[] data = getImage(url);
+                            if (data != null) {
 //                            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);// bitmap
-                            getBitmapHWfromByte(data);
-                            bitmap = byteToBitmap(data);
+                                getBitmapHWfromByte(data);
+                                bitmap = byteToBitmap(data);
 //                            Log.d(TAG,"bitmap height = "+bitmap.getHeight()+"  bitmap width = "+bitmap.getWidth());
-                            String fileName = url.substring(url.lastIndexOf('/') + 1, url.length());
-                            saveFile(bitmap, fileName);
-                            msg.what = 1;
-                            msg.obj = filePath + fileName;
+                                String fileName = String.format("%s_", System.currentTimeMillis()) + url.substring(url.lastIndexOf('/') + 1, url.length());
+                                saveFile(bitmap, fileName);
+                                msg.what = 1;
+                                msg.obj = filePath + fileName;
 
-                        } else {
-                            msg.what = 0;
-                            Log.e(TAG, "Image error!");
+                                if (resultHandler != null)
+                                    resultHandler.sendMessage(msg);
+
+                                break;
+                            }
+                            Thread.sleep(3000);
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
 
-                        if (resultHandler != null)
-                            resultHandler.sendMessage(msg);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             }
@@ -574,9 +636,12 @@ public class Network extends Service {
         }
 
         private byte[] getImage(String path) throws Exception {
+            if(path == null)
+                return null;
+
             URL url = new URL(path);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(5 * 1000);
+            conn.setConnectTimeout(HTTP_REQUEST_INTERVAL * 1000);
             conn.setRequestMethod("GET");
             InputStream inStream = conn.getInputStream();
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
@@ -614,38 +679,34 @@ public class Network extends Service {
     private class SocketHandler {
         private Socket socket;
         private android.os.Handler receiveHandler = null;
-        private int bufSize = 1500;
+        private android.os.Handler socketStaHandler = null;
+        private int bufSize = 40*1024;
         private String ip = "";
         private int port = 0;
-        private boolean socketConnected = false;
-        private boolean creating = false;
-        private Timer socketWatchman = null;
+        private boolean isSocketConnected = false;
+        private boolean isSocketCreating = false;
+//        private Timer socketWatchman = null;
 
         //Thread
         private receiveThread receiver;
         private CreatSocketThread creatSocket;
         private sendThread sender;
 
-        public SocketHandler(String ip, int port) {
+        private SocketHandler(String ip, int port) {
             this.ip = ip;
             this.port = port;
         }
 
-        public void createSocket() {
-            if (creating)
+        private void createSocket() {
+            if (isSocketCreating)
                 return;
             creatSocket = new CreatSocketThread();
             creatSocket.start();
         }
 
-        public void closeSocket() {
+        private void closeSocket() {
             try {
-                if (null != socket) {
-                    if (!socket.isClosed()) {
-                        socket.close();
-                    }
-                    socket = null;
-                }
+
                 if (receiver != null) {
                     receiver.interrupt();
                     receiver = null;
@@ -658,19 +719,22 @@ public class Network extends Service {
                     sender.interrupt();
                     sender = null;
                 }
-                discreateSocketWatchman();
-                socketConnected = false;
-                sendStatus(STA_DISCONNECTED);
+
+                if (null != socket) {
+                    if (!socket.isClosed()) {
+                        socket.close();
+                    }
+                    socket = null;
+                }
+//                discreateSocketWatchman();
+//                socketConnected = false;
+//                sendStatus(STA_DISCONNECTED);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        public boolean getSocketConnected() {
-            return socketConnected;
-        }
-
-        public void sendMsg(byte[] msg) {
+        private void sendMsg(byte[] msg) {
             if (sender != null) {
                 sender.send(msg);
             }
@@ -680,21 +744,57 @@ public class Network extends Service {
             sendMsg(msg.getBytes());
         }
 
-        public void setReceiverBufSize(int bufSize) {
-            this.bufSize = bufSize;
+
+        private void setReceiveHandler(android.os.Handler handler) {
+            receiveHandler = handler;
         }
 
-        public void setReceiveHandler(android.os.Handler handler) {
-            receiveHandler = handler;
+        private void setSocketStaHandler(android.os.Handler handler) {
+            socketStaHandler = handler;
+        }
+
+        private class CreatSocketThread extends Thread {
+            @Override
+            public void run() {
+                isSocketCreating = true;
+                while (true) {
+                    try {
+                        while (!(netDevEn && networkEn)) {
+                            sleep(1000);
+                        }
+                        socket = new Socket(ip, port);
+                        if (socket.isConnected()) {
+                            receiver = new receiveThread();
+                            receiver.start();
+                            sender = new sendThread();
+                            sender.start();
+                            if(socketStaHandler != null){
+                                socketStaHandler.sendEmptyMessage(STA_CONNECTED);
+                            }
+                            isSocketConnected = true;
+                            break;
+                        }
+                        Thread.sleep(3000);
+                    } catch (IOException e) {
+                        socket = null;
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+                isSocketCreating = false;
+            }
         }
 
         private class receiveThread extends Thread {
 
+            private final byte[] netHead = NET_PROTOCOL_HEAD.getBytes();
+
             @Override
             public void run() {
-                synchronized ("receiveThread") {
+                synchronized (this) {
                     byte[] buffer = new byte[bufSize];
                     int length;
+
                     if (socket == null) {
                         closeSocket();
                         return;
@@ -702,78 +802,53 @@ public class Network extends Service {
                     try {
                         InputStream stream = socket.getInputStream();
 //                        Log.d(TAG,socket.isClosed()+" "+socket.isInputShutdown()+" "+stream.read(buffer)+" "+socketConnected);
-                        while (!socket.isClosed() && !socket.isInputShutdown() && ((length = stream.read(buffer)) != -1) && socketConnected) {
-                            Thread.sleep(1);
-                            if (length > 0) {
-//                                Log.d(TAG, socket.getInetAddress() + ":" + new String(Arrays.copyOf(buffer, length)).trim());
-//                                Log.d(TAG, socket.getInetAddress() + ":" + Debug.Byte2Str(buffer));
-                                if (receiveHandler != null) {
-                                    Message msg = Message.obtain();
-                                    msg.obj = buffer.clone();
-                                    receiveHandler.sendMessage(msg);
+                        while (!socket.isClosed() && !socket.isInputShutdown()) {
+                            if ((length = stream.read(buffer)) != -1 && length > 0) {
+                                if (receiveHandler != null && length > netHead.length) {
+                                    for(int i = 0; i < (length - netHead.length) ;i++){
+                                        if(buffer[i] == netHead[0] && buffer[i+1] == netHead[1] && buffer[i+2] == netHead[2] && buffer[i+3] == netHead[3]){
+                                            int packLen = (buffer[i+8] & 0xFF) + (buffer[i+9] & 0xFF) * 256;
+                                            if(packLen <= 24)
+                                                continue;
+
+                                            byte[] buf = new byte[packLen];
+                                            Bundle bundle = new Bundle();
+
+                                            System.arraycopy(buffer,i,buf,0,packLen);
+                                            bundle.putByteArray("JSON",buf);
+
+                                            Log.d(TAG,"packLen = "+ packLen +" content:" + General.Byte2Str(buf,packLen > 50 ? 50 : packLen) + "..  end :" +buf[packLen-2] + " "+buf[packLen - 1]);
+
+                                            Message msg = Message.obtain();
+                                            msg.setData(bundle);
+                                            receiveHandler.sendMessage(msg);
+                                        }
+                                    }
                                     Arrays.fill(buffer, (byte) 0x00);
                                 }
                             }
+                            Thread.sleep(500);
                         }
-                    } catch (IOException e) {
-//                        Debug.d(TAG, "socket receiver err:" + e);
+                    } catch (SocketException e){
+                        e.printStackTrace();
+                    }catch(SocketTimeoutException e){
+                        e.printStackTrace();
+                    }catch (IOException e) {
+                        e.printStackTrace();
                     } catch (InterruptedException e) {
-//                        Debug.d(TAG, "socket receiver exit by interrupted!");
-                        closeSocket();
+                        e.printStackTrace();
                     }
-//                    Debug.d(TAG, "socket receive exit");
-//                    closeSocket();
-                    socketConnected = false;
-                }
-            }
-        }
-
-        private class CreatSocketThread extends Thread {
-            @Override
-            public void run() {
-                int i = 0;
-                creating = true;
-                sendStatus(STA_CONNECTING);
-                while (true) {
-                    try {
-                        while (!(netDevEn && networkEn)) {
-                            sleep(1000);
-//                            Log.d(TAG,"netDevEn = "+netDevEn+"  networkEn = "+networkEn);
-                        }
-                        Thread.sleep(i > 0 ? 2000 : 0);
-                        socket = new Socket(ip, port);
-                        if (socket.isConnected()) {
-//                            Log.d(TAG,"socket connect success!!");
-                            socketConnected = true;
-                            receiver = new receiveThread();
-                            receiver.start();
-                            sender = new sendThread();
-                            sender.start();
-                            createSocketWatchman();
-                            sendStatus(STA_CONNECTED);
-                            break;
-                        }
-                    } catch (IOException e) {
-                        socket = null;
-//                        Debug.d(TAG, "Creat socket err: " + e.getMessage() + " try times:" + (++i));
-                    } catch (InterruptedException e) {
-//                        Debug.d(TAG, "CreatSocket exit by interrupted!");
-                        break;
+                    if(socketStaHandler != null){
+                        socketStaHandler.sendEmptyMessage(STA_DISCONNECTED);
                     }
+                    isSocketConnected = false;
                 }
-                creating = false;
             }
         }
 
         private class sendThread extends Thread {
             private Deque<byte[]> queue = new LinkedBlockingDeque<byte[]>();
-
-            //            private byte[] msg;
             private OutputStream stream;
-
-//            public sendThread(byte[] msg){
-//                this.msg = msg;
-//            }
 
             public void send(byte[] msg) {
                 if (msg != null) {
@@ -790,89 +865,66 @@ public class Network extends Service {
                     }
                     try {
                         stream = socket.getOutputStream();
-                        while (!socket.isClosed() && !socket.isOutputShutdown() && socketConnected) {
+                        while (!socket.isClosed() && !socket.isOutputShutdown()) {
                             if (queue.size() > 0) {
                                 byte[] temp = queue.poll();
 //                                Debug.d(TAG,"network send : "+ (new String(Arrays.copyOf(temp,temp.length),SERV_ENCODING)));
                                 stream.write(temp);
                                 stream.flush();
-                                Thread.sleep(300);
+//                                Thread.sleep(300);
                             }
-                            Thread.sleep(1);
+                            Thread.sleep(300);
                         }
                     } catch (IOException e) {
-//                        Debug.d(TAG, "socket send err:" + e);
+                        e.printStackTrace();
                     } catch (InterruptedException e) {
-//                        Debug.d(TAG, "socket send exit by interrupted!");
-                        closeSocket();
+                        e.printStackTrace();
                     }
-//                    Debug.d(TAG, "socket send exit");
-                    socketConnected = false;
+                    if(socketStaHandler != null){
+                        socketStaHandler.sendEmptyMessage(STA_DISCONNECTED);
+                    }
+                    isSocketConnected = false;
                 }
             }
+        }
 
+//        private void createSocketWatchman() {
+//            if (socketWatchman == null) {
+//                socketWatchman = new Timer();
+//                socketWatchman.schedule(new watchmanTask(), 5000, 5000);
+//            }
+//        }
+//
+//        private void discreateSocketWatchman() {
+//            if (socketWatchman != null) {
+//                socketWatchman.cancel();
+//                socketWatchman = null;
+//            }
+//        }
+
+//        private class watchmanTask extends TimerTask {
+//
 //            @Override
 //            public void run() {
-//                synchronized ("sendMsg") {
-//                    int waittime = 0;
-//                    try {
-//                        while(!socketConnected){
-//                            Thread.sleep(1000);
-//                            if(waittime++ > 60)
-//                                return;
-//                        }
-//                        if (!socket.isClosed() && !socket.isOutputShutdown()) {
-//                            stream = socket.getOutputStream();
-//                            stream.write(this.msg);
-//                            stream.flush();
-//                        }
-//                    } catch (IOException e) {
-//                        Log.e(TAG, "socket send msg err:" + e);
-//                    } catch (InterruptedException e) {
-//                        Log.i(TAG, "sender exit by interrupted");
-//                    }
+//                if (!socketConnected) {
+//                    closeSocket();
+//                    createSocket();
 //                }
 //            }
-        }
+//        }
 
-        private void createSocketWatchman() {
-            if (socketWatchman == null) {
-                socketWatchman = new Timer();
-                socketWatchman.schedule(new watchmanTask(), 5000, 5000);
-            }
-        }
-
-        private void discreateSocketWatchman() {
-            if (socketWatchman != null) {
-                socketWatchman.cancel();
-                socketWatchman = null;
-            }
-        }
-
-        private class watchmanTask extends TimerTask {
-
-            @Override
-            public void run() {
-                if (!socketConnected) {
-//                    Debug.d(TAG,"watchmanTask : socketConnected = false!!");
-                    closeSocket();
-                    createSocket();
-                }
-            }
-        }
-
-        private void sendStatus(int sta) {
-            if (replyMessenger != null) {
-                try {
-                    Message msg = Message.obtain();
-                    msg.what = CMD_NETWORK_STATUS;
-                    msg.arg1 = sta;
-                    replyMessenger.send(msg);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+//        private void sendStatus(int sta) {
+//            if (replyMessenger != null) {
+//                try {
+//                    Message msg = Message.obtain();
+//                    msg.what = CMD_NETWORK_STATUS;
+//                    msg.arg1 = sta;
+//                    replyMessenger.send(msg);
+//                } catch (RemoteException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
     }
 
 }
