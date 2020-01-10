@@ -6,18 +6,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.widget.Cmd;
 import com.itc.ts8209a.widget.Debug;
 import com.itc.ts8209a.widget.General;
 
-import java.lang.reflect.Array;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -27,7 +24,7 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Timer;
 
-import static com.itc.ts8209a.widget.General.addrStrToInt;
+import static com.itc.ts8209a.widget.General.addrStrToIntArr;
 
 /**
  * Created by kuangyt on 2018/12/12.
@@ -78,6 +75,8 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
     protected abstract void shutdown();
 
     protected abstract NetDevInfo getDevInfo();
+
+    protected abstract void refreshNet();
 
     //设置网络参数
     protected void setNetDevInfo(final int[] ip, final int[] mask, final int[] gw) {
@@ -187,9 +186,12 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
 
     //通过命令行获取以太网信息
     protected void getNetDevSta() {
-        Cmd.execCmd(IFCONFIG + devName(), this);
-        Cmd.execCmd(GETPROP + devName(), this);
-        Cmd.execCmd(NETCFG, this);
+//        Cmd.execCmd(IFCONFIG + devName(), this);
+//        Cmd.execCmd(GETPROP + devName(), this);
+//        Cmd.execCmd(NETCFG, this);
+
+//        Log.d(TAG,"ip : " + getIpAddressString());
+//        isConnected();
     }
 
     //广播处理方法
@@ -215,39 +217,35 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
 
     protected abstract void action(Message msg);
 
-    private void connectManager() {
+    protected boolean isConnected() {
         ConnectivityManager connectivityManager = (ConnectivityManager) myApplication.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null) {
-            int type = networkInfo.getType();
 
-//            Debug.d(TAG,"activity network = "+ type);
+        return networkInfo != null && networkInfo.isAvailable();
 
-            if (type == ConnectivityManager.TYPE_WIFI)
-                Debug.d(TAG, "activity network wifi");
-            else if (type == ConnectivityManager.TYPE_ETHERNET)
-                Debug.d(TAG, "activity netork ethernet");
-        }
     }
 
-//    private static String getIpAddressString() {
-//        try {
-//            for (Enumeration<NetworkInterface> enNetI = NetworkInterface
-//                    .getNetworkInterfaces(); enNetI.hasMoreElements(); ) {
-//                NetworkInterface netI = enNetI.nextElement();
-//                for (Enumeration<InetAddress> enumIpAddr = netI
-//                        .getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
-//                    InetAddress inetAddress = enumIpAddr.nextElement();
-//                    if (inetAddress instanceof Inet4Address && !inetAddress.isLoopbackAddress()) {
-//                        return inetAddress.getHostAddress();
-//                    }
-//                }
-//            }
-//        } catch (SocketException e) {
-//            e.printStackTrace();
-//        }
-//        return "0.0.0.0";
-//    }
+    protected String getIpAddressString() {
+        try {
+            for (Enumeration<NetworkInterface> enNetI = NetworkInterface
+                    .getNetworkInterfaces(); enNetI.hasMoreElements(); ) {
+                NetworkInterface netI = enNetI.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = netI.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (inetAddress instanceof Inet4Address && !inetAddress.isLoopbackAddress()) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return "0.0.0.0";
+    }
+
+
+
+
 
     @Override
     public void onResult(String cmd, String res, int value) {
@@ -260,18 +258,22 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
 
         try {
             if (cmd.contains(IFCONFIG)) {
-                int[] ip = new int[4], mask = new int[4];
+                int[] ip, mask = new int[4];
 
                 if (res.contains("ip") && res.contains("mask")) {
-                    ip = addrStrToInt(res.substring(res.indexOf("ip ") + 3, res.indexOf(" mask")));
-                    mask = addrStrToInt(res.substring(res.indexOf("mask ") + 5, res.indexOf(" flags")));
+//                    ip = addrStrToIntArr(res.substring(res.indexOf("ip ") + 3, res.indexOf(" mask")));
+                    mask = addrStrToIntArr(res.substring(res.indexOf("mask ") + 5, res.indexOf(" flags")));
 //                    Log.d(TAG, "ip : " + ip[0] + ip[1] + ip[2] + ip[3] + "  mask : " + mask[0] + mask[1] + mask[2] + mask[3]);
-                } else {
-                    Arrays.fill(ip, 0);
-                    Arrays.fill(mask, 0);
-                    infoListener.infoUpdate(devName());
-                    return;
                 }
+
+//                else {
+//                    Arrays.fill(ip, 0);
+//                    Arrays.fill(mask, 0);
+//                    infoListener.infoUpdate(devName());
+//                    return;
+//                }
+
+                ip = addrStrToIntArr(getIpAddressString());
 
                 if ((infoListener != null) && (!General.ContrastArray(ip, netDevInfo.ip) || !General.ContrastArray(mask, netDevInfo.mask))) {
                     netDevInfo.ip = ip;
@@ -283,8 +285,8 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
                 boolean netEn = false;
 
                 if (res.contains(con_gw)) {
-//                    gw = netDevInfo.dhcp ? addrStrToInt(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip))) : netDevInfo.gw;
-                    gw = addrStrToInt(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip)));
+//                    gw = netDevInfo.dhcp ? addrStrToIntArr(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip))) : netDevInfo.gw;
+                    gw = addrStrToIntArr(res.substring(res.indexOf(index_gw) + index_gw.length(), res.indexOf(index_ip)));
                 } else
                     Arrays.fill(gw, 0);
 

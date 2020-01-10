@@ -107,7 +107,7 @@ public class AppConfig {
 
     /***************** 网络相关参数 ******************/
     //获取网络状态信息时间(单位:毫秒)
-    public static final int GET_NETWOR_STA_TIME = 10 * 1000;//10S
+    public static final int GET_NETWOR_STA_TIME = 15 * 1000;//10S
 
     //协议头
     public static final String NET_PROTOCOL_HEAD = "ITCL";
@@ -140,16 +140,16 @@ public class AppConfig {
     public static final int REC_HARTBEAT_TIMEOUT = SEND_HARTBEAT_TIME * 3;
 
     //Socket重连时间（单位S）
-    public static final int RESTART_NET_TIME = 30; //(Second)
+    public static final int RESTART_NET_TIME = 15; //(Second)
 
     //设备重复时间（单位S）
     public static final int DEV_REGISTE_TIME = 30; //(Second)
 
     //HTTP请求时间（单位S）
-    public static final int HTTP_REQUEST_INTERVAL = 30;
+    public static final int HTTP_REQUEST_INTERVAL = 15;
 
     //HTTP最大请求次数
-    public static final int HTTP_REQUEST_TIMES = 10;
+    public static final int HTTP_REQUEST_TIMES = 20;
     /***************** 打印信息相关参数 ******************/
     //Debug功能是否使用Log打印功能
     public static final boolean DEBUG_LOG_EN = true;

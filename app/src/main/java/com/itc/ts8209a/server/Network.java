@@ -32,7 +32,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.logging.*;
 
 import static com.itc.ts8209a.app.AppConfig.*;
 import static com.itc.ts8209a.module.network.NetworkManager.*;
@@ -61,6 +60,7 @@ public class Network extends Service {
     public static final int CMD_RECEIVE_DATA = 22;
     public static final int CMD_HTTP_DOWNLOAD_RES = 23;
     public static final int CMD_ID_REPEAT = 24;
+    public static final int CMD_REFRESH_NETWORK = 25;
 
     //******************* 设备信息字段 ***********************/
 //    public static final String DEV_RSSI = "DEV_WIFI_RSSI";
@@ -255,7 +255,7 @@ public class Network extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case STA_CONNECTED:{
-                    Log.d(TAG,"socket is connect");
+                    Log.d(TAG,"socket is connected");
                     sendStatus(msg.what);
                     socketTransHandler.sendEmptyMessage(REQ_TS_DEVICE_REG);
                 }break;
@@ -466,16 +466,12 @@ public class Network extends Service {
     };
 
     private class NetworkMonitor implements Runnable {
-//        private static final int SEND_HARTBEAT_TIME = 30; //(Second)
-//        private static final int RESTART_NET_TIME = 30; //(Second)
-//        private static final int DEV_REGISTE_TIME = 30; //(Second)
-//        private static final int REC_HARTBEAT_TIMEOUT = SEND_HARTBEAT_TIME * 3; //(Second)
 
         private int sendHartbeatTime = 0;
         private int recHartbeatTime = 0;
         private int restartNetworkTime = 0;
+        private int restarNetCount = 0;
         private int devRegisteTime = DEV_REGISTE_TIME;
-
 
         private void sendHartbeatTimeReset() {
             sendHartbeatTime = 0;
@@ -493,16 +489,24 @@ public class Network extends Service {
             synchronized ("NetworkMonitor") {
                 while (true) {
                     try {
-//                        while (socketHandler == null || !socketHandler.isSocketConnected) {
-//                            Thread.sleep(1000);
-//                        }
                         if (socketHandler == null || !socketHandler.isSocketConnected) {
                             if(restartNetworkTime++ >= RESTART_NET_TIME) {
-                                restartNetwork();
+                                if(networkEn){
+                                    Log.d(TAG,"NetworkMonitor->Restart to connect network");
+                                    restartNetwork();
+                                }else{
+                                    Log.d(TAG,"NetworkMonitor->Network conditions not available!");
+                                }
                                 restartNetworkTime = 0;
+                                if(restarNetCount++ >= 5){
+                                    restarNetCount = 0;
+                                    if (replyMessenger != null) {
+                                        Message msg = Message.obtain();
+                                        msg.what = CMD_REFRESH_NETWORK;
+                                        replyMessenger.send(msg);
+                                    }
+                                }
                             }
-//                            Log.d(TAG,"Network monitor restart network");
-//                            Thread.sleep(10*1000);
                         }
                         else {
                             if (!devRegistered) {
@@ -757,11 +761,11 @@ public class Network extends Service {
             @Override
             public void run() {
                 isSocketCreating = true;
-                while (true) {
+//                while (true) {
                     try {
-                        while (!(netDevEn && networkEn)) {
-                            sleep(1000);
-                        }
+//                        while (!(netDevEn && networkEn)) {
+//                            sleep(1000);
+//                        }
                         socket = new Socket(ip, port);
                         if (socket.isConnected()) {
                             receiver = new receiveThread();
@@ -772,15 +776,18 @@ public class Network extends Service {
                                 socketStaHandler.sendEmptyMessage(STA_CONNECTED);
                             }
                             isSocketConnected = true;
-                            break;
+                            return;
+//                            break;
                         }
-                        Thread.sleep(3000);
+//                        Thread.sleep(3000);
                     } catch (IOException e) {
+                        e.printStackTrace();
                         socket = null;
-                    } catch (InterruptedException e) {
-                        break;
                     }
-                }
+//                    catch (InterruptedException e) {
+//                        break;
+//                    }
+//                }
                 isSocketCreating = false;
             }
         }

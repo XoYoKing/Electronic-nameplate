@@ -185,15 +185,15 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
         try {
             //IP地址参数设置->服务器参数
             tvDevId.setText(String.valueOf(databaseManager.getDeviceID()));
-            tvServIp.setText(addrIntToStr(databaseManager.getServIp()));
+            tvServIp.setText(General.addrIntArrToStr(databaseManager.getServIp()));
             tvServPort.setText(String.valueOf(databaseManager.getServPort()));
 
             tvNetType.setText(netDevInfo.getNetType() == NetDevManager.TYPE_WIER_NET ?
                     getResources().getString(R.string.wire_network) :
                     getResources().getString(R.string.wireless_network));
-            tvLocalIp.setText(addrIntToStr(netDevInfo.getIp()));
-            tvGatewey.setText(addrIntToStr(netDevInfo.getGw()));
-            tvNetmask.setText(addrIntToStr(netDevInfo.getMask()));
+            tvLocalIp.setText(General.addrIntArrToStr(netDevInfo.getIp()));
+            tvGatewey.setText(General.addrIntArrToStr(netDevInfo.getGw()));
+            tvNetmask.setText(General.addrIntArrToStr(netDevInfo.getMask()));
 
             int type = netDevInfo.getNetType();
             if (type == NetDevManager.TYPE_WIER_NET) {
@@ -217,7 +217,7 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
             tvMac.setText(netDevInfo.getMac());
         }catch(Exception e){
             e.printStackTrace();
-            MyApplication.LocalBroadcast.send(MyApplication.ACTION_HARDFAULT_REBOOT);
+//            MyApplication.LocalBroadcast.send(MyApplication.ACTION_HARDFAULT_REBOOT);
         }
 
         //亮度参数
@@ -258,7 +258,7 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                         int id = databaseManager.getDeviceID();
 
                         tvDevId.setText(String.valueOf(para.devId));
-                        tvServIp.setText(General.addrIntToStr(para.servIP));
+                        tvServIp.setText(General.addrIntArrToStr(para.servIP));
                         tvServPort.setText(String.valueOf(para.servPort));
 
                         databaseManager.setServIp(para.servIP)
@@ -300,9 +300,9 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                         if (para.dhcp) {
                             networkManager.setDhcpEn();
 
-                            tvLocalIp.setText(General.addrIntToStr(netDevInfo.getIp()));
-                            tvGatewey.setText(General.addrIntToStr(netDevInfo.getGw()));
-                            tvNetmask.setText(General.addrIntToStr(netDevInfo.getMask()));
+                            tvLocalIp.setText(General.addrIntArrToStr(netDevInfo.getIp()));
+                            tvGatewey.setText(General.addrIntArrToStr(netDevInfo.getGw()));
+                            tvNetmask.setText(General.addrIntArrToStr(netDevInfo.getMask()));
                         } else {
                             networkManager.setNetworkInfo(para.localIP,para.mask,para.gateway);
 
@@ -310,12 +310,12 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                                     .setGateway(para.gateway)
                                     .setMask(para.mask);
 
-                            tvLocalIp.setText(General.addrIntToStr(para.localIP));
-                            tvGatewey.setText(General.addrIntToStr(para.gateway));
-                            tvNetmask.setText(General.addrIntToStr(para.mask));
+                            tvLocalIp.setText(General.addrIntArrToStr(para.localIP));
+                            tvGatewey.setText(General.addrIntArrToStr(para.gateway));
+                            tvNetmask.setText(General.addrIntArrToStr(para.mask));
                         }
                         databaseManager.save();
-                        networkManager.sendDevInfo();
+//                        networkManager.sendDevInfo();
                         (new Timer()).schedule(new TimerTask() {
                             @Override
                             public void run() {
@@ -395,9 +395,9 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
 
             }
             tvMac.setText(bundle.getString(NETWORK_MAC));
-            tvLocalIp.setText(General.addrIntToStr(bundle.getIntArray(NETWORK_LOCAL_IP)));
-            tvGatewey.setText(General.addrIntToStr(bundle.getIntArray(NETWORK_GATEWAY)));
-            tvNetmask.setText(General.addrIntToStr(bundle.getIntArray(NETWORK_MASK)));
+            tvLocalIp.setText(General.addrIntArrToStr(bundle.getIntArray(NETWORK_LOCAL_IP)));
+            tvGatewey.setText(General.addrIntArrToStr(bundle.getIntArray(NETWORK_GATEWAY)));
+            tvNetmask.setText(General.addrIntArrToStr(bundle.getIntArray(NETWORK_MASK)));
         }
 
 //        else if(intent.getAction().equals(MyApplication.ACTION_POWER_INFO_UPDATE)){

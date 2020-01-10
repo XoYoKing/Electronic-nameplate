@@ -95,7 +95,8 @@ public class NameplateManager {
 
                                     @Override
                                     public void onSetPicTimeOut() {
-                                        MyApplication.LocalBroadcast.send(MyApplication.ACTION_HARDFAULT_REBOOT);
+//                                        MyApplication.LocalBroadcast.send(MyApplication.ACTION_HARDFAULT_REBOOT);
+                                        Log.d(TAG,"Nameplate updata timeout !!!");
                                     }
                                 });
                                 setNamePlateByByteData();
@@ -177,7 +178,7 @@ public class NameplateManager {
                     @Override
                     public void onSetPicTimeOut() {
                         Log.i("NameplateManager", "onSetPicTimeOut");
-                        MyApplication.LocalBroadcast.send(MyApplication.ACTION_HARDFAULT_REBOOT);
+//                        MyApplication.LocalBroadcast.send(MyApplication.ACTION_HARDFAULT_REBOOT);
                         Ra8876l.devInit();
                         dialog.dismiss();
                         updating = false;

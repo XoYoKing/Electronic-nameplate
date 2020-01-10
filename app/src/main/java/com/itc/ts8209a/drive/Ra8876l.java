@@ -6,8 +6,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 
-import com.itc.ts8209a.widget.Debug;
-
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -44,7 +43,7 @@ public class Ra8876l {
         new Thread(){
             public void run() {
                 devHandshake();
-                init(40*1000*1000);
+                init(45*1000*1000);
                 if(initFinishListener != null){
                     initFinishListener.onInitFinish();
                 }
@@ -62,12 +61,12 @@ public class Ra8876l {
             imgDataListener.onImgData(imgData);
         }
 
-//        Debug.d("setPic","data len="+imgData.length);
+//        Debug.d("setPic","data len="+imageData.length);
 
         setPic(imgData);
 
         viewBmp = null;
-        imgData = null;
+//        imgData = null;
     }
 
     public static void setPic(final byte[] data) {
@@ -103,7 +102,7 @@ public class Ra8876l {
 						}catch(Exception e){
 							Log.e("Stop sendDataThread",""+e);
 						}
-						sendImgData.imgData = null;
+//						sendImgData.imageData = null;
 						if (picTimeOutListener != null)
 							picTimeOutListener.onSetPicTimeOut();
 //						sendImgData.beingSend = false;
@@ -117,31 +116,33 @@ public class Ra8876l {
 
     private static class sendImageData implements Runnable {
         public boolean beingSend = false;
-        public byte[] imgData = null;
+        public byte[] imageData = new byte[1024*600*3];
 
         public void setImageData(byte[] data) {
-            imgData = data;
+//            imageData = data;
+            System.arraycopy(data,0, imageData,0,data.length);
         }
 
         @Override
         public void run() {
-            synchronized ("sendImageData") {
+//            synchronized ("sendImageData") {
                 Log.i("sendImageData Thread","Start");
-                if (imgData == null || beingSend)
+                if (imageData == null || beingSend)
                     return;
                 else {
-                    // displayOff();
+//                     displayOff();
                     beingSend = true;
-                    sendData((short) 0, (short) 0, (short) 1024, (short) 600, imgData, imgData.length);
-                    imgData = null;
+                    sendData((short) 0, (short) 0, (short) 1024, (short) 600, imageData, imageData.length);
+//                    imageData = null;
+                    Arrays.fill(imageData,(byte)0x00);
                     beingSend = false;
-                    displayOn();
+//                    displayOn();
                     if (picFinishListener != null)
                         picFinishListener.onSetPicFinish();
 
                 }
                 Log.i("sendImageData Thread","End");
-            }
+//            }
         }
     };
 
@@ -198,7 +199,7 @@ public class Ra8876l {
 
                 imgData[(width * i + j) * 3 + 2] = (byte) ((grey & 0x00FF0000) >> 16);
                 imgData[(width * i + j) * 3 + 1] = (byte) ((grey & 0x0000FF00) >> 8);
-                imgData[(width * i + j) * 3 + 0] = (byte) (grey & 0x000000FF);
+                imgData[(width * i + j) * 3]     = (byte) (grey & 0x000000FF);
             }
         }
 

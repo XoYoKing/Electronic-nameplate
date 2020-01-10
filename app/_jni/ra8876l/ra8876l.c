@@ -170,6 +170,8 @@ static uint8_t ReadWriteByte(uint8_t *data, uint8_t len) {
 
 	struct spi_ioc_transfer xfer;
 
+    memset(&xfer,0,sizeof(struct spi_ioc_transfer));
+    LOGD("clear spi_ioc_transfer\n");
 	memset(sbuf, 0, len);
 	memset(rbuf, 0, len);
 	memcpy(sbuf, data, len);

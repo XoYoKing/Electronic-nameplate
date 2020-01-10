@@ -122,8 +122,8 @@ public class PowerManager {
 
         });
 
-//        String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
-//        Cmd.execCmd(cmd);
+        String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
+        Cmd.execCmd(cmd);
     }
 
 //    public void resetSavePowerTime() {

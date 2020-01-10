@@ -9,9 +9,11 @@ android {
         minSdkVersion 19
         targetSdkVersion 19
         versionCode 2
-        versionName "20191202"
+        versionName "20191216"
+
+
 //            ndk {
-//                moduleName "serialport"//指定生成的so文件名
+//                moduleName "ra8876l"//指定生成的so文件名
 //                abiFilters "armeabi-v7a"//cpu的类型A
 //                ldLibs "-llog"
 //            }

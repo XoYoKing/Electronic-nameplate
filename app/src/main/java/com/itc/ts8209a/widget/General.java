@@ -65,7 +65,7 @@ public class General {
     }
 
     //地址类数据字符串转整形数组函数
-    public static int[] addrStrToInt(String addr) {
+    public static int[] addrStrToIntArr(String addr) {
         int[] result = {0,0,0,0};
 
         String[] addrStrArray = addr.split("\\.");
@@ -76,13 +76,29 @@ public class General {
         return result;
     }
 
+    public static String addrIntToStr(int addr) {
+        return ((addr & 0xFF) + "." +
+                ((addr >>>= 8) & 0xFF) + "." +
+                ((addr >>>= 8) & 0xFF) + "." +
+                ((addr >>>= 8) & 0xFF));
+    }
+
+    public static int[] addrIntToIntArr(int addr) {
+        int[] result = {0,0,0,0};
+        result[0] = (addr & 0xFF);
+        result[1] = ((addr >>>= 8) & 0xFF);
+        result[2] = ((addr >>>= 8) & 0xFF);
+        result[3] = ((addr >>>= 8) & 0xFF);
+        return result;
+    }
+
+
     //地址类数据整形数组转字符串函数
-    public static String addrIntToStr(int[] addr){
+    public static String addrIntArrToStr(int[] addr){
         if(addr.length != 4)
             return "";
 
-        String result = addr[0]+"."+addr[1]+"."+addr[2]+"."+addr[3];
-        return result;
+        return (addr[0]+"."+addr[1]+"."+addr[2]+"."+addr[3]);
     }
 
     // 将int类型的IP转换成字符串形式的IP

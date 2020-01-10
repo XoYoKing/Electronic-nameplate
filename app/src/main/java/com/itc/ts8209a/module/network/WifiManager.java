@@ -2,9 +2,11 @@ package com.itc.ts8209a.module.network;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.os.Message;
 import android.os.Parcelable;
 import android.util.Log;
@@ -15,7 +17,7 @@ import com.itc.ts8209a.widget.Cmd;
 import com.itc.ts8209a.activity.view.CustomDialog;
 import com.itc.ts8209a.activity.view.WifiPassword;
 import com.itc.ts8209a.activity.view.WifiSelection;
-import com.itc.ts8209a.widget.Debug;
+import com.itc.ts8209a.widget.General;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +31,13 @@ import static com.itc.ts8209a.app.AppConfig.*;
  * Created by kuangyt on 2018/8/23.
  */
 
-public class WifiManager extends NetDevManager{
+public class WifiManager extends NetDevManager {
 
     private static final String TAG = "WifiManager";
 
     public static final String DEV_NAME = "wlan0";
 
-    public static final int NONE =1;
+    public static final int NONE = 1;
     public static final int WEP = 2;
     public static final int WPA = 3;
     public static final int EAP = 4;
@@ -54,7 +56,7 @@ public class WifiManager extends NetDevManager{
     /*  系统WIFI管理相关对象  */
     //系统WifiManager
     private android.net.wifi.WifiManager osWifiManager = null;
-    private android.net.wifi.WifiInfo osWifiInfo;
+//    private android.net.wifi.WifiInfo osWifiInfo;
 
     // 扫描出的网络连接列表
     private List<ScanResult> wifiList;
@@ -71,10 +73,10 @@ public class WifiManager extends NetDevManager{
     private static String selectedPwd = "";         //已选择WIFI的密码
     private static int selectedType = 0;            //已选择WIFI的类型
 
-    private WifiManager(){
+    private WifiManager() {
     }
 
-    protected static WifiManager getWifiManager(){
+    protected static WifiManager getWifiManager() {
         return wifiManager;
     }
 
@@ -87,7 +89,7 @@ public class WifiManager extends NetDevManager{
         netDevInfo.name = DEV_NAME;
         netDevInfo.type = TYPE_WIRELESS;
         osWifiManager = (android.net.wifi.WifiManager) myApplication.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        osWifiInfo = osWifiManager.getConnectionInfo();
+//        osWifiInfo = osWifiManager.getConnectionInfo();
 
         startGetState();
     }
@@ -113,24 +115,40 @@ public class WifiManager extends NetDevManager{
     // 启动WIFI
     @Override
     protected void startup() {
-        if (!osWifiManager.isWifiEnabled()) {
+//        if (!osWifiManager.isWifiEnabled()) {
             osWifiManager.setWifiEnabled(true);
-        }
+//        }
     }
 
     @Override
     protected void setDhcpEn() {
         super.setDhcpEn();
-        String cmd = String.format(Locale.ENGLISH,"netcfg %s %s",DEV_NAME,"up");
+        String cmd = String.format(Locale.ENGLISH, "netcfg %s %s", DEV_NAME, "up");
         Cmd.execCmd(cmd);
     }
 
     // 关闭WIFI
     @Override
     protected void shutdown() {
-        if (osWifiManager.isWifiEnabled()) {
+//        if (osWifiManager.isWifiEnabled()) {
             osWifiManager.setWifiEnabled(false);
-        }
+//        }
+    }
+
+    @Override
+    protected void refreshNet() {
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    shutdown();
+                    Thread.sleep(2500);
+                    startup();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -144,12 +162,12 @@ public class WifiManager extends NetDevManager{
         boolean res;
         int wcgID;
 
-         wcg = isExits(selectedSsid);
+        wcg = isExits(selectedSsid);
 
-        if(wcg != null)
+        if (wcg != null)
             wcgID = wcg.networkId;
         else {
-            wcg = createWifiInfo(ssid,pwd,type);
+            wcg = createWifiInfo(ssid, pwd, type);
             wcgID = osWifiManager.addNetwork(wcg);
         }
 
@@ -168,7 +186,7 @@ public class WifiManager extends NetDevManager{
     // 断开指定ID的网络
     protected void removeWifi(String ssid) {
         WifiConfiguration wcg = isExits(ssid);
-        if(wcg != null) {
+        if (wcg != null) {
             osWifiManager.disableNetwork(wcg.networkId);
             osWifiManager.disconnect();
             osWifiManager.removeNetwork(wcg.networkId);
@@ -199,8 +217,8 @@ public class WifiManager extends NetDevManager{
                 case android.net.wifi.WifiManager.WIFI_STATE_DISABLING:
 //                    Log.d(TAG,NET_DRIVE_NAME+" wifi disable");
                     netDevInfo.devEn = false;
-                    stopGetState();
-                    stopAutoConnect();
+//                    stopGetState();
+//                    stopAutoConnect();
                     break;
                 case android.net.wifi.WifiManager.WIFI_STATE_ENABLED:
 //                    Log.d(TAG,NET_DRIVE_NAME+" wifi enable");
@@ -210,7 +228,7 @@ public class WifiManager extends NetDevManager{
 //                        Log.d(TAG,"WIFI_STATE_ENABLING");
                     break;
             }
-        }else if (android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {   //监听网络连接
+        } else if (android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {   //监听网络连接
             Parcelable parcelableExtra = intent.getParcelableExtra(android.net.wifi.WifiManager.EXTRA_NETWORK_INFO);
             if (null != parcelableExtra) {
                 NetworkInfo networkInfo = (NetworkInfo) parcelableExtra;
@@ -219,14 +237,16 @@ public class WifiManager extends NetDevManager{
 //                    Log.d(TAG,NET_DRIVE_NAME+" network connected");
                     osWifiManager.saveConfiguration();
                     netDevInfo.netEn = true;
+                    acquireWifiLock();
 //                    startGetState();//启动wifi信息更新定时器   `
-                    stopAutoConnect(); //关闭wifi自动连接定时器
-                } else if(state == NetworkInfo.State.DISCONNECTED) {
+//                    stopAutoConnect(); //关闭wifi自动连接定时器
+                } else if (state == NetworkInfo.State.DISCONNECTED) {
 //                    Log.d(TAG,NET_DRIVE_NAME+" network disconnected");
                     netDevInfo.netEn = false;
                     netDevInfo.reset();
+                    releaseWifiLock();
 //                    stopGetState();
-                    startAutoConnect();
+//                    startAutoConnect();
 //                    updateWifiCfg();
                 }
             }
@@ -287,55 +307,93 @@ public class WifiManager extends NetDevManager{
             return;
         }
         // 连接配置好的指定ID的网络
-        osWifiManager.enableNetwork(wifiConfiguration.get(index).networkId,true);
+        osWifiManager.enableNetwork(wifiConfiguration.get(index).networkId, true);
     }
 
     //启动定时获取wifi状态
-    private void startGetState(){
-        if(getState == null)
+    private void startGetState() {
+        if (getState == null)
             getState = new Timer();
         getState.schedule(new TimerTask() {
             @Override
             public void run() {
                 getNetDevSta();
-                osWifiInfo = osWifiManager.getConnectionInfo();
-                updateWifiCfg();
 //                Log.d(TAG,ssid+" "+mac+" "+rssi);
             }
         }, 5000, GET_NETWOR_STA_TIME);
     }
 
-    private void updateWifiCfg(){
-        String ssid,mac;
-        int rssi;
+    protected void getNetDevSta() {
+        String ssid, mac;
+        int rssi, ip[],gw[],mask[];
+        boolean netEn;
+
+        WifiInfo osWifiInfo = osWifiManager.getConnectionInfo();
+        DhcpInfo dhcpInfo = osWifiManager.getDhcpInfo();
+
         ssid = osWifiInfo.getSSID().equals("0x") ? "" : osWifiInfo.getSSID();
         rssi = osWifiInfo.getRssi();
         mac = osWifiInfo.getMacAddress();
+        ip = General.addrStrToIntArr(getIpAddressString());
+        gw = General.addrIntToIntArr(dhcpInfo.gateway);
+        mask = General.addrIntToIntArr(dhcpInfo.netmask);
+        netEn = isConnected();
+
+        Log.d(TAG,"ssid : " + ssid);
+        Log.d(TAG,"mac : " + mac);
+        Log.d(TAG,"ip : " + ip[0] + ip[1] + ip[2] + ip[3]);
 
         try {
-            if ((infoListener != null) && (!ssid.equals(netDevInfo.ssid) || !mac.equals(netDevInfo.mac) || rssi != netDevInfo.rssi)) {
+            if ((infoListener != null) && (!ssid.equals(netDevInfo.ssid) || !mac.equals(netDevInfo.mac) ||
+                    rssi != netDevInfo.rssi || netEn != netDevInfo.netEn || !General.ContrastArray(netDevInfo.ip, ip) ||
+                    !General.ContrastArray(netDevInfo.gw, gw) || !General.ContrastArray(netDevInfo.mask, mask))) {
+
                 netDevInfo.ssid = ssid;
                 netDevInfo.rssi = rssi;
                 netDevInfo.mac = mac;
+                netDevInfo.ip = ip;
+                netDevInfo.gw = gw;
+                netDevInfo.mask = mask;
+                netDevInfo.netEn = netEn;
                 infoListener.infoUpdate(DEV_NAME);
             }
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }
 
+//    private void updateWifiCfg(String ssid, String mac, int rssi, int[] ip, int[] gw, int[] mask) {
+//
+//        try {
+//            if ((infoListener != null) && (!ssid.equals(netDevInfo.ssid) || !mac.equals(netDevInfo.mac) ||
+//                    rssi != netDevInfo.rssi || !General.ContrastArray(netDevInfo.ip, ip) ||
+//                    General.ContrastArray(netDevInfo.gw, gw) || General.ContrastArray(netDevInfo.mask, mask))) {
+//
+//                netDevInfo.ssid = ssid;
+//                netDevInfo.rssi = rssi;
+//                netDevInfo.mac = mac;
+//                netDevInfo.ip = ip;
+//                netDevInfo.gw = gw;
+//                netDevInfo.mask = mask;
+//                infoListener.infoUpdate(DEV_NAME);
+//            }
+//        } catch (NullPointerException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     //停止定时获取wifi状态
-    private void stopGetState(){
-        if(getState != null){
+    private void stopGetState() {
+        if (getState != null) {
             getState.cancel();
             getState = null;
         }
     }
 
     //启动自动WIFI连接
-    private void startAutoConnect(){
+    private void startAutoConnect() {
         scan();
-        if(autoConnect == null)
+        if (autoConnect == null)
             autoConnect = new Timer();
         autoConnect.schedule(new TimerTask() {
             int index = 0;
@@ -343,15 +401,15 @@ public class WifiManager extends NetDevManager{
             @Override
             public void run() {
                 connectConfiguration(index++);
-                if(index > wifiConfiguration.size())
+                if (index > wifiConfiguration.size())
                     index = 0;
             }
-        }, 5000, 10 * 1000);
+        }, 5000, 30 * 1000);
     }
 
     //关闭自动WIFI连接
-    private void stopAutoConnect(){
-        if(autoConnect != null){
+    private void stopAutoConnect() {
+        if (autoConnect != null) {
             autoConnect.cancel();
             autoConnect = null;
         }
@@ -359,7 +417,7 @@ public class WifiManager extends NetDevManager{
 
     @Override
     protected void action(Message msg) {
-        switch (msg.what){
+        switch (msg.what) {
             case ACTION_WIFI_SELECT:
                 creatWifiSelector((Context) msg.obj);
                 break;
@@ -372,9 +430,9 @@ public class WifiManager extends NetDevManager{
     }
 
     //Wifi接入设置->Wifi选择列表
-    private void creatWifiSelector(final Context context){
+    private void creatWifiSelector(final Context context) {
         scan();
-        CustomDialog.Builder builder = new CustomDialog.Builder(context,CustomDialog.VERTICAL_LIST);
+        CustomDialog.Builder builder = new CustomDialog.Builder(context, CustomDialog.VERTICAL_LIST);
         ScanResult[] wifiListArr = wifiList.toArray(new ScanResult[wifiList.size()]);
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -383,11 +441,11 @@ public class WifiManager extends NetDevManager{
                 selectedSsid = selection.getSsid();
                 selectedType = selection.getEncryptType();
 
-                if(selectedType == NONE || isExits(selectedSsid) != null) {
+                if (selectedType == NONE || isExits(selectedSsid) != null) {
                     wifiManager.connect(selectedSsid, "", selectedType);
                     selector.dismiss();
-                }else
-                    creatWifiPassword(context,selection.getSsid(),selection.getRssi());
+                } else
+                    creatWifiPassword(context, selection.getSsid(), selection.getRssi());
             }
         };
         for (ScanResult aWifiListArr : wifiListArr) {
@@ -396,21 +454,21 @@ public class WifiManager extends NetDevManager{
             selection.setOnClickListener(listener);
             builder.addListView(selection);
         }
-        selector = builder.setTitle(true,"WIFI列表").creatDialog();
+        selector = builder.setTitle(true, "WIFI列表").creatDialog();
         selector.show();
     }
 
     //Wifi接入设置->Wifi密码输入
-    private void creatWifiPassword(Context context,String ssid,int rssi){
+    private void creatWifiPassword(Context context, String ssid, int rssi) {
         WifiPassword.Builder builder = new WifiPassword.Builder(context);
         password = builder.setRssi(rssi).setSsid(ssid).creatWifiPassword();
         password.setOnPasswordResultListener(new WifiPassword.OnPasswordResultListener() {
             @Override
             public void passwordResult(int result, String password) {
-                if(result == WifiPassword.CONNECT){
+                if (result == WifiPassword.CONNECT) {
                     selectedPwd = password;
                     wifiManager.connect(selectedSsid, selectedPwd, selectedType);
-                }else if(result == WifiPassword.CANCEL){
+                } else if (result == WifiPassword.CANCEL) {
                     selectedSsid = "";
                     selectedPwd = "";
                 }
@@ -422,22 +480,21 @@ public class WifiManager extends NetDevManager{
     }
 
     //通过获取到的字段判断加密类型
-    private int getEncryptionMethod(String field){
+    private int getEncryptionMethod(String field) {
         int result;
-        if(field.contains("WPA-PSK") || field.contains("WPA2-PSK")){
+        if (field.contains("WPA-PSK") || field.contains("WPA2-PSK")) {
             result = WPA;
-            if(field.contains("WPA-PSK") && field.contains("WPA2-PSK"))
+            if (field.contains("WPA-PSK") && field.contains("WPA2-PSK"))
                 result = WPA_WPA2;
-            else if(!field.contains("WPA-PSK") || field.contains("WPA2-PSK"))
+            else if (!field.contains("WPA-PSK") || field.contains("WPA2-PSK"))
                 result = WPA2;
-            else if(field.contains("WPA-PSK") || !field.contains("WPA2-PSK"))
+            else if (field.contains("WPA-PSK") || !field.contains("WPA2-PSK"))
                 result = WPA;
-        }
-        else if(field.contains("WEP"))
+        } else if (field.contains("WEP"))
             result = WEP;
-        else if(field.contains("EAP"))
+        else if (field.contains("EAP"))
             result = EAP;
-        else if(field.equals("[ESS]"))
+        else if (field.equals("[ESS]"))
             result = NONE;
         else
             result = UNKNOW;
@@ -445,7 +502,7 @@ public class WifiManager extends NetDevManager{
         return result;
     }
 
-    private WifiConfiguration createWifiInfo(String SSID, String Password,int Type) {
+    private WifiConfiguration createWifiInfo(String SSID, String Password, int Type) {
         WifiConfiguration config = new WifiConfiguration();
         config.allowedAuthAlgorithms.clear();
         config.allowedGroupCiphers.clear();
@@ -463,7 +520,7 @@ public class WifiManager extends NetDevManager{
         if (Type == NONE) // WIFICIPHER_NOPASS
         {
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        }else if (Type == WEP) // WIFICIPHER_WEP
+        } else if (Type == WEP) // WIFICIPHER_WEP
         {
             config.hiddenSSID = true;
             config.wepKeys[0] = "\"" + Password + "\"";
@@ -474,7 +531,7 @@ public class WifiManager extends NetDevManager{
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
             config.wepTxKeyIndex = 0;
-        }else if (Type == WPA||Type == WPA2||Type == WPA_WPA2) // WIFICIPHER_WPA
+        } else if (Type == WPA || Type == WPA2 || Type == WPA_WPA2) // WIFICIPHER_WPA
         {
             config.preSharedKey = "\"" + Password + "\"";
             config.hiddenSSID = true;
@@ -499,10 +556,10 @@ public class WifiManager extends NetDevManager{
         return null;
     }
 
-    private void removeAllWifiCfg(){
+    private void removeAllWifiCfg() {
         List<WifiConfiguration> existingConfigs = osWifiManager.getConfiguredNetworks();
         for (WifiConfiguration existingConfig : existingConfigs) {
-            removeWifi(existingConfig.SSID.replace("\"",""));
+            removeWifi(existingConfig.SSID.replace("\"", ""));
 //            Debug.d(TAG,"remove wifi "+existingConfig.SSID);
         }
     }

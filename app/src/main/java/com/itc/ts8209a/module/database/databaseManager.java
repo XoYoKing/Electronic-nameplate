@@ -358,10 +358,10 @@ public class DatabaseManager {
             gateway = new int[4];
             mask = new int[4];
 
-            localIp = General.addrStrToInt(spfNetwork.getString(KEY_LOCAL_IP, LOCAL_IP_DEF));
-            serverIp = General.addrStrToInt(spfNetwork.getString(KEY_SERVER_IP, SERVER_IP_DEF));
-            gateway = General.addrStrToInt(spfNetwork.getString(KEY_GATEWAY, GATEWAY_DEF));
-            mask = General.addrStrToInt(spfNetwork.getString(KEY_NETMASK, NETMASK_DEF));
+            localIp = General.addrStrToIntArr(spfNetwork.getString(KEY_LOCAL_IP, LOCAL_IP_DEF));
+            serverIp = General.addrStrToIntArr(spfNetwork.getString(KEY_SERVER_IP, SERVER_IP_DEF));
+            gateway = General.addrStrToIntArr(spfNetwork.getString(KEY_GATEWAY, GATEWAY_DEF));
+            mask = General.addrStrToIntArr(spfNetwork.getString(KEY_NETMASK, NETMASK_DEF));
 
             serverPort = spfNetwork.getInt(KEY_SERVER_PORT, SERVER_PORT_DEF);
             dhcp = spfNetwork.getBoolean(KEY_DHCP_EN, DHCP_EN_DEF);
@@ -441,10 +441,10 @@ public class DatabaseManager {
                     synchronized (NETWORK_PREF){
                         SharedPreferences.Editor editor = spfNetwork.edit();
 
-                        editor.putString(KEY_LOCAL_IP, General.addrIntToStr(localIp));
-                        editor.putString(KEY_SERVER_IP, General.addrIntToStr(serverIp));
-                        editor.putString(KEY_GATEWAY, General.addrIntToStr(gateway));
-                        editor.putString(KEY_NETMASK, General.addrIntToStr(mask));
+                        editor.putString(KEY_LOCAL_IP, General.addrIntArrToStr(localIp));
+                        editor.putString(KEY_SERVER_IP, General.addrIntArrToStr(serverIp));
+                        editor.putString(KEY_GATEWAY, General.addrIntArrToStr(gateway));
+                        editor.putString(KEY_NETMASK, General.addrIntArrToStr(mask));
                         editor.putInt(KEY_SERVER_PORT, serverPort);
                         editor.putBoolean(KEY_DHCP_EN, dhcp);
                         editor.putString(KEY_WIFI_SSID, ssid);

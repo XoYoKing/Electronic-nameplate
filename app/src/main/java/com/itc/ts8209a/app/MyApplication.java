@@ -296,7 +296,7 @@ public class MyApplication extends Application {
                         }
                     }
                 }
-            }, 1000, 500);
+            }, 3000, 500);
         }
 
         private static Handler monitorHandler = new Handler() {
