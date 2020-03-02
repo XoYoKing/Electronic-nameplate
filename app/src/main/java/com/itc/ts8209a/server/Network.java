@@ -31,6 +31,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static com.itc.ts8209a.app.AppConfig.*;
@@ -218,7 +220,7 @@ public class Network extends Service {
         (new Thread(networkMonitor)).start();
     }
 
-    public void restartNetwork() {
+    private void restartNetwork() {
         devRegistered = false;
         getUserList = false;
         String ip = servIp[0] + "." + servIp[1] + "." + servIp[2] + "." + servIp[3];
@@ -486,26 +488,18 @@ public class Network extends Service {
         public void run() {
 //            if(running)
 //                return;
-            synchronized ("NetworkMonitor") {
+            synchronized (this) {
                 while (true) {
                     try {
                         if (socketHandler == null || !socketHandler.isSocketConnected) {
                             if(restartNetworkTime++ >= RESTART_NET_TIME) {
-                                if(networkEn){
-                                    Log.d(TAG,"NetworkMonitor->Restart to connect network");
+                                if (networkEn) {
+                                    Log.d(TAG, "NetworkMonitor->Restart to connect network");
                                     restartNetwork();
-                                }else{
-                                    Log.d(TAG,"NetworkMonitor->Network conditions not available!");
+                                } else {
+                                    Log.d(TAG, "NetworkMonitor->Network conditions not available!");
                                 }
                                 restartNetworkTime = 0;
-                                if(restarNetCount++ >= 5){
-                                    restarNetCount = 0;
-                                    if (replyMessenger != null) {
-                                        Message msg = Message.obtain();
-                                        msg.what = CMD_REFRESH_NETWORK;
-                                        replyMessenger.send(msg);
-                                    }
-                                }
                             }
                         }
                         else {
@@ -524,11 +518,12 @@ public class Network extends Service {
                                         socketTransHandler.sendEmptyMessage(REQ_TS_GET_USERLIST);
                                     sendHartbeatTimeReset();
                                 }
+                            }
 
-                                if (recHartbeatTime++ >= REC_HARTBEAT_TIMEOUT) {
-                                    restartNetwork();
-                                    recHartbeatTimeReset();
-                                }
+                            if (recHartbeatTime++ >= REC_HARTBEAT_TIMEOUT) {
+                                Log.d(TAG,"HartbeatTime OVER .. ");
+                                restartNetwork();
+                                recHartbeatTimeReset();
                             }
                         }
 
@@ -692,9 +687,10 @@ public class Network extends Service {
 //        private Timer socketWatchman = null;
 
         //Thread
-        private receiveThread receiver;
         private CreatSocketThread creatSocket;
+        private receiveThread receiver;
         private sendThread sender;
+        private Timer socMonitor;
 
         private SocketHandler(String ip, int port) {
             this.ip = ip;
@@ -724,10 +720,16 @@ public class Network extends Service {
                     sender = null;
                 }
 
+                if(socMonitor != null){
+                    socMonitor.cancel();
+                    socMonitor = null;
+                }
+
                 if (null != socket) {
-                    if (!socket.isClosed()) {
+//                    if (!socket.isClosed()) {
                         socket.close();
-                    }
+//                    }
+                    Log.d(TAG,"Close socket .. ");
                     socket = null;
                 }
 //                discreateSocketWatchman();
@@ -739,15 +741,16 @@ public class Network extends Service {
         }
 
         private void sendMsg(byte[] msg) {
-            if (sender != null) {
-                sender.send(msg);
+            synchronized ("sendMsg") {
+                if (sender != null) {
+                    sender.send(msg);
+                }
             }
         }
 
         public void sendMsg(String msg) {
             sendMsg(msg.getBytes());
         }
-
 
         private void setReceiveHandler(android.os.Handler handler) {
             receiveHandler = handler;
@@ -772,6 +775,8 @@ public class Network extends Service {
                             receiver.start();
                             sender = new sendThread();
                             sender.start();
+                            socMonitor = new Timer();
+                            socMonitor.schedule(socMonitorTask,1000,2000);
                             if(socketStaHandler != null){
                                 socketStaHandler.sendEmptyMessage(STA_CONNECTED);
                             }
@@ -875,7 +880,7 @@ public class Network extends Service {
                         while (!socket.isClosed() && !socket.isOutputShutdown()) {
                             if (queue.size() > 0) {
                                 byte[] temp = queue.poll();
-//                                Debug.d(TAG,"network send : "+ (new String(Arrays.copyOf(temp,temp.length),SERV_ENCODING)));
+                                Log.d(TAG,"network send : "+ (new String(Arrays.copyOf(temp,temp.length),SERV_ENCODING)));
                                 stream.write(temp);
                                 stream.flush();
 //                                Thread.sleep(300);
@@ -895,43 +900,15 @@ public class Network extends Service {
             }
         }
 
-//        private void createSocketWatchman() {
-//            if (socketWatchman == null) {
-//                socketWatchman = new Timer();
-//                socketWatchman.schedule(new watchmanTask(), 5000, 5000);
-//            }
-//        }
-//
-//        private void discreateSocketWatchman() {
-//            if (socketWatchman != null) {
-//                socketWatchman.cancel();
-//                socketWatchman = null;
-//            }
-//        }
+        private TimerTask socMonitorTask = new TimerTask() {
+            private byte[] msg = {(byte) 0xFF};
 
-//        private class watchmanTask extends TimerTask {
-//
-//            @Override
-//            public void run() {
-//                if (!socketConnected) {
-//                    closeSocket();
-//                    createSocket();
-//                }
-//            }
-//        }
-
-//        private void sendStatus(int sta) {
-//            if (replyMessenger != null) {
-//                try {
-//                    Message msg = Message.obtain();
-//                    msg.what = CMD_NETWORK_STATUS;
-//                    msg.arg1 = sta;
-//                    replyMessenger.send(msg);
-//                } catch (RemoteException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
+            @Override
+            public void run() {
+                Log.d(TAG,"Socket monitor task..");
+                sendMsg(msg);
+            }
+        };
     }
 
 }

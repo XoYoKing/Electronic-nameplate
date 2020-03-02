@@ -395,7 +395,7 @@ public class WifiManager extends NetDevManager {
         scan();
         if (autoConnect == null)
             autoConnect = new Timer();
-        autoConnect.schedule(new TimerTask() {
+            autoConnect.schedule(new TimerTask() {
             int index = 0;
 
             @Override

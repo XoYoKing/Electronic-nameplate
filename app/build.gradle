@@ -9,8 +9,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 19
         versionCode 2
-        versionName "20191216"
-
+        versionName "20200227"
 
 //            ndk {
 //                moduleName "ra8876l"//指定生成的so文件名
@@ -38,7 +37,7 @@ android {
     sourceSets {
         main {
 //            jni.srcDirs = ['src/main/jni', 'src/main/jni/']
-            jniLibs.srcDirs =['JniLibs']
+            jniLibs.srcDirs = ['JniLibs']
         }
     }
 }

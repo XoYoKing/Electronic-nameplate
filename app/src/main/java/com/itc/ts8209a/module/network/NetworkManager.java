@@ -106,8 +106,10 @@ public class NetworkManager implements NetDevManager.NetDevInfoUpdatedListener {
                 Bundle bundle = (Bundle) msg.obj;
                 String res = bundle.getString(KEY_RES);
                 if (res.contains(EthernetManager.DEV_NAME)) {
+                    Log.d(TAG,"Network device is ethernet..");
                     netDevManager = EthernetManager.getEthernetManager();
                 } else if (res.contains(WifiManager.DEV_NAME)) {
+                    Log.d(TAG,"Network device is wifi..");
                     netDevManager = WifiManager.getWifiManager();
                 }
 //                else{
