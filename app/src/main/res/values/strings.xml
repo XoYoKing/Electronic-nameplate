@@ -73,6 +73,7 @@
     <string name="cancel">取 消</string>
     <string name="please_select_the_addressee">请选择收件人</string>
     <string name="text_messaging_cannot_be_empty">短信发送内容不能为空</string>
+    <string name="text_messaging_sending">短信正在发送</string>
     <string name="text_messaging_success">短信发送成功</string>
     <string name="server_dose_not_connect">未连接服务器</string>
     <string name="select_all">全选</string>

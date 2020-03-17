@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -327,7 +328,15 @@ public class SettingActivity extends AppActivity implements RadioGroup.OnChecked
                 dialog.show();
                 break;
             case R.id.setting_wifi_cfg_btn:
+                /* 自制页面 */
                 networkManager.creatWifiSelection(this);
+
+                /* 调用系统WIFI设置页面 */
+//                Intent intentWifi = new Intent(Settings.ACTION_WIFI_SETTINGS);
+//                intentWifi.putExtra("extra_prefs_show_button_bar", true);
+//                intentWifi.putExtra("extra_prefs_set_back_text","返回");
+//                intentWifi.putExtra("extra_prefs_set_next_text","");
+//                startActivity(intentWifi);
                 break;
             case R.id.setting_wifi_disconnect_btn:
                 networkManager.removeAllWifi();

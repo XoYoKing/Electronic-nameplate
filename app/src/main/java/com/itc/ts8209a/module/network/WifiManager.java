@@ -176,10 +176,18 @@ public class WifiManager extends NetDevManager {
         return res;
     }
 
+
     // 断开当前网络
     protected void disconnect() {
         if (!osWifiManager.isWifiEnabled()) {
             osWifiManager.disconnect();
+        }
+    }
+
+    protected void reconnect(){
+        if(osWifiManager.isWifiEnabled()){
+            Log.d(TAG,"reconnect wifi");
+            osWifiManager.reconnect();
         }
     }
 
@@ -320,7 +328,7 @@ public class WifiManager extends NetDevManager {
                 getNetDevSta();
 //                Log.d(TAG,ssid+" "+mac+" "+rssi);
             }
-        }, 5000, GET_NETWOR_STA_TIME);
+        }, 2000, GET_NETWOR_STA_TIME);
     }
 
     protected void getNetDevSta() {
@@ -425,6 +433,9 @@ public class WifiManager extends NetDevManager {
                 break;
             case ACTION_REMOVE_ALL_WIFI:
                 removeAllWifiCfg();
+                break;
+            case ACTION_RECONNECT_WIFI:
+                reconnect();
                 break;
         }
     }

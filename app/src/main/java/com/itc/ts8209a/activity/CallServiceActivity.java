@@ -89,7 +89,7 @@ public class CallServiceActivity extends AppActivity {
                                 break;
                             case R.id.custom_dialog_second_btn:
                                 networkManager.callService((String) button.getText());
-                                if (networkManager.getNetworkStatus() != Network.STA_CONNECTED)
+                                if (networkManager.getNetworkStatus() != Network.SOC_STA_CONNECTED)
                                     PromptBox.BuildPrompt("SERVER_NOT_CONNECTED").Text(getString(R.string.server_dose_not_connect)).Time(1).TimeOut(3000);
                                 else
                                     PromptBox.BuildPrompt("CALLING_SERVICE").Text("正在为您呼叫服务").Time(1).TimeOut(2000);

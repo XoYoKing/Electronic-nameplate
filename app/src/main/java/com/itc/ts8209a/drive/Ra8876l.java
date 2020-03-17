@@ -16,6 +16,7 @@ import java.util.concurrent.Future;
  */
 
 public class Ra8876l {
+    private static String TAG = "RA8876L";
 
     private static boolean picSetting = false;
     private static OnInitFinishListener initFinishListener = null;
@@ -52,7 +53,7 @@ public class Ra8876l {
     }
 
     public static void setPic(final View view){
-//        Log.d("setPic","w="+view.getMeasuredWidth()+",h="+view.getMeasuredHeight());
+        Log.d(TAG,"w="+view.getMeasuredWidth()+",h="+view.getMeasuredHeight());
 
         viewBmp = getViewBitmap(view);
         imgData = getPixels(viewBmp);

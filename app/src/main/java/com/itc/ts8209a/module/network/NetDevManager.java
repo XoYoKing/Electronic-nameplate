@@ -39,6 +39,7 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
     protected static final int ACTION_WIFI_SELECT = 1;
     protected static final int ACTION_REMOVE_WIFI = 2;
     protected static final int ACTION_REMOVE_ALL_WIFI = 3;
+    protected static final int ACTION_RECONNECT_WIFI = 4;
 
     protected final String IFCONFIG = "ifconfig ";
     protected final String NETCFG = "netcfg";
@@ -242,9 +243,6 @@ public abstract class NetDevManager implements Cmd.cmdResultListener {
         }
         return "0.0.0.0";
     }
-
-
-
 
 
     @Override

@@ -95,8 +95,8 @@ public class AppConfig {
     public static final int NAMEPLATE_STR_SIZE_DEF = 36;
 
     /***************** 电池电量相关参数 ******************/
-    //设置定时获取电池状态时间(单位:毫秒)
-    public static final int GET_BAT_INFO_TIME = 20 * 1000;
+    //设置定时获取电池状态时间(单位:秒)
+    public static final int GET_BAT_INFO_TIME = 60;
 
     //进入低功耗模式无操作时间(单位:秒)    10分钟进入低功耗模式
     public static final int ENTER_SAVE_POWER_TIME = 10 * 60;
@@ -133,23 +133,27 @@ public class AppConfig {
     //默认是否使能DHCP
     public static final boolean DHCP_EN_DEF = true;
 
-    //发送心跳间隔（单位S）
-    public static final int SEND_HARTBEAT_TIME = 10;
-
-    //心跳超时
-    public static final int REC_HARTBEAT_TIMEOUT = SEND_HARTBEAT_TIME * 2;
-
     //Socket重连时间（单位S）
-    public static final int RESTART_NET_TIME = 3; //(Second)
-
-    //设备重复注册时间（单位S）
-    public static final int DEV_REGISTE_TIME = 15; //(Second)
+    public static final int RESTART_NET_TIME = 5; //(Second)
 
     //HTTP请求时间（单位S）
     public static final int HTTP_REQUEST_INTERVAL = 15;
 
+    //HTTP读取时间（单位S）
+    public static final int HTTP_READ_TIMEOUT = 30;
+
     //HTTP最大请求次数
-    public static final int HTTP_REQUEST_TIMES = 20;
+    public static final int HTTP_REQUEST_TIMES = 10;
+
+    //发送心跳间隔（单位S）
+    public static final int SEND_HARTBEAT_TIME = 15;
+
+    //心跳超时
+    public static final int REC_HARTBEAT_TIMEOUT = SEND_HARTBEAT_TIME * 3;
+
+    //设备重复注册时间（单位S）
+    public static final int DEV_REGISTE_TIME = SEND_HARTBEAT_TIME; //(Second)
+
     /***************** 打印信息相关参数 ******************/
     //Debug功能是否使用Log打印功能
     public static final boolean DEBUG_LOG_EN = true;

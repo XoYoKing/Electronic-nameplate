@@ -11,8 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -23,8 +23,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextClock;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.module.nameplate.NameplateManager;
 import com.itc.ts8209a.module.power.PowerManager;
@@ -213,7 +213,7 @@ public class AppActivity extends Activity implements View.OnClickListener {
             networkManager.setOnNetworkStatusListener(this);
 
             setBatLevel(powerManager.getLevel(), powerManager.getCharge(),powerManager.getVoltage()!=0);
-            setNetworkStaDisplay(networkManager.getNetworkStatus() == Network.STA_CONNECTED);
+            setNetworkStaDisplay(networkManager.getNetworkStatus() == Network.SOC_STA_CONNECTED);
 
             NetDevManager.NetDevInfo netDevInfo = networkManager.getNetDevInfo();
             if(netDevInfo != null){
@@ -343,7 +343,7 @@ public class AppActivity extends Activity implements View.OnClickListener {
 
         @Override
         public void OnNetworkStatus(int sta) {
-            if (sta == Network.STA_CONNECTED) {
+            if (sta == Network.SOC_STA_CONNECTED) {
                 setNetworkStaDisplay(true);
                 tcClock.setVisibility(View.VISIBLE);
             }
@@ -444,8 +444,12 @@ public class AppActivity extends Activity implements View.OnClickListener {
         //电量状态更新广播
         else if(intent.getAction().equals(MyApplication.ACTION_POWER_INFO_UPDATE)){
             Bundle bundle = intent.getBundleExtra("BUNDLE");
+            boolean cha = bundle.getBoolean(PowerManager.BAT_CHARGE);
+            int lev = bundle.getInt(PowerManager.BAT_LEVEL) , vol = bundle.getInt(PowerManager.BAT_VOLTAGE);
+
+//            Toast.makeText(AppActivity.this,"charge = " + cha + " level = " + lev + " voltage = " + vol,Toast.LENGTH_LONG).show();
             stateBar.setPowMode(bundle.getInt(PowerManager.POWER_MODE));
-            stateBar.setBatLevel(bundle.getInt(PowerManager.BAT_LEVEL),bundle.getBoolean(PowerManager.BAT_CHARGE),bundle.getInt(PowerManager.BAT_VOLTAGE)!=0);
+            stateBar.setBatLevel(lev,cha,vol != 0);
         }
 
         //重启广播

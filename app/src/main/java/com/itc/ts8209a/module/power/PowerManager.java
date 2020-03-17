@@ -4,10 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.itc.ts8209a.app.MyApplication;
 import com.itc.ts8209a.module.network.EthernetManager;
@@ -43,10 +43,17 @@ public class PowerManager {
 
     private static PowerManager powerManager = new PowerManager();
 
-    private static final int ELECTRIC_QUANTITY_MAX_VOLTAGE = 4000;
-    private static final int ELECTRIC_QUANTITY_MIN_VOLTAGE = 3550;
-    private static final int CHARGING_CORRECTION_VOLTAGE = 350;
-    private static final int BAT_MAX_VOLTAGE = 4180;
+    /* 无充电状态下电池电压变化范围 */
+    private static final int NORMAL_BAT_MAX_VOLTAGE = 4040;
+    private static final int NORMAL_BAT_MIN_VOLTAGE = 3530;
+
+    /* 充电状态下电池电压变化范围 */
+    private static final int CHARGING_BAT_MAX_VOLTAGE = 4190;
+    private static final int CHARGING_BAT_MIN_VOLTAGE = 3830;
+
+
+//    private static final int CHARGING_CORRECTION_VOLTAGE = 350;
+//    private static final int BAT_MAX_VOLTAGE = 4180;
 
     private int powMode;
     private int level;
@@ -113,7 +120,7 @@ public class PowerManager {
                     intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
                     app.registerReceiver(new betteryStatusReceiver(), intentFilter);
 
-                    (new Timer()).schedule(new getPowerStatus(), 1000, GET_BAT_INFO_TIME);
+                    (new Timer()).schedule(new getPowerStatus(), 5000,1000);
 //                    (new Timer()).schedule(new savePowerTimer(), 5000, 1000);
                 }
 
@@ -122,8 +129,8 @@ public class PowerManager {
 
         });
 
-        String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
-        Cmd.execCmd(cmd);
+//        String cmd = "echo \"performance\" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
+//        Cmd.execCmd(cmd);
     }
 
 //    public void resetSavePowerTime() {
@@ -138,11 +145,18 @@ public class PowerManager {
     //定时获取设备状态
     private class getPowerStatus extends TimerTask implements Cmd.cmdResultListener {
 
+        private int timeCnt = 0;
+
         @Override
         public void run() {
-            Cmd.execCmd("dumpsys battery", this);
+            int time = isGetVoltage ? GET_BAT_INFO_TIME : 5;
+
+            if(timeCnt++ >= time) {
+                timeCnt = 0;
+                Cmd.execCmd("dumpsys battery", this);
 //            Cmd.execCmd("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", this);
 //            Cmd.execCmd("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", this);
+            }
         }
 
         @Override
@@ -180,7 +194,7 @@ public class PowerManager {
                 int vol = Integer.parseInt(strVoltage);
                 int sta = Integer.parseInt(strState);
                 boolean cha = (strUsbPow.contains("true") || strAcPow.contains("true"));
-                int lev = vol == 0 ? 0 : voltageToLevel(vol);
+                int lev = vol == 0 ? 0 : voltageToLevel(vol,cha);
 
                 Debug.d(TAG, "onResult: vol = " + vol + "  lev = " + lev + " sta = " + sta + "  cha = " + cha);
 
@@ -191,7 +205,7 @@ public class PowerManager {
                             isGetVoltage = true;
                             level = lev;
                         } else {
-                            if (charge)
+                            if (cha)
                                 level = lev > level ? level + 1 : level;
                             else
                                 level = level > lev ? level - 1 : level;
@@ -284,7 +298,7 @@ public class PowerManager {
         bundle.putString(CPU_FREQ, cpuFreq);
         MyApplication.LocalBroadcast.send(MyApplication.ACTION_POWER_INFO_UPDATE, bundle);
 
-        Debug.d(TAG, "PowerInfo Battery: level = " + level + "  voltage = " + voltage + " charge = " + charge + "  cpu_freq = " + cpuFreq);
+//        Debug.d(TAG, "PowerInfo Battery: level = " + level + "  voltage = " + voltage + " charge = " + charge + "  cpu_freq = " + cpuFreq);
     }
 
 //    private void broadcastPowerMode(){
@@ -305,21 +319,20 @@ public class PowerManager {
 //        Debug.d(TAG, "normalpower mode");
 //    }
 
-    private int voltageToLevel(int v) {
+    private int voltageToLevel(int vol,boolean cha) {
         int level = 0;
-        int correction, max_voltage, min_voltage;
+        int volMax, volMin;
 
-        correction = charge ? CHARGING_CORRECTION_VOLTAGE : 0;
-        max_voltage = ELECTRIC_QUANTITY_MAX_VOLTAGE + correction > BAT_MAX_VOLTAGE ? BAT_MAX_VOLTAGE : ELECTRIC_QUANTITY_MAX_VOLTAGE + correction;
-        min_voltage = ELECTRIC_QUANTITY_MIN_VOLTAGE + correction;
+        volMax = cha ? CHARGING_BAT_MAX_VOLTAGE : NORMAL_BAT_MAX_VOLTAGE;
+        volMin = cha ? CHARGING_BAT_MIN_VOLTAGE : NORMAL_BAT_MIN_VOLTAGE;
 
-        if (v <= max_voltage && v >= min_voltage) {
-            level = ((v - min_voltage) * 100) / (max_voltage - min_voltage);
-        } else if (v > max_voltage)
+        if (vol <= volMax && vol >= volMin) {
+            level = ((vol - volMin) * 100) / (volMax - volMin);
+        } else if (vol > volMax) {
             level = 100;
-
-        else if (v < min_voltage)
+        }else if (vol < volMin) {
             level = 0;
+        }
 
         return level;
     }

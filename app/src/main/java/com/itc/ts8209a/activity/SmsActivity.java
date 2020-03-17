@@ -12,16 +12,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.itc.ts8209a.activity.view.CheckSelectorDialog;
 import com.itc.ts8209a.R;
 import com.itc.ts8209a.app.MyApplication;
-import com.itc.ts8209a.module.network.WifiManager;
 import com.itc.ts8209a.server.Network;
-import com.itc.ts8209a.widget.Debug;
 
 import java.util.ArrayList;
 
@@ -252,39 +249,41 @@ public class SmsActivity extends AppActivity implements TextWatcher{
                     PromptBox.BuildPrompt("PLEASE_CHOISE_ADDRESSEE").Text(getString(R.string.please_select_the_addressee)).Time(1).TimeOut(5000);
                 } else if (msgContent.equals("")) {
                     PromptBox.BuildPrompt("CONTENT_CAN_NOT_EMPTY").Text(getString(R.string.text_messaging_cannot_be_empty)).Time(1).TimeOut(5000);
-                } else if(networkManager.getNetworkStatus() != Network.STA_CONNECTED){
+                } else if(networkManager.getNetworkStatus() != Network.SOC_STA_CONNECTED){
                     PromptBox.BuildPrompt("SERVER_NOT_CONNECTED").Text(getString(R.string.server_dose_not_connect)).Time(1).TimeOut(5000);
                 }
                 else {
-                    PromptBox.BuildPrompt("SMS_SEND_SUCCESS").Text(getString(R.string.text_messaging_success)).Time(1).TimeOut(5000);
 
-                    int id[] = getUserID();
 
-                    if (id != null) {
-                        for (int i = 0; i < id.length; i++) {
-//                            Debug.d(TAG, id[i] + " . " + userList.get(id[i]));
-                            networkManager.sendSms(id[i], msgContent);
+                    (new Thread() {
+                        @Override
+                        public void run() {
+                            int id[] = getUserID();
+                            int i;
+                            String content = msgContent;
+                            try {
+                                if (id != null) {
+//                                    PromptBox.BuildPrompt("SMS_SENDING").Text(getString(R.string.text_messaging_sending)).Time(1).TimeOut(5000);
+                                    ProgressBar pBar = new ProgressBar(SmsActivity.this);
+                                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(30, 30);
+                                    pBar.setLayoutParams(params);
+                                    PromptBox.BuildPrompt("SMS_SENDING").Text(getString(R.string.text_messaging_sending)).View(pBar);
+                                    for (i = 0;i < id.length;i++) {
+                                        sleep(500);
+                                        networkManager.sendSms(id[i], content);
+                                    }
+                                }
+                                msgContent = "";
+                                PromptBox.removePrompt("SMS_SENDING");
+                                PromptBox.BuildPrompt("SMS_SEND_SUCCESS").Text(getString(R.string.text_messaging_success)).Time(1).TimeOut(5000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
+                    }).start();
 
-//                    String[] addresseeChoice = addresseeChoiceList.toArray(new String[addresseeChoiceList.size()]);
-//                    for (String anAddresseeChoice : addresseeChoice) {
-//                        if (anAddresseeChoice == null) {
-//                        }
-//                        else {
-//                            int id[] = getUserID();
-//
-//                            if (id != null) {
-//                                for(int i=0;i<id.length;i++) {
-//                                    Debug.d(TAG, id[i] + " . " + anAddresseeChoice);
-//                                    networkManager.sendSms(id[i], msgContent);
-//                                }
-//                            }
-//                        }
-//                    }
                     layAddressee.removeAllViews();
                     etContent.setText("");
-                    msgContent = "";
                     addresseeChoiceList.removeAll(addresseeChoiceList);
                     for (int i = 0; i < addrChecked.length; i++)
                         addrChecked[i] = false;
