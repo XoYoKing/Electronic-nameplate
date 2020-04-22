@@ -8,8 +8,8 @@ android {
         applicationId "com.itc.ts8209a"
         minSdkVersion 19
         targetSdkVersion 19
-        versionCode 2
-        versionName "202000317"
+        versionCode 3
+        versionName "20200327"
 
 //            ndk {
 //                moduleName "ra8876l"//指定生成的so文件名

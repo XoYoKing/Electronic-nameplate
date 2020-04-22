@@ -601,11 +601,11 @@ public class Network extends Service {
                             Log.d(TAG,"Image download try time = " + (HTTP_REQUEST_TIMES - retryTime));
                             byte[] data = getImage(url);
                             if (data != null) {
-                                getBitmapHWfromByte(data);
-                                bitmap = byteToBitmap(data);
-                                Log.d(TAG,"bitmap height = "+bitmap.getHeight()+"  bitmap width = "+bitmap.getWidth());
+//                                getBitmapHWfromByte(data);
+//                                bitmap = byteToBitmap(data);
+//                                Log.d(TAG,"bitmap height = "+bitmap.getHeight()+"  bitmap width = "+bitmap.getWidth());
                                 String fileName = String.format("%s_", System.currentTimeMillis()) + url.substring(url.lastIndexOf('/') + 1, url.length());
-                                saveFile(bitmap, fileName);
+                                saveFile(data, fileName);
                                 msg.what = 1;
                                 msg.obj = filePath + fileName;
                                 break;
@@ -640,11 +640,16 @@ public class Network extends Service {
             InputStream input;
             Bitmap bitmap;
             BitmapFactory.Options options = new BitmapFactory.Options();
+
             int[] hw = getBitmapHWfromByte(imgByte);
-            if (hw[0] > 2048 && hw[1] > 1024)
+            if (hw[0] > 2048 && hw[1] > 1024) {
                 options.inSampleSize = 2;
-            else
+                Log.d(TAG,"inSampleSize = 2 ");
+            }
+            else {
                 options.inSampleSize = 1;
+                Log.d(TAG,"inSampleSize = 1 ");
+            }
             input = new ByteArrayInputStream(imgByte);
             SoftReference softRef = new SoftReference(BitmapFactory.decodeStream(input, null, options));
             bitmap = (Bitmap) softRef.get();
@@ -660,6 +665,7 @@ public class Network extends Service {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+
             return bitmap;
         }
 
@@ -674,7 +680,7 @@ public class Network extends Service {
             conn.setReadTimeout(HTTP_READ_TIMEOUT * 1000);
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Connection","close");
-//            conn.setRequestProperty("Content-Type","image/jpeg");
+            conn.setRequestProperty("Content-Type","image/jpeg");
             InputStream inStream = conn.getInputStream();
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 return readStream(inStream);
@@ -702,9 +708,22 @@ public class Network extends Service {
             }
             File myCaptureFile = new File(jia + "/" + fileName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(myCaptureFile));
-            bm.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, bos);
             bos.flush();
             bos.close();
+        }
+
+        private void saveFile(byte[] by, String fileName) throws IOException {
+//            fileName = "abc.jpg";
+            File jia = new File(filePath);
+            if (!jia.exists()) {   //判断文件夹是否存在，不存在则创建
+                jia.mkdirs();
+            }
+            Log.d(TAG,"data byte size = "+ by.length);
+            File myCaptureFile = new File(jia + "/" + fileName);
+            FileOutputStream stream = new FileOutputStream(myCaptureFile);
+            stream.write(by,0,by.length);
+            stream.close();
         }
     }
 
